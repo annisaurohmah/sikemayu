@@ -1,46 +1,28 @@
 <!-- Tab 7: Format 7 -->
-<div class="tab-pane fade table-responsive" id="format7" role="tabpanel" aria-labelledby="format7-tab">
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <!-- Log on to codeastro.com for more projects! -->
-                <table id="datatable-buttons-7" class="table table-striped table-hover table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+<div class="tab-pane fade table-responsive" id="format7" role="tabpanel">
 
-                    <thead class="thead-dark">
-                        <tr>
-                            <th data-priority="1">NIM</th>
-                            <th data-priority="2">Nama</th>
-                            <th data-priority="3">Agama</th>
-                            <th data-priority="4">Provinsi</th>
-                            <th data-priority="5">Status</th>
-                            <th data-priority="6">Prodi</th>
-                            <th data-priority="7">Flat</th>
-                            <th data-priority="8">Kamar</th>
-                            <th data-priority="9">Aksi</th>
+    <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
 
-                        </tr>
-                    </thead>
-                    <tbody>
-
-
-                        <tr>
-                            <td>2</td>
-                            <td>3</td>
-                            <td>4</td>
-                            <td>4</td>
-                            <td>5</td>
-                            <td>7</td>
-                            <td>2</td>
-                            <td>3</td>
-                            <td>
-                                <a href="#edit" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
-                                <a href="#delete" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
-                            </td>
-                        </tr>
-
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    <table id="table-format7" class="table table-striped table-hover table-bordered dt-responsive nowrap">
+        <thead class="thead-dark">
+            <tr>
+                <th data-priority="1">NO</th>
+                <th data-priority="2">NOMOR RW</th>
+                <th data-priority="3">JUML. RT</th>
+                <th data-priority="4">JUML. DASA WISMA</th>
+                <th data-priority="5">JUML. KRT</th>
+                <th data-priority="6">JUML. KK</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>01</td>
+                <td>5</td>
+                <td>10</td>
+                <td>50</td>
+                <td>45</td>
+            </tr>
+        </tbody>
+    </table>
 </div>

@@ -3,6 +3,7 @@
 @section('css')
 @endsection
 
+
 @section('breadcrumb')
 <div class="col-sm-6">
     <h4 class="page-title text-left">Catatan Dasawisma Desa Pangalengan</h4>
@@ -12,11 +13,7 @@
     </ol>
 </div>
 @endsection
-@section('button')
-<a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
 
-
-@endsection
 
 @section('content')
 @include('includes.flash')
@@ -26,21 +23,20 @@
     <div class="col-12">
 
         <div class="container mt-2">
-            <h5 class="mb-4">Laporan Data RW</h5>
 
             <!-- Tabs -->
-            <ul class="nav nav-tabs" id="dataTabs" role="tablist">
+            <ul class="nav nav-tabs mb-3" id="pills-tab" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="wilayah-tab" data-bs-toggle="tab" data-bs-target="#wilayah" type="button" role="tab">Data Wilayah</button>
+                    <a class="nav-link active" data-toggle="tab" href="#wilayah">Data Wilayah</a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="keluarga-tab" data-bs-toggle="tab" data-bs-target="#keluarga" type="button" role="tab">Anggota Keluarga</button>
+                    <a class="nav-link" data-toggle="tab" href="#keluarga">Anggota Keluarga</a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="rumah-tab" data-bs-toggle="tab" data-bs-target="#rumah" type="button" role="tab">Kriteria Rumah, Air, & Makanan Pokok</button>
+                    <a class="nav-link" data-toggle="tab" href="#rumah">Kriteria Rumah, Air, & Makanan Pokok</a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="kegiatan-tab" data-bs-toggle="tab" data-bs-target="#kegiatan" type="button" role="tab">Partisipasi Warga</button>
+                    <a class="nav-link" data-toggle="tab" href="#kegiatan">Partisipasi Warga</a>
                 </li>
             </ul>
 
@@ -49,7 +45,10 @@
 
                 <!-- Tab 1: Wilayah -->
                 <div class="tab-pane fade show active table-responsive" id="wilayah" role="tabpanel">
-                    <table id="datatable-buttons" class="table table-sm table-bordered dt-responsive nowrap">
+
+                    <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
+
+                    <table id="table-wilayah" class="table table-striped table-hover table-bordered dt-responsive nowrap">
                         <thead class="thead-dark">
                             <tr>
                                 <th data-priority="1">NO</th>
@@ -75,7 +74,9 @@
 
                 <!-- Tab 2: Anggota Keluarga -->
                 <div class="tab-pane fade table-responsive" id="keluarga" role="tabpanel">
-                    <table id="datatable-buttons" class="table table-sm table-bordered dt-responsive nowrap">
+                    <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
+
+                    <table id="table-keluarga" class="table table-striped table-hover table-bordered dt-responsive nowrap">
                         <thead class="thead-dark">
                             <tr>
                                 <th data-priority="1">No</th>
@@ -115,7 +116,9 @@
 
                 <!-- Tab 3: Kriteria Rumah -->
                 <div class="tab-pane fade table-responsive" id="rumah" role="tabpanel">
-                    <table id="datatable-buttons" class="table table-sm table-bordered dt-responsive nowrap">
+                    <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
+
+                    <table id="table-rumah" class="table table-striped table-hover table-bordered dt-responsive nowrap">
                         <thead class="thead-dark">
                             <tr>
                                 <th>No</th>
@@ -157,7 +160,10 @@
 
                 <!-- Tab 4: Kegiatan Warga -->
                 <div class="tab-pane fade table-responsive" id="kegiatan" role="tabpanel">
-                    <table id="datatable-buttons" class="table table-sm table-bordered dt-responsive nowrap">
+                    <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
+
+                     <table id="table-kegiatan" class="table table-striped table-hover table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+
                         <thead class="thead-dark">
                             <tr>
                                 <th>No</th>
@@ -194,6 +200,32 @@
 
 
 @section('script')
-<!-- Responsive-table-->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#table-wilayah').DataTable({
+            responsive: true
+        });
+        $('#table-keluarga').DataTable({
+            responsive: true
+        });
+        $('#table-rumah').DataTable({
+            responsive: true
+        });
+        $('#table-kegiatan').DataTable({
+            responsive: true
+        });
+    });
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function() {
+        $($.fn.dataTable.tables({
+                visible: true,
+                api: true
+            }))
+            .DataTable()
+            .columns.adjust()
+            .responsive.recalc();
+    });
+</script>
+
 @endsection

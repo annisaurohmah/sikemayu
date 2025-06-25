@@ -2,20 +2,33 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Anak;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class BayiBalitaController extends Controller
 {
-    
+
     public function showBayi()
     {
         // Logic to show bayi data
-        
-        return view('bayi_balita.index');
+        $bayi = Anak::where('tanggal_lahir', '>=', Carbon::now()->subYear())->get();
+        return view('masterdata.bayi', compact('bayi'));
+    }
+
+    public function showBalita()
+    {
+        $balita = Anak::whereBetween('tanggal_lahir', [
+            Carbon::now()->subYears(5),
+            Carbon::now()->subYear()
+        ])->get();
+        return view('masterdata.balita', compact('balita'));
     }
 
     public function create()
     {
+        // Logic to show the form for creating a new bayi or balita
+
         return view('bayi_balita.create');
     }
 

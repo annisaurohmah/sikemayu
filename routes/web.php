@@ -11,6 +11,11 @@ use App\Http\Controllers\LHBPController;
 use App\Http\Controllers\SIPController;
 use App\Http\Controllers\PosyanduController;
 use App\Http\Controllers\BayiBalitaController;
+use App\Models\Penduduk;
+use App\Http\Controllers\PendudukController;
+use App\Models\User;
+use App\Http\Controllers\RWController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -75,6 +80,40 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/anak/update/{id}', [BayiBalitaController::class, 'update'])->name('bayi.update');
     Route::post('/anak/delete/{id}', [BayiBalitaController::class, 'delete'])->name('bayi.delete');
 
+    Route::get('/posyandu', [PosyanduController::class, 'index'])->name('posyandu.index');
+    Route::get('/posyandu/create', [PosyanduController::class, 'create'])->name('posyandu.create');
+    Route::post('/posyandu/store', [PosyanduController::class, 'store'])->name('posyandu.store');
+    Route::get('/posyandu/edit/{id}', [PosyanduController::class, 'edit'])->name('posyandu.edit');
+    Route::post('/posyandu/update/{id}', [PosyanduController::class, 'update'])->name('posyandu.update');
+    Route::post('/posyandu/delete/{id}', [PosyanduController::class, 'delete'])->name('posyandu.delete');
+
+    Route::get('/penduduk' , [PendudukController::class, 'index'])->name('penduduk.index');
+    Route::get('/penduduk/create', [PendudukController::class, 'create'])->name('penduduk.create');
+    Route::post('/penduduk/store', [PendudukController::class, 'store'])->name('penduduk.store');
+    Route::get('/penduduk/edit/{id}', [PendudukController::class, 'edit'])->name('penduduk.edit');
+    Route::post('/penduduk/update/{id}', [PendudukController::class, 'update'])->name('penduduk.update');
+    Route::post('/penduduk/delete/{id}', [PendudukController::class, 'delete'])->name('penduduk.delete');
+
+    Route::get('/user', [UserController::class, 'index'])->name('user.index');
+    Route::get('/user/create', [UserController::class, 'create'])->name('user.create');
+    Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
+    Route::get('/user/edit/{id}', [UserController::class, 'edit'])->name('user.edit');
+    Route::post('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
+    Route::post('/user/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
+
+    Route::get('rekap/dasawisma', [DasawismaController::class, 'rekap'])->name('dasawisma.rekap');
+    Route::get('rekap/dasawisma/create', [DasawismaController::class, 'createRekap'])->name('dasawisma.rekap.create');
+    Route::post('rekap/dasawisma/store', [DasawismaController::class, 'storeRekap'])->name('dasawisma.rekap.store');
+    Route::get('rekap/dasawisma/edit/{id}', [DasawismaController::class, 'editRekap'])->name('dasawisma.rekap.edit');
+    Route::post('rekap/dasawisma/update/{id}', [DasawismaController::class, 'updateRekap'])->name('dasawisma.rekap.update');
+    Route::post('rekap/dasawisma/delete/{id}', [DasawismaController::class, 'deleteRekap'])->name('dasawisma.rekap.delete');
+
+    Route::get('rw/', [RWController::class, 'index'])->name('rw.index');
+    Route::get('rw/create', [RWController::class, 'create'])->name('rw.create');
+    Route::post('rw/store', [RWController::class, 'store'])->name('rw.store');
+    Route::get('rw/edit/{id}', [RWController::class, 'edit'])->name('rw.edit');
+    Route::post('rw/update/{id}', [RWController::class, 'update'])->name('rw.update');
+    Route::post('rw/delete/{id}', [RWController::class, 'delete'])->name('rw.delete');
 
 });
 

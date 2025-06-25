@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Dasawisma;
 use Illuminate\Http\Request;
 
 class DasawismaController extends Controller
 {
     public function index()
     {
+
+        $dasawisma = Dasawisma::all(); // Assuming you have a Dasawisma model
         // Logic to retrieve and display dasawisma data
-        return view('dasawisma.index');
+        return view('masterdata.dasawisma', compact('dasawisma'));
     }
     public function create()
     {
@@ -59,5 +62,18 @@ class DasawismaController extends Controller
         // Logic to show the details of a specific dasawisma
         // $dasawisma = Dasawisma::findOrFail($id);
         return view('dasawisma.show', compact('id'));
+    }
+
+    public function rekap()
+    {
+             
+
+        // Logic to show the rekapitulasi of dasawisma
+        return view('dasawisma.index');
+    }
+    public function createRekap()
+    {
+        // Logic to show the form for creating a new rekapitulasi dasawisma
+        return view('dasawisma.rekap.create'); 
     }
 }

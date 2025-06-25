@@ -26,7 +26,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $keterangan
  * 
  * @property Posyandu|null $posyandu
- * @property Rw|null $rw
  *
  * @package App\Models
  */
@@ -38,7 +37,7 @@ class Sip1 extends Model
 
 	protected $casts = [
 		'posyandu_id' => 'int',
-		'tahun' => 'datetime',
+		'tahun' => 'integer',
 		'rw_id' => 'int',
 		'tgl_lahir' => 'datetime',
 		'tgl_meninggal_ibu' => 'datetime',
@@ -62,10 +61,5 @@ class Sip1 extends Model
 	public function posyandu()
 	{
 		return $this->belongsTo(Posyandu::class);
-	}
-
-	public function rw()
-	{
-		return $this->belongsTo(Rw::class);
 	}
 }

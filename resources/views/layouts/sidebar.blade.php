@@ -24,47 +24,52 @@
                           </ul>
                       </li>
                       <li class="">
-                          <a href="" class="waves-effect">
+                          <a href="{{ route('gizi.index') ? 'active' : '' }}" class="waves-effect">
                               <i class="ti-cup"></i> <span> F1 Gizi </span>
                           </a>
                       </li>
                       <li class="">
-                          <a href="{{ route('dasawisma.index') }}" class="waves-effect">
+                          <a href="{{ route('dasawisma.rekap') }}" class="waves-effect">
                               <i class="ti-home"></i> <span> Dasawisma </span>
                           </a>
                       </li>
                       <li class="menu-title">Master Data</li>
                       <li class="">
-                          <a href="" class="waves-effect">
+                          <a href="{{ route('bayi.show')}}" class="waves-effect">
                               <i class="ti-heart"></i> <span>Data Bayi</span>
                           </a>
                       </li>
                       <li class="">
-                          <a href="" class="waves-effect">
+                          <a href="{{ route('balita.show') }}" class="waves-effect">
                               <i class="ti-user"></i> <span>Data Balita</span>
                           </a>
                       </li>
                       <li class="">
-                          <a href="" class="waves-effect">
+                          <a href="{{ route('penduduk.index') }}" class="waves-effect">
                               <i class="ti-calendar"></i> <span>Data Penduduk</span>
                           </a>
                       </li>
                       <li class="">
-                          <a href="" class="waves-effect">
-                              <i class="ti-calendar"></i> <span>Data Posyandu</span>
+                          <a href="{{ route('posyandu.index') }}" class="waves-effect">
+                              <i class="ti-book"></i> <span>Data Posyandu</span>
                           </a>
                       </li>
                       <li class="">
-                          <a href="" class="waves-effect">
-                              <i class="ti-calendar"></i> <span>Data Dasawisma</span>
+                          <a href="{{ route('dasawisma.index') }}" class="waves-effect">
+                              <i class="ti-archive"></i> <span>Data Dasawisma</span>
+                          </a>
+                      </li>
+                      <li class="">
+                          <a href="{{ route('rw.index') }}" class="waves-effect">
+                              <i class="ti-announcement"></i> <span>Data RW</span>
                           </a>
                       </li>
 
                       <li class="menu-title">Pengaturan</li>
 
                       <li class="">
-                          <a href="" class="waves-effect">
-                              <i class="ti-map"></i> <span>Daftar Akun </span>
+                          <a href="{{ route('user.index') }}" class="waves-effect">
+                              <i class="ti-key"></i> <span>Daftar Akun </span>
                           </a>
                       </li>
 

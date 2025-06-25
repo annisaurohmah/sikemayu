@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @package App\Models
  */
-class Sip2Keteranganbalitum extends Model
+class Sip2Keteranganbalita extends Model
 {
 	protected $table = 'sip2_keteranganbalita';
 	protected $primaryKey = 'ket_id';

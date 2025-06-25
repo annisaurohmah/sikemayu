@@ -39,6 +39,12 @@
   border-radius: 3px;
   border: 1px solid #ddd;
   margin-bottom: 20px;
+  
+}
+
+.table-responsive {
+    overflow-x: auto;
+    overflow-y: visible !important;
 }
 .table-responsive > .table {
   margin-bottom: 0;
