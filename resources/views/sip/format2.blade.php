@@ -16,7 +16,7 @@
                 <th colspan="6" class="text-center">Pemberian ASI</th>
                 <th colspan="4" class="text-center">Pelayanan</th>
                 <th colspan="8" class="text-center">Imunisasi</th>
-                <th rowspan="2">Tanggal Balita Meninggal</th>
+                <th rowspan="2">Tanggal Bayi Meninggal</th>
                 <th rowspan="2">Catatan</th>
             </tr>
             <tr>
@@ -62,18 +62,27 @@
 
 
                     @foreach(['E1','E2','E3','E4','E5','E6'] as $jenis)
-                    <td>{{ $bayi->asi->where('jenis', $jenis)->isNotEmpty() ? '✓' : '' }}</td>
+                    @php
+                    $asi = $bayi->asi->firstWhere('jenis', $jenis);
+                    @endphp
+                    <td>{{ $asi ? \Carbon\Carbon::parse($asi->tanggal_diberikan)->format('d-m-Y') : '' }}</td>
                     @endforeach
 
                     @foreach(['Vitamin A','Oralit','HB Nol','BCG'] as $jenis)
-                    <td>{{ $bayi->pelayanan->where('jenis', $jenis)->isNotEmpty() ? '✓' : '' }}</td>
+                    @php
+                    $pelayanan = $bayi->pelayanan->firstWhere('jenis', $jenis);
+                    @endphp
+                    <td>{{ $pelayanan ? \Carbon\Carbon::parse($pelayanan->tanggal_diberikan)->format('d-m-Y') : '' }}</td>
                     @endforeach
+
 
                     @foreach(['POLIO I','POLIO II','POLIO III','POLIO IV','DPT/HB I','DPT/HB II','DPT/HB III','Campak'] as $jenis)
-                    <td>{{ $bayi->imunisasi->where('jenis', $jenis)->isNotEmpty() ? '✓' : '' }}</td>
+                    @php
+                    $imunisasi = $bayi->imunisasi->firstWhere('jenis', $jenis);
+                    @endphp
+                    <td>{{ $imunisasi ? \Carbon\Carbon::parse($imunisasi->tanggal_diberikan)->format('d-m-Y') : '' }}</td>
                     @endforeach
-
-                    <td>{{ $bayi->keteranganBalita->tanggal_meninggal ?? '' }}</td>
+                        <td>{{ $bayi->keteranganBalita ? \Carbon\Carbon::parse($bayi->keteranganBalita->tanggal_meninggal)->format('d-m-Y') : '' }}</td>
                     <td>{{ $bayi->keteranganBalita->catatan ?? '' }}</td>
             </tr>
             @endforeach

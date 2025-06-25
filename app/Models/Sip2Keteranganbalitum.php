@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Sip2Keteranganbalita
+ * Class Sip2Keteranganbalitum
  * 
  * @property int $ket_id
  * @property int|null $bayi_id
@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @package App\Models
  */
-class Sip2Keteranganbalita extends Model
+class Sip2Keteranganbalitum extends Model
 {
 	protected $table = 'sip2_keteranganbalita';
 	protected $primaryKey = 'ket_id';

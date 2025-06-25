@@ -7,6 +7,7 @@ use App\Models\Sip1;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Sip2;
+use App\Models\Sip3;
 
 class SIPController extends Controller
 {
@@ -26,10 +27,18 @@ class SIPController extends Controller
             'dasawisma',
         ])->where('posyandu_id', $posyandu_id)->get();
 
+         $balitaList = Sip3::with([
+            'penimbangan',
+            'pelayanan',
+            'imunisasi',
+            'keteranganBalita',
+            'dasawisma',
+        ])->where('posyandu_id', $posyandu_id)->get();
 
 
 
 
-        return view('sip.index', compact('posyandu_id', 'posyandu', 'format1', 'bayiList'));
+
+        return view('sip.index', compact('posyandu_id', 'posyandu', 'format1', 'bayiList', 'balitaList'));
     }
 }

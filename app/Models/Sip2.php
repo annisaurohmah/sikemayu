@@ -9,7 +9,6 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Sip2KeteranganBalita;
 
 /**
  * Class Sip2
@@ -26,15 +25,10 @@ use App\Models\Sip2KeteranganBalita;
  * @property Posyandu|null $posyandu
  * @property Dasawisma|null $dasawisma
  * @property Collection|Sip2Imunisasi[] $sip2_imunisasis
- * @property Collection|Sip2Keteranganbalita[] $sip2_keteranganbalita
+ * @property Collection|Sip2Keteranganbalitum[] $sip2_keteranganbalita
  * @property Collection|Sip2Pelayanan[] $sip2_pelayanans
  * @property Collection|Sip2Pemberianasi[] $sip2_pemberianasis
  * @property Collection|Sip2Penimbangan[] $sip2_penimbangans
- * @property Collection|Sip2PemberianASI[] $asi
- * @property Collection|Sip2Pelayanan[] $pelayanan
- * @property Collection|Sip2Imunisasi[] $imunisasi
- * @property Sip2KeteranganBalita|null $keteranganBalita
- * 
  *
  * @package App\Models
  */
@@ -68,7 +62,7 @@ class Sip2 extends Model
 
 	public function dasawisma()
 	{
-		return $this->belongsTo(Dasawisma::class, 'dasawisma_id');
+		return $this->belongsTo(Dasawisma::class);
 	}
 
 	public function sip2_imunisasis()
@@ -78,7 +72,7 @@ class Sip2 extends Model
 
 	public function sip2_keteranganbalita()
 	{
-		return $this->hasMany(Sip2Keteranganbalita::class, 'bayi_id');
+		return $this->hasMany(Sip2Keteranganbalitum::class, 'bayi_id');
 	}
 
 	public function sip2_pelayanans()
@@ -95,25 +89,5 @@ class Sip2 extends Model
 	{
 		return $this->hasMany(Sip2Penimbangan::class, 'bayi_id');
 	}
-
-	public function penimbangan()
-	{
-		return $this->hasMany(Sip2Penimbangan::class, 'bayi_id');
-	}
-	public function asi()
-	{
-		return $this->hasMany(Sip2PemberianASI::class, 'bayi_id');
-	}
-	public function pelayanan()
-	{
-		return $this->hasMany(Sip2Pelayanan::class, 'bayi_id');
-	}
-	public function imunisasi()
-	{
-		return $this->hasMany(Sip2Imunisasi::class, 'bayi_id');
-	}
-	public function keteranganBalita()
-	{
-		return $this->hasOne(Sip2KeteranganBalita::class, 'bayi_id');
-	}
+	
 }
