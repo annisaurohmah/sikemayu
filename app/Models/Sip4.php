@@ -36,6 +36,9 @@ class Sip4 extends Model
 	public $timestamps = false;
 
 	protected $casts = [
+		'posyandu_id' => 'int',
+		'bulan' => 'int',
+		'tahun' => 'int',
 		'umur' => 'int',
 		'jumlah_anak_hidup' => 'int',
 		'ukuran_lila_cm' => 'float',
@@ -43,28 +46,41 @@ class Sip4 extends Model
 	];
 
 	protected $fillable = [
+		'posyandu_id',
+		'bulan',
+		'tahun',
 		'nama',
 		'umur',
 		'nama_suami',
 		'tahapan_ks',
-		'kelompok_dasawisma',
+		'dasawisma_id',
 		'jumlah_anak_hidup',
 		'anak_meninggal_umur',
 		'ukuran_lila_cm',
 		'lebih_23_5_cm'
 	];
 
-	public function sip4_imunisasitts()
+	public function posyandu()
+	{
+		return $this->belongsTo(Posyandu::class);
+	}
+
+	public function dasawisma()
+	{
+		return $this->belongsTo(Dasawisma::class, 'dasawisma_id');
+	}
+
+	public function imunisasitt()
 	{
 		return $this->hasMany(Sip4Imunisasitt::class, 'wuspus_id');
 	}
 
-	public function sip4_kontrasepsis()
+	public function kontrasepsi()
 	{
 		return $this->hasMany(Sip4Kontrasepsi::class, 'wuspus_id');
 	}
 
-	public function sip4_penggantiankontrasepsis()
+	public function penggantianKontrasepsi()
 	{
 		return $this->hasMany(Sip4Penggantiankontrasepsi::class, 'wuspus_id');
 	}

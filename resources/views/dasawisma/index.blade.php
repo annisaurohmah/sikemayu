@@ -23,6 +23,8 @@
     <div class="col-12">
 
         <div class="container mt-2">
+            <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
+
 
             <!-- Tabs -->
             <ul class="nav nav-tabs mb-3" id="pills-tab" role="tablist">
@@ -46,186 +48,254 @@
                 <!-- Tab 1: Wilayah -->
                 <div class="tab-pane fade show active table-responsive" id="wilayah" role="tabpanel">
 
-                    <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
-
                     <table id="table-wilayah" class="table table-striped table-hover table-bordered dt-responsive nowrap">
                         <thead class="thead-dark">
                             <tr>
-                                <th data-priority="1">NO</th>
-                                <th data-priority="2">NOMOR RW</th>
-                                <th data-priority="3">JUML. RT</th>
-                                <th data-priority="4">JUML. DASA WISMA</th>
-                                <th data-priority="5">JUML. KRT</th>
-                                <th data-priority="6">JUML. KK</th>
+                                <th data-priority="1">No</th>
+                                <th data-priority="2">Nomor RW</th>
+                                <th data-priority="3">Jumlah RT</th>
+                                <th data-priority="4">Jumlah Dasawisma</th>
+                                <th data-priority="5">Jumlah KRT</th>
+                                <th data-priority="6">Jumlah KK</th>
+                                <th data-priority="7">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @if($dasawisma->count() > 0)
+                            @foreach($dasawisma as $data)
                             <tr>
-                                <td>1</td>
-                                <td>01</td>
-                                <td>5</td>
-                                <td>10</td>
-                                <td>50</td>
-                                <td>45</td>
+                                <td>{{$loop->iteration }}</td>
+                                <td>{{$data->no_rw ?? '-'}}</td>
+                                <td>{{$data->jumlah_RT ?? 0}}</td>
+                                <td>{{$data->jumlah_DW ?? 0}}</td>
+                                <td>{{$data->jumlah_KRT ?? 0}}</td>
+                                <td>{{$data->jumlah_KK ?? 0}}</td>
+                                <td>
+                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#edit{{$data->dw_id}}">
+                                        <i class="fa fa-edit"></i> Edit
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete{{$data->dw_id}}">
+                                        <i class="fa fa-trash"></i> Hapus
+                                    </button>
+                                </td>
                             </tr>
+                            @endforeach
+                            @else
+                            <tr>
+                                <td colspan="7" class="text-center">Tidak ada data untuk ditampilkan</td>
+                            </tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>
 
                 <!-- Tab 2: Anggota Keluarga -->
                 <div class="tab-pane fade table-responsive" id="keluarga" role="tabpanel">
-                    <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
 
                     <table id="table-keluarga" class="table table-striped table-hover table-bordered dt-responsive nowrap">
                         <thead class="thead-dark">
                             <tr>
                                 <th data-priority="1">No</th>
                                 <th data-priority="2">Nomor RW</th>
-                                <th data-priority="3">TOTAL L</th>
-                                <th data-priority="4">TOTAL P</th>
-                                <th data-priority="5">BALITA L</th>
-                                <th data-priority="6">BALITA P</th>
+                                <th data-priority="3">Total L</th>
+                                <th data-priority="4">Total P</th>
+                                <th data-priority="5">Balita L</th>
+                                <th data-priority="6">Balita P</th>
                                 <th data-priority="7">PUS</th>
                                 <th data-priority="8">WUS</th>
-                                <th data-priority="9">IBU HAMIL</th>
-                                <th data-priority="10">IBU MENYUSUI</th>
-                                <th data-priority="11">LANSIA</th>
-                                <th data-priority="12">3 BUTA L</th>
-                                <th data-priority="13w3">3 BUTA P</th>
+                                <th data-priority="9">Ibu Hamil</th>
+                                <th data-priority="10">Ibu Menyusui</th>
+                                <th data-priority="11">Lansia</th>
+                                <th data-priority="12">3 Buta L</th>
+                                <th data-priority="13">3 Buta P</th>
+                                <th data-priority="14">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @if($dasawisma->count() > 0)
+                            @foreach($dasawisma as $data)
                             <tr>
-                                <td>1</td>
-                                <td>01</td>
-                                <td>30</td>
-                                <td>25</td>
-                                <td>10</td>
-                                <td>8</td>
-                                <td>5</td>
-                                <td>3</td>
-                                <td>2</td>
-                                <td>1</td>
-                                <td>5</td>
-                                <td>2</td>
-                                <td>1</td>
+                                <td>{{$loop->iteration }}</td>
+                                <td>{{$data->no_rw ?? '-'}}</td>
+                                <td>{{$data->total_L ?? 0}}</td>
+                                <td>{{$data->total_P ?? 0}}</td>
+                                <td>{{$data->balita_L ?? 0}}</td>
+                                <td>{{$data->balita_P ?? 0}}</td>
+                                <td>{{$data->PUS ?? 0}}</td>
+                                <td>{{$data->WUS ?? 0}}</td>
+                                <td>{{$data->ibu_hamil ?? 0}}</td>
+                                <td>{{$data->ibu_menyusui ?? 0}}</td>
+                                <td>{{$data->lansia ?? 0}}</td>
+                                <td>{{$data->tiga_buta_L ?? 0}}</td>
+                                <td>{{$data->tiga_buta_P ?? 0}}</td>
+                                <td>
+                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#edit{{$data->dw_id}}">
+                                        <i class="fa fa-edit"></i> Edit
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete{{$data->dw_id}}">
+                                        <i class="fa fa-trash"></i> Hapus
+                                    </button>
+                                </td>
                             </tr>
+                            @endforeach
+                            @else
+                            <tr>
+                                <td colspan="14" class="text-center">Tidak ada data untuk ditampilkan</td>
+                            </tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>
 
                 <!-- Tab 3: Kriteria Rumah -->
                 <div class="tab-pane fade table-responsive" id="rumah" role="tabpanel">
-                    <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
 
                     <table id="table-rumah" class="table table-striped table-hover table-bordered dt-responsive nowrap">
                         <thead class="thead-dark">
+
                             <tr>
                                 <th>No</th>
                                 <th>Nomor RW</th>
-                                <th>SEHAT</th>
-                                <th>KURANG SEHAT</th>
-                                <th>PEMB. SAMPAH</th>
+                                <th>Sehat</th>
+                                <th>Kurang Sehat</th>
+                                <th>Pemb. Sampah</th>
                                 <th>SPAL</th>
-                                <th>STIKER P4K</th>
+                                <th>Stiker P4K</th>
                                 <th>PDAM</th>
-                                <th>SUMUR</th>
-                                <th>SUNGAI</th>
-                                <th>DLL</th>
-                                <th>JAMBAN KELUARGA</th>
-                                <th>MAKANAN BERAS</th>
-                                <th>NON BERAS</th>
+                                <th>Sumur</th>
+                                <th>Sungai</th>
+                                <th>Dll</th>
+                                <th>Jamban Keluarga</th>
+                                <th>Makanan Beras</th>
+                                <th>Non Beras</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @if($dasawisma->count() > 0)
+                            @foreach($dasawisma as $data)
                             <tr>
-                                <td>1</td>
-                                <td>01</td>
-                                <td>2</td>
-                                <td>4</td>
-                                <td>6</td>
-                                <td>2</td>
-                                <td>3</td>
-                                <td>4</td>
-                                <td>5</td>
-                                <td>4</td>
-                                <td>2</td>
-                                <td>2</td>
-                                <td>3</td>
-                                <td>4</td>
+                                <td>{{$loop->iteration}}</td>
+                                <td>{{$data->no_rw ?? '-'}}</td>
+                                <td>{{$data->sehat ?? 0}}</td>
+                                <td>{{$data->krg_sehat ?? 0}}</td>
+                                <td>{{$data->tempat_sampah ?? 0}}</td>
+                                <td>{{$data->spal ?? 0}}</td>
+                                <td>{{$data->stiker_pak ?? 0}}</td>
+                                <td>{{$data->pdam ?? 0}}</td>
+                                <td>{{$data->sumur ?? 0}}</td>
+                                <td>{{$data->sungai ?? 0}}</td>
+                                <td>{{$data->dll ?? 0}}</td>
+                                <td>{{$data->jumlah_jamban ?? 0}}</td>
+                                <td>{{$data->beras ?? 0}}</td>
+                                <td>{{$data->non_beras ?? 0}}</td>
+                                <td>
+                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#edit{{$data->dw_id}}">
+                                        <i class="fa fa-edit"></i> Edit
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete{{$data->dw_id}}">
+                                        <i class="fa fa-trash"></i> Hapus
+                                    </button>
+                                </td>
                             </tr>
+                            @endforeach
+                            @else
+                            <tr>
+                                <td colspan="15" class="text-center">Tidak ada data untuk ditampilkan</td>
+                            </tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>
 
                 <!-- Tab 4: Kegiatan Warga -->
                 <div class="tab-pane fade table-responsive" id="kegiatan" role="tabpanel">
-                    <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
 
-                     <table id="table-kegiatan" class="table table-striped table-hover table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <table id="table-kegiatan" class="table table-striped table-hover table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
 
                         <thead class="thead-dark">
                             <tr>
                                 <th>No</th>
                                 <th>Nomor RW</th>
                                 <th>UP2K</th>
-                                <th>PEMANFAATAN TANAH PEKARANGAN</th>
-                                <th>INDUSTRI RUMAH TANGGA</th>
-                                <th>KESEHATAN LINGKUNGAN</th>
-                                <th>KETERANGAN</th>
+                                <th>Pemanfaatan Tanah Pekarangan</th>
+                                <th>Industri Rumah Tangga</th>
+                                <th>Kesehatan Lingkungan</th>
+                                <th>Keterangan</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @if($dasawisma->count() > 0)
+                            @foreach($dasawisma as $data)
                             <tr>
-                                <td>1</td>
-                                <td>01</td>
-                                <td>2</td>
-                                <td>3</td>
-                                <td>4</td>
-                                <td>3</td>
-                                <td>-</td>
+                                <td>{{$loop->iteration}}</td>
+                                <td>{{$data->no_rw ?? '-'}}</td>
+                                <td>{{ $data->up2k ?? 0 }}</td>
+                                <td>{{$data->tanah_pkrgn ?? 0}}</td>
+                                <td>{{$data->industri_rt ?? 0}}</td>
+                                <td>{{$data->kesling ?? 0}}</td>
+                                <td>{{$data->keterangan ?? '-'}}</td>
+                                <td>
+                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#edit{{$data->dw_id}}">
+                                        <i class="fa fa-edit"></i> Edit
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete{{$data->dw_id}}">
+                                        <i class="fa fa-trash"></i> Hapus
+                                    </button>
+                                </td>
                             </tr>
+                            @endforeach
+                            @else
+                            <tr>
+                                <td colspan="8" class="text-center">Tidak ada data untuk ditampilkan</td>
+                            </tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div> <!-- end col -->
-</div> <!-- end row -->
+    @endsection
+
+    @include('includes.add_dasawisma')
+
+    @if($dasawisma->count() > 0)
+    @foreach($dasawisma as $item)
+    @include('includes.edit_delete_dasawisma', ['data' => $item])
+    @endforeach
+    @endif
 
 
 
+    @section('script')
 
-@endsection
-
-
-@section('script')
-
-<script>
-    $(document).ready(function() {
-        $('#table-wilayah').DataTable({
-            responsive: true
+    <script>
+        $(document).ready(function() {
+            $('#table-wilayah').DataTable({
+                responsive: true
+            });
+            $('#table-keluarga').DataTable({
+                responsive: true
+            });
+            $('#table-rumah').DataTable({
+                responsive: true
+            });
+            $('#table-kegiatan').DataTable({
+                responsive: true
+            });
         });
-        $('#table-keluarga').DataTable({
-            responsive: true
-        });
-        $('#table-rumah').DataTable({
-            responsive: true
-        });
-        $('#table-kegiatan').DataTable({
-            responsive: true
-        });
-    });
 
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function() {
-        $($.fn.dataTable.tables({
-                visible: true,
-                api: true
-            }))
-            .DataTable()
-            .columns.adjust()
-            .responsive.recalc();
-    });
-</script>
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function() {
+            $($.fn.dataTable.tables({
+                    visible: true,
+                    api: true
+                }))
+                .DataTable()
+                .columns.adjust()
+                .responsive.recalc();
+        });
+    </script>
 
-@endsection
+    @endsection

@@ -9,6 +9,13 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Dasawisma;
+use App\Models\Posyandu;
+use App\Models\Sip3Imunisasi;
+
+use App\Models\Sip3Penimbangan;
+use App\Models\Sip3Pelayanan;
+use App\Models\Sip3KeteranganBalita;
 
 /**
  * Class Sip3
@@ -27,6 +34,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property Collection|Sip3Imunisasi[] $sip3_imunisasis
  * @property Collection|Sip3Keteranganbalitum[] $sip3_keteranganbalita
  * @property Collection|Sip3Penimbangan[] $sip3_penimbangans
+ * @property Collection|Sip3Pelayanan[] $sip3_pelayanans
+ * @property Collection|Sip3Imunisasi[] $sip3_imunisasi
  *
  * @package App\Models
  */
@@ -60,7 +69,7 @@ class Sip3 extends Model
 
 	public function dasawisma()
 	{
-		return $this->belongsTo(Dasawisma::class);
+		return $this->belongsTo(Dasawisma::class, 'dasawisma_id');
 	}
 
 	public function sip3_imunisasis()
@@ -70,11 +79,25 @@ class Sip3 extends Model
 
 	public function sip3_keteranganbalita()
 	{
-		return $this->hasMany(Sip3Keteranganbalitum::class, 'balita_id');
+		return $this->hasMany(Sip3Keteranganbalita::class, 'balita_id');
 	}
 
 	public function sip3_penimbangans()
 	{
 		return $this->hasMany(Sip3Penimbangan::class, 'balita_id');
 	}
+	public function penimbangan() {
+    return $this->hasMany(Sip3Penimbangan::class, 'bayi_id');
+}
+
+public function pelayanan() {
+    return $this->hasMany(Sip3Pelayanan::class, 'bayi_id');
+}
+public function imunisasi() {
+    return $this->hasMany(Sip3Imunisasi::class, 'bayi_id');
+}
+public function keteranganBalita() {
+    return $this->hasOne(Sip3KeteranganBalita::class, 'bayi_id');
+}
+
 }

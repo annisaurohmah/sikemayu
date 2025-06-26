@@ -38,6 +38,7 @@ class Sip5 extends Model
 	public $timestamps = false;
 
 	protected $casts = [
+		'posyandu_id' => 'int',
 		'umur' => 'int',
 		'tanggal_pendaftaran' => 'datetime',
 		'umur_kehamilan' => 'int',
@@ -47,9 +48,11 @@ class Sip5 extends Model
 	];
 
 	protected $fillable = [
+		'posyandu_id',
 		'nama_ibu',
 		'umur',
 		'alamat_kelompok',
+		'dasawisma_id',
 		'tanggal_pendaftaran',
 		'umur_kehamilan',
 		'hamil_ke',
@@ -58,22 +61,32 @@ class Sip5 extends Model
 		'catatan'
 	];
 
-	public function sip5_imunisasittibuhamils()
+	public function posyandu()
+	{
+		return $this->belongsTo(Posyandu::class);
+	}
+
+	public function dasawisma()
+	{
+		return $this->belongsTo(Dasawisma::class, 'dasawisma_id');
+	}
+
+	public function imunisasittIbuHamil()
 	{
 		return $this->hasMany(Sip5Imunisasittibuhamil::class, 'ibu_hamil_id');
 	}
 
-	public function sip5_penimbanganibuhamils()
+	public function penimbanganIbuHamil()
 	{
 		return $this->hasMany(Sip5Penimbanganibuhamil::class, 'ibu_hamil_id');
 	}
 
-	public function sip5_tablettambahdarahs()
+	public function tabletTambahDarah()
 	{
 		return $this->hasMany(Sip5Tablettambahdarah::class, 'ibu_hamil_id');
 	}
 
-	public function sip5_vitaminaibuhamils()
+	public function vitaminIbuHamil()
 	{
 		return $this->hasMany(Sip5Vitaminaibuhamil::class, 'ibu_hamil_id');
 	}

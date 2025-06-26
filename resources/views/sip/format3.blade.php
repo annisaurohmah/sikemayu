@@ -1,22 +1,23 @@
-<!-- Tab 2: Format 2 -->
-<div class="tab-pane fade table-responsive" id="format2" role="tabpanel">
+<!-- Tab 3: Format 3 -->
+<div class="tab-pane fade table-responsive" id="format3" role="tabpanel">
 
     <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
 
-    <table id="table-format2" class="table table-striped table-hover table-bordered dt-responsive nowrap">
+    <table id="table-format3" class="table table-striped table-hover table-bordered dt-responsive nowrap">
         <thead class="thead-dark">
             <tr>
                 <th rowspan="2">No</th>                                                      
                 <th rowspan="2">Nama Balita</th>
                 <th rowspan="2">Tanggal Lahir</th>
                 <th rowspan="2">BBL KG</th>
-                <th colspan="2" class="text-center" s>Nama</th>
+                <th colspan="2" class="text-center">Nama</th>
                 <th rowspan="2">Kelompok Dasawisma</th>
                 <th colspan="12" class="text-center">Hasil Penimbangan (TB/BB)</th>
                 <th colspan="4" class="text-center">Pelayanan</th>
                 <th colspan="8" class="text-center">Imunisasi</th>
                 <th rowspan="2">Tanggal Balita Meninggal</th>
                 <th rowspan="2">Catatan</th>
+                <th rowspan="2">Aksi</th>
             </tr>
             <tr>
                 <th>Ayah</th>
@@ -74,6 +75,10 @@
                     @endforeach
                         <td>{{ $balita->keteranganBalita ? \Carbon\Carbon::parse($balita->keteranganBalita->tanggal_meninggal)->format('d-m-Y') : '' }}</td>
                     <td>{{ $balita->keteranganBalita->catatan ?? '' }}</td>
+                    <td>
+                        <a href="#edit{{$balita->balita_id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
+                        <a href="#delete{{$balita->balita_id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
+                    </td>
             </tr>
             @endforeach
         </tbody>

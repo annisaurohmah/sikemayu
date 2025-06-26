@@ -84,4 +84,9 @@ class Dw extends Model
 	{
 		return $this->hasMany(DwWmk::class);
 	}
+
+	public function rw()
+	{
+		return $this->belongsTo(Rw::class, 'rw_id');
+	}
 }

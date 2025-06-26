@@ -62,7 +62,7 @@ class Sip2 extends Model
 
 	public function dasawisma()
 	{
-		return $this->belongsTo(Dasawisma::class);
+		return $this->belongsTo(Dasawisma::class, 'dasawisma_id');
 	}
 
 	public function sip2_imunisasis()
@@ -72,7 +72,7 @@ class Sip2 extends Model
 
 	public function sip2_keteranganbalita()
 	{
-		return $this->hasMany(Sip2Keteranganbalitum::class, 'bayi_id');
+		return $this->hasMany(Sip2Keteranganbalita::class, 'bayi_id');
 	}
 
 	public function sip2_pelayanans()
@@ -89,5 +89,25 @@ class Sip2 extends Model
 	{
 		return $this->hasMany(Sip2Penimbangan::class, 'bayi_id');
 	}
-	
+
+	public function penimbangan()
+	{
+		return $this->hasMany(Sip2Penimbangan::class, 'bayi_id');
+	}
+	public function asi()
+	{
+		return $this->hasMany(Sip2PemberianASI::class, 'bayi_id');
+	}
+	public function pelayanan()
+	{
+		return $this->hasMany(Sip2Pelayanan::class, 'bayi_id');
+	}
+	public function imunisasi()
+	{
+		return $this->hasMany(Sip2Imunisasi::class, 'bayi_id');
+	}
+	public function keteranganBalita()
+	{
+		return $this->hasOne(Sip2KeteranganBalita::class, 'bayi_id');
+	}
 }

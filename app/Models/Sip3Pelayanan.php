@@ -10,36 +10,37 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Sip3Keteranganbalitum
+ * Class Sip3Pelayanan
  * 
- * @property int $ket_id
+ * @property int $pelayanan_id
  * @property int|null $balita_id
- * @property Carbon|null $tanggal_meninggal
- * @property string|null $catatan
+ * @property string|null $jenis
+ * @property Carbon|null $tanggal_diberikan
  * 
- * @property Sip3|null $sip3
+ * @property Sip3|null $sip2
  *
  * @package App\Models
  */
-class Sip3Keteranganbalitum extends Model
+class Sip3Pelayanan extends Model
 {
-	protected $table = 'sip3_keteranganbalita';
-	protected $primaryKey = 'ket_id';
+	protected $table = 'sip3_pelayanan';
+	protected $primaryKey = 'pelayanan_id';
 	public $timestamps = false;
 
 	protected $casts = [
 		'balita_id' => 'int',
-		'tanggal_meninggal' => 'datetime'
+		'tanggal_diberikan' => 'datetime'
 	];
 
 	protected $fillable = [
 		'balita_id',
-		'tanggal_meninggal',
-		'catatan'
+		'jenis',
+		'tanggal_diberikan'
 	];
 
 	public function sip3()
 	{
 		return $this->belongsTo(Sip3::class, 'balita_id');
 	}
+
 }

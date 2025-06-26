@@ -48,6 +48,9 @@
                 <li class="nav-item" role="presentation">
                     <a class="nav-link" data-toggle="tab" href="#format7">Format 7</a>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" data-toggle="tab" href="#dokum">Dokumentasi</a>
+                </li>
             </ul>
 
             <!-- Tab Content -->
@@ -59,6 +62,7 @@
                 @include('sip.format5')
                 @include('sip.format6')
                 @include('sip.format7')
+                @include('sip.dokum')
             </div>
         </div>
     </div> <!-- end col -->
@@ -93,6 +97,9 @@
             responsive: true
         });
         $('#table-format7').DataTable({
+            responsive: true
+        });
+         $('#table-dokum').DataTable({
             responsive: true
         });
     });

@@ -16,6 +16,7 @@
                 <th data-priority="8">Tanggal Meninggal Bayi</th>
                 <th data-priority="9">Tanggal Meninggal Ibu</th>
                 <th data-priority="10">Keterangan</th>
+                <th data-priority="11">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -31,6 +32,9 @@
                 <td>{{$format1->tgl_meninggal_ibu}}</td>
                 <td>{{$format1->tgl_meninggal_bayi}}</td>
                 <td>{{$format1->keterangan}}</td>
+                <td>
+                    <a href="#edit{{$format1->sip1_id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
+                    <a href="#delete{{$format1->sip1_id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
             </tr>
             @endforeach
         </tbody>

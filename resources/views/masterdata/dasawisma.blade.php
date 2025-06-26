@@ -51,8 +51,8 @@
                                 <td>{{$loop->iteration}}</td>
                                 <td>{{$dasawisma->nama_dasawisma}}</td>
                                 <td>
-                                    <a href="#edit{{$dasawisma->dasawisma_id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
-                                    <a href="#delete{{$dasawisma->dasawisma_id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
+                                    <a href="#edit{{$dasawisma->dw_id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
+                                    <a href="#delete{{$dasawisma->dw_id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
                                 </td>
                             </tr>
                             @endforeach

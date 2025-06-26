@@ -50,7 +50,7 @@ class Sip6 extends Model
 		'jumlah_meninggal' => 'int',
 		'ibu_hamil_meninggal' => 'int',
 		'ibu_melahirkan_meninggal' => 'int',
-		'nifas_meninggal' => 'int',
+		'nifas' => 'int',
 		'kader_posyandu' => 'int',
 		'plkb' => 'int',
 		'medis_paramedis' => 'int'
@@ -69,7 +69,7 @@ class Sip6 extends Model
 		'jumlah_meninggal',
 		'ibu_hamil_meninggal',
 		'ibu_melahirkan_meninggal',
-		'nifas_meninggal',
+		'nifas',
 		'kader_posyandu',
 		'plkb',
 		'medis_paramedis',

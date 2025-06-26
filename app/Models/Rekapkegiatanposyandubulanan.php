@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $bulan
  * @property int|null $tahun
  * @property int|null $jml_ibu_hamil
- * @property int|null $ibu_melahirkan
+ * @property int|null $ibu_periksa
  * @property int|null $ibu_mendapat_fe
  * @property int|null $ibu_menyusui
  * @property int|null $ibu_nifas_dapat_vit_a
@@ -59,7 +59,7 @@ class Rekapkegiatanposyandubulanan extends Model
 		'bulan' => 'int',
 		'tahun' => 'int',
 		'jml_ibu_hamil' => 'int',
-		'ibu_melahirkan' => 'int',
+		'ibu_periksa' => 'int',
 		'ibu_mendapat_fe' => 'int',
 		'ibu_menyusui' => 'int',
 		'ibu_nifas_dapat_vit_a' => 'int',
@@ -96,7 +96,7 @@ class Rekapkegiatanposyandubulanan extends Model
 		'bulan',
 		'tahun',
 		'jml_ibu_hamil',
-		'ibu_melahirkan',
+		'ibu_periksa',
 		'ibu_mendapat_fe',
 		'ibu_menyusui',
 		'ibu_nifas_dapat_vit_a',

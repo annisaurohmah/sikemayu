@@ -37,7 +37,7 @@ class Sip1 extends Model
 
 	protected $casts = [
 		'posyandu_id' => 'int',
-		'tahun' => 'datetime',
+		'tahun' => 'int',
 		'rw_id' => 'int',
 		'tgl_lahir' => 'datetime',
 		'tgl_meninggal_ibu' => 'datetime',

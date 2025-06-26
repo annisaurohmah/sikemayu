@@ -10,7 +10,7 @@
                 <th rowspan="2">Nama Bayi</th>
                 <th rowspan="2">Tanggal Lahir</th>
                 <th rowspan="2">BBL KG</th>
-                <th colspan="2" class="text-center" s>Nama</th>
+                <th colspan="2" class="text-center">Nama</th>
                 <th rowspan="2">Kelompok Dasawisma</th>
                 <th colspan="12" class="text-center">Hasil Penimbangan (TB/BB)</th>
                 <th colspan="6" class="text-center">Pemberian ASI</th>
@@ -18,6 +18,7 @@
                 <th colspan="8" class="text-center">Imunisasi</th>
                 <th rowspan="2">Tanggal Bayi Meninggal</th>
                 <th rowspan="2">Catatan</th>
+                <th rowspan="2">Aksi</th>
             </tr>
             <tr>
                 <th>Ayah</th>
@@ -82,8 +83,12 @@
                     @endphp
                     <td>{{ $imunisasi ? \Carbon\Carbon::parse($imunisasi->tanggal_diberikan)->format('d-m-Y') : '' }}</td>
                     @endforeach
-                        <td>{{ $bayi->keteranganBalita ? \Carbon\Carbon::parse($bayi->keteranganBalita->tanggal_meninggal)->format('d-m-Y') : '' }}</td>
+                    <td>{{ $bayi->keteranganBalita ? \Carbon\Carbon::parse($bayi->keteranganBalita->tanggal_meninggal)->format('d-m-Y') : '' }}</td>
                     <td>{{ $bayi->keteranganBalita->catatan ?? '' }}</td>
+                    <td>
+                        <a href="#edit{{$bayi->bayi_id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
+                        <a href="#delete{{$bayi->bayi_id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
+                    </td>
             </tr>
             @endforeach
         </tbody>

@@ -101,7 +101,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
     Route::post('/user/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
 
-    Route::get('rekap/dasawisma', [DasawismaController::class, 'rekap'])->name('dasawisma.rekap');
+    Route::get('rekap/dasawisma', [DasawismaController::class, 'indexRekap'])->name('dasawisma.rekap');
     Route::get('rekap/dasawisma/create', [DasawismaController::class, 'createRekap'])->name('dasawisma.rekap.create');
     Route::post('rekap/dasawisma/store', [DasawismaController::class, 'storeRekap'])->name('dasawisma.rekap.store');
     Route::get('rekap/dasawisma/edit/{id}', [DasawismaController::class, 'editRekap'])->name('dasawisma.rekap.edit');

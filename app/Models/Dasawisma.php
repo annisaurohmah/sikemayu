@@ -32,7 +32,8 @@ class Dasawisma extends Model
 	];
 
 	protected $fillable = [
-		'nama_dasawisma'
+		'nama_dasawisma',
+		'alamat_dasawisma',
 	];
 
 	public function sip2s()
