@@ -8,10 +8,13 @@
     <title>SIKEMAYU</title>
     <meta content="Admin Dashboard" name="description" />
     <meta content="Themesbrand" name="author" />
+
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
-
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
     @include('layouts.head')
 </head>
 
@@ -19,6 +22,7 @@
     <div id="wrapper">
         @include('layouts.header')
         @include('layouts.sidebar')
+
         <div class="content-page">
             <div class="content">
                 <div class="container-fluid">
@@ -27,16 +31,18 @@
                 </div>
             </div>
         </div>
+
         @include('layouts.footer')
         @include('layouts.footer-script')
     </div>
+
     @include('includes.flash')
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-
-    <!-- jQuery (required for Bootstrap 4) -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <!-- Popper.js (for tooltip/dropdown/tab) -->
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- Popper.js (for Bootstrap 4 tooltips) -->
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <!-- Bootstrap 4 JS -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -53,6 +59,9 @@
 
     <script>
         $(document).ready(function() {
+            // Inisialisasi Select2 jika digunakan
+            $('.select2').select2();
+
             // Fungsi untuk inisialisasi DataTable dengan tombol export
             function initDataTable(tableId) {
                 if (!$.fn.DataTable.isDataTable('#' + tableId)) {
@@ -70,8 +79,8 @@
             // Inisialisasi tabel di tab pertama
             initDataTable('datatable-buttons');
 
-            // Saat tab diklik
-            $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+            // Saat tab diklik (Bootstrap 4 pakai data-toggle)
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
                 const target = $(e.target).attr('href'); // #format2 misalnya
                 const table = $(target).find('table');
                 const tableId = table.attr('id');
@@ -82,6 +91,7 @@
         });
     </script>
 
+    @yield('scripts')
 
 </body>
 

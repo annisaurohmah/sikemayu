@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Anak;
+use App\Models\Dasawisma;
 use App\Models\Posyandu;
 use App\Models\Rekapkegiatanposyandubulanan;
 use App\Models\Sip1;
@@ -26,6 +27,14 @@ class SIPController extends Controller
         //sip format 1
         $format1 = Sip1::where('posyandu_id', $posyandu_id)->get();
         $posyandu = Posyandu::find($posyandu_id);
+        
+        // Get data for dropdowns
+        $dasawismaList = Dasawisma::all();
+        
+        // Filter bayi (0-12 bulan) dan balita (1-5 tahun) berdasarkan umur dari tanggal lahir
+        $today = now();
+        $bayiList_master = Anak::whereRaw('TIMESTAMPDIFF(MONTH, tanggal_lahir, ?) <= 12', [$today])->get();
+        $balitaList_master = Anak::whereRaw('TIMESTAMPDIFF(MONTH, tanggal_lahir, ?) > 12 AND TIMESTAMPDIFF(YEAR, tanggal_lahir, ?) <= 5', [$today, $today])->get();
 
         //sip format 2
         $bayiList = Sip2::with([
@@ -185,7 +194,7 @@ class SIPController extends Controller
                 }
 
                 // Ambil data bulan sebelumnya dari balita yang sama
-                $prev = Sip3::where('bayi_id', $item->bayi_id)
+                $prev = Sip3::where('balita_id', $item->balita_id)
                     ->whereMonth('tgl_lahir', $prevBulan)
                     ->whereYear('tgl_lahir', $prevTahun)
                     ->first();
@@ -414,6 +423,254 @@ class SIPController extends Controller
 
 
 
-        return view('sip.index', compact('posyandu_id', 'posyandu', 'format1', 'bayiList', 'balitaList', 'wuspusList', 'ibuHamilList', 'sip6', 'sip7'));
+        return view('sip.index', compact('posyandu_id', 'posyandu', 'format1', 'bayiList', 'balitaList', 'wuspusList', 'ibuHamilList', 'sip6', 'sip7', 'dasawismaList', 'bayiList_master', 'balitaList_master'));
+    }
+
+    // SIP1 CRUD Methods
+    public function storeSip1(Request $request)
+    {
+        $request->validate([
+            'posyandu_id' => 'required|exists:posyandu,posyandu_id',
+            'tahun' => 'required|integer|min:1900|max:2100',
+            'bulan' => 'required|string|max:20',
+            'nama_ibu' => 'required|string|max:255',
+            'nama_bapak' => 'required|string|max:255',
+            'nama_bayi' => 'required|string|max:255',
+            'tgl_lahir' => 'required|date',
+            'tgl_meninggal_ibu' => 'nullable|date',
+            'tgl_meninggal_bayi' => 'nullable|date',
+            'keterangan' => 'nullable|string'
+        ]);
+
+        Sip1::create($request->all());
+
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 1 berhasil ditambahkan.');
+    }
+
+    public function updateSip1(Request $request, $id)
+    {
+        $sip1 = Sip1::findOrFail($id);
+        
+        $request->validate([
+            'posyandu_id' => 'required|exists:posyandu,posyandu_id',
+            'tahun' => 'required|integer|min:1900|max:2100',
+            'bulan' => 'required|string|max:20',
+            'nama_ibu' => 'required|string|max:255',
+            'nama_bapak' => 'required|string|max:255',
+            'nama_bayi' => 'required|string|max:255',
+            'tgl_lahir' => 'required|date',
+            'tgl_meninggal_ibu' => 'nullable|date',
+            'tgl_meninggal_bayi' => 'nullable|date',
+            'keterangan' => 'nullable|string'
+        ]);
+
+        $sip1->update($request->all());
+
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 1 berhasil diperbarui.');
+    }
+
+    public function deleteSip1($id)
+    {
+        $sip1 = Sip1::findOrFail($id);
+        $posyandu_id = $sip1->posyandu_id;
+        $nama_bayi = $sip1->nama_bayi;
+        
+        $sip1->delete();
+
+        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 1 untuk ' . $nama_bayi . ' berhasil dihapus.');
+    }
+
+    // SIP2 CRUD Methods
+    public function storeSip2(Request $request)
+    {
+        $request->validate([
+            'posyandu_id' => 'required|exists:posyandu,posyandu_id',
+            'nama_bayi' => 'required|string|max:255',
+            'tgl_lahir' => 'required|date',
+            'bbl_kg' => 'required|numeric|min:0',
+            'nama_ayah' => 'required|string|max:255',
+            'nama_ibu' => 'required|string|max:255',
+            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+        ]);
+
+        Sip2::create($request->all());
+
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 2 berhasil ditambahkan.');
+    }
+
+    public function updateSip2(Request $request, $id)
+    {
+        $sip2 = Sip2::findOrFail($id);
+        
+        $request->validate([
+            'posyandu_id' => 'required|exists:posyandu,posyandu_id',
+            'nama_bayi' => 'required|string|max:255',
+            'tgl_lahir' => 'required|date',
+            'bbl_kg' => 'required|numeric|min:0',
+            'nama_ayah' => 'required|string|max:255',
+            'nama_ibu' => 'required|string|max:255',
+            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+        ]);
+
+        $sip2->update($request->all());
+
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 2 berhasil diperbarui.');
+    }
+
+    public function deleteSip2($id)
+    {
+        $sip2 = Sip2::findOrFail($id);
+        $posyandu_id = $sip2->posyandu_id;
+        $nama_bayi = $sip2->nama_bayi;
+        
+        $sip2->delete();
+
+        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 2 untuk ' . $nama_bayi . ' berhasil dihapus.');
+    }
+
+    // SIP3 CRUD Methods
+    public function storeSip3(Request $request)
+    {
+        $request->validate([
+            'posyandu_id' => 'required|exists:posyandu,posyandu_id',
+            'nama_balita' => 'required|string|max:255',
+            'tgl_lahir' => 'required|date',
+            'bbl_kg' => 'required|numeric|min:0',
+            'nama_ayah' => 'required|string|max:255',
+            'nama_ibu' => 'required|string|max:255',
+            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+        ]);
+
+        Sip3::create($request->all());
+
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 3 berhasil ditambahkan.');
+    }
+
+    public function updateSip3(Request $request, $id)
+    {
+        $sip3 = Sip3::findOrFail($id);
+        
+        $request->validate([
+            'posyandu_id' => 'required|exists:posyandu,posyandu_id',
+            'nama_balita' => 'required|string|max:255',
+            'tgl_lahir' => 'required|date',
+            'bbl_kg' => 'required|numeric|min:0',
+            'nama_ayah' => 'required|string|max:255',
+            'nama_ibu' => 'required|string|max:255',
+            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+        ]);
+
+        $sip3->update($request->all());
+
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 3 berhasil diperbarui.');
+    }
+
+    public function deleteSip3($id)
+    {
+        $sip3 = Sip3::findOrFail($id);
+        $posyandu_id = $sip3->posyandu_id;
+        $nama_balita = $sip3->nama_balita;
+        
+        $sip3->delete();
+
+        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 3 untuk ' . $nama_balita . ' berhasil dihapus.');
+    }
+
+    // SIP4 CRUD Methods
+    public function storeSip4(Request $request)
+    {
+        $request->validate([
+            'posyandu_id' => 'required|exists:posyandu,posyandu_id',
+            'tahun' => 'required|integer|min:1900|max:2100',
+            'bulan' => 'required|string|max:20',
+            'nama_wuspus' => 'required|string|max:255',
+            'nama_suami' => 'required|string|max:255',
+            'umur' => 'required|integer|min:0',
+            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+        ]);
+
+        Sip4::create($request->all());
+
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 4 berhasil ditambahkan.');
+    }
+
+    public function updateSip4(Request $request, $id)
+    {
+        $sip4 = Sip4::findOrFail($id);
+        
+        $request->validate([
+            'posyandu_id' => 'required|exists:posyandu,posyandu_id',
+            'tahun' => 'required|integer|min:1900|max:2100',
+            'bulan' => 'required|string|max:20',
+            'nama_wuspus' => 'required|string|max:255',
+            'nama_suami' => 'required|string|max:255',
+            'umur' => 'required|integer|min:0',
+            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+        ]);
+
+        $sip4->update($request->all());
+
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 4 berhasil diperbarui.');
+    }
+
+    public function deleteSip4($id)
+    {
+        $sip4 = Sip4::findOrFail($id);
+        $posyandu_id = $sip4->posyandu_id;
+        $nama_wuspus = $sip4->nama_wuspus;
+        
+        $sip4->delete();
+
+        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 4 untuk ' . $nama_wuspus . ' berhasil dihapus.');
+    }
+
+    // SIP5 CRUD Methods
+    public function storeSip5(Request $request)
+    {
+        $request->validate([
+            'posyandu_id' => 'required|exists:posyandu,posyandu_id',
+            'tahun' => 'required|integer|min:1900|max:2100',
+            'bulan' => 'required|string|max:20',
+            'nama_ibu_hamil' => 'required|string|max:255',
+            'nama_suami' => 'required|string|max:255',
+            'umur' => 'required|integer|min:0',
+            'tanggal_pendaftaran' => 'required|date',
+            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+        ]);
+
+        Sip5::create($request->all());
+
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 5 berhasil ditambahkan.');
+    }
+
+    public function updateSip5(Request $request, $id)
+    {
+        $sip5 = Sip5::findOrFail($id);
+        
+        $request->validate([
+            'posyandu_id' => 'required|exists:posyandu,posyandu_id',
+            'tahun' => 'required|integer|min:1900|max:2100',
+            'bulan' => 'required|string|max:20',
+            'nama_ibu_hamil' => 'required|string|max:255',
+            'nama_suami' => 'required|string|max:255',
+            'umur' => 'required|integer|min:0',
+            'tanggal_pendaftaran' => 'required|date',
+            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+        ]);
+
+        $sip5->update($request->all());
+
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 5 berhasil diperbarui.');
+    }
+
+    public function deleteSip5($id)
+    {
+        $sip5 = Sip5::findOrFail($id);
+        $posyandu_id = $sip5->posyandu_id;
+        $nama_ibu_hamil = $sip5->nama_ibu_hamil;
+        
+        $sip5->delete();
+
+        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 5 untuk ' . $nama_ibu_hamil . ' berhasil dihapus.');
     }
 }

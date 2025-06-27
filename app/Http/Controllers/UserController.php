@@ -4,60 +4,76 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $users = User::all(); // Assuming you have a User model
-        // Logic to retrieve and display user data
+        $users = User::all();
         return view('masterdata.user', compact('users'));
-    }
-
-    public function create()
-    {
-        // Logic to show the form for creating a new user
-        return view('users.create');
     }
 
     public function store(Request $request)
     {
-        // Logic to store a new user in the database
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+        $request->validate([
+            'username' => 'required|string|max:255|unique:users,username',
+            'password' => 'required|string|min:6',
+            'role' => 'required|string|in:admin,kader,user',
+            'no_rw' => 'nullable|string|max:10',
+            'nama_posyandu' => 'nullable|string|max:255'
         ]);
-        // Save the user data to the database
-        // User::create($data);
-        return redirect()->route('users.index')->with('success', 'User created successfully.');
-    }
 
-    public function edit($id)
-    {
-        // Logic to show the form for editing an existing user
-        return view('users.edit', compact('id'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        // Logic to update an existing user in the database
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
-            'password' => 'nullable|string|min:8|confirmed',
+        User::create([
+            'username' => $request->username,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'no_rw' => $request->no_rw,
+            'nama_posyandu' => $request->nama_posyandu
         ]);
-        // Find the user and update it
-        // $user = User::findOrFail($id);
-        // $user->update($data);
-        return redirect()->route('users.index')->with('success', 'User updated successfully.');
+
+        return redirect()->route('user.index')->with('success', 'Data pengguna berhasil ditambahkan!');
     }
 
-    public function destroy($id)
+    public function update(Request $request)
     {
-        // Logic to delete a user from the database
-        // $user = User::findOrFail($id);
-        // $user->delete();
-        return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+        $request->validate([
+            'user_id' => 'required|integer',
+            'username' => 'required|string|max:255|unique:users,username,' . $request->user_id . ',user_id',
+            'password' => 'nullable|string|min:6',
+            'role' => 'required|string|in:admin,kader,user',
+            'no_rw' => 'nullable|string|max:10',
+            'nama_posyandu' => 'nullable|string|max:255'
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+        
+        $updateData = [
+            'username' => $request->username,
+            'role' => $request->role,
+            'no_rw' => $request->no_rw,
+            'nama_posyandu' => $request->nama_posyandu
+        ];
+
+        // Only update password if provided
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+
+        $user->update($updateData);
+
+        return redirect()->route('user.index')->with('success', 'Data pengguna berhasil diubah!');
+    }
+
+    public function delete(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|integer'
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+        $user->delete();
+
+        return redirect()->route('user.index')->with('success', 'Data pengguna berhasil dihapus!');
     }
 }

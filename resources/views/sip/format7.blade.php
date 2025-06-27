@@ -1,7 +1,9 @@
-<!-- Tab 6: Format 6 -->
+<!-- Tab 7: Format 7 -->
 <div class="tab-pane fade table-responsive" id="format7" role="tabpanel">
 
-    <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
+    <div class="alert alert-info mt-2 mb-2">
+        <i class="fa fa-info-circle"></i> Data Format 7 diisi otomatis berdasarkan perhitungan dari seluruh format lainnya. Tidak dapat ditambah manual.
+    </div>
 
     <table id="table-format7" class="table table-striped table-hover table-bordered dt-responsive nowrap">
         <thead class="thead-dark">
@@ -18,7 +20,6 @@
                 <th colspan="5" class="text-center">Jumlah WUS dan Bumil yang Mendapat TT</th>
                 <th colspan="2" class="text-center">Balita yang Diare</th>
                 <th rowspan="2">Keterangan</th>
-                <th rowspan="2">Aksi</th>
             </tr>
             <tr>
                 <th>Jumlah</th>
@@ -98,16 +99,11 @@
                 <td>{{ $rekap->balita_diare}}</td>
                 <td>{{ $rekap->balita_diare_dapat_oralit }}</td>
                 <td>{{ $rekap->keterangan }}</td>
-                <td>
-                    <a href="#edit{{$rekap->id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
-                    <a href="#delete{{$rekap->id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
-                </td>
-
             </tr>
             @endforeach
             @else
             <tr>
-                <td colspan="17" class="text-center">Tidak ada data untuk ditampilkan</td>
+                <td colspan="33" class="text-center">Tidak ada data untuk ditampilkan</td>
             </tr>
             @endif
         </tbody>

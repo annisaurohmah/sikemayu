@@ -20,11 +20,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $jumlah_pus
  * @property int|null $jumlah_hamil
  * @property int|null $jumlah_menyusui
- * @property int|null $jumlah_lahir
- * @property int|null $jumlah_meninggal
+ * @property int|null $bayi_lahir
+ * @property int|null $bayi_meninggal
  * @property int|null $ibu_hamil_meninggal
  * @property int|null $ibu_melahirkan_meninggal
- * @property int|null $nifas_meninggal
+ * @property int|null $nifas
  * @property int|null $kader_posyandu
  * @property int|null $plkb
  * @property int|null $medis_paramedis
@@ -46,8 +46,8 @@ class Sip6 extends Model
 		'jumlah_pus' => 'int',
 		'jumlah_hamil' => 'int',
 		'jumlah_menyusui' => 'int',
-		'jumlah_lahir' => 'int',
-		'jumlah_meninggal' => 'int',
+		'bayi_lahir' => 'int',
+		'bayi_meninggal' => 'int',
 		'ibu_hamil_meninggal' => 'int',
 		'ibu_melahirkan_meninggal' => 'int',
 		'nifas' => 'int',
@@ -65,8 +65,8 @@ class Sip6 extends Model
 		'jumlah_pus',
 		'jumlah_hamil',
 		'jumlah_menyusui',
-		'jumlah_lahir',
-		'jumlah_meninggal',
+		'bayi_lahir',
+		'bayi_meninggal',
 		'ibu_hamil_meninggal',
 		'ibu_melahirkan_meninggal',
 		'nifas',

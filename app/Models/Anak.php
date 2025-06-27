@@ -24,6 +24,8 @@ use Illuminate\Database\Eloquent\Model;
 class Anak extends Model
 {
 	protected $table = 'anak';
+	protected $primaryKey = 'nik';
+	protected $keyType = 'string';
 	public $incrementing = false;
 	public $timestamps = false;
 

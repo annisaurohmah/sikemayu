@@ -15,13 +15,7 @@
 </div>
 @endsection
 @section('button')
-<!-- <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Tambah Data Bayi</a>
-<a href="/import" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Import Data Bayi</a>
-<form class="mt-1" action="" method="POST">
-    @csrf
-    @method('DELETE')
-    <button type="submit" onclick="alert('Anda yakin menghapus seluruh data?')" class="btn btn-danger btn-sm btn-flat"><i class="mdi mdi-trash-can mr-2"></i>Hapus Semua Mahasiswa</button>
-</form> -->
+<a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Tambah Data Posyandu</a>
 @endsection
 
 @section('content')
@@ -68,13 +62,14 @@
 </div> <!-- end col -->
 </div> <!-- end row -->
 
-
-
-
+@include('includes.add_data_posyandu')
+@foreach($posyandus as $posyandu)
+    @include('includes.edit_delete_posyandu', ['posyandu' => $posyandu])
+@endforeach
 @endsection
 
 
 @section('script')
 <!-- Responsive-table-->
 
-@endsection`
+@endsection

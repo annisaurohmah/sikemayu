@@ -15,13 +15,7 @@
 </div>
 @endsection
 @section('button')
-<!-- <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Tambah Data Bayi</a>
-<a href="/import" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Import Data Bayi</a>
-<form class="mt-1" action="" method="POST">
-    @csrf
-    @method('DELETE')
-    <button type="submit" onclick="alert('Anda yakin menghapus seluruh data?')" class="btn btn-danger btn-sm btn-flat"><i class="mdi mdi-trash-can mr-2"></i>Hapus Semua Mahasiswa</button>
-</form> -->
+<a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Tambah Pengguna</a>
 @endsection
 
 @section('content')
@@ -77,4 +71,9 @@
 @section('script')
 <!-- Responsive-table-->
 
-@endsection`
+@endsection
+
+@include('includes.add_user')
+@foreach($users as $user)
+    @include('includes.edit_delete_user', ['user' => $user])
+@endforeach

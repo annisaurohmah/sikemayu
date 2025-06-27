@@ -15,13 +15,7 @@
 </div>
 @endsection
 @section('button')
-<!-- <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Tambah Data Bayi</a>
-<a href="/import" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Import Data Bayi</a>
-<form class="mt-1" action="" method="POST">
-    @csrf
-    @method('DELETE')
-    <button type="submit" onclick="alert('Anda yakin menghapus seluruh data?')" class="btn btn-danger btn-sm btn-flat"><i class="mdi mdi-trash-can mr-2"></i>Hapus Semua Mahasiswa</button>
-</form> -->
+<a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Tambah Data RW</a>
 @endsection
 
 @section('content')
@@ -45,14 +39,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach( $rw as $rw)
+                            @foreach( $rw as $rw_item)
 
                             <tr>
                                 <td>{{$loop->iteration}}</td>
-                                <td>{{$rw->no_rw}}</td>
+                                <td>{{$rw_item->no_rw}}</td>
                                 <td>
-                                    <a href="#edit{{$rw->rw_id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
-                                    <a href="#delete{{$rw->rw_id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
+                                    <a href="#edit{{$rw_item->rw_id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
+                                    <a href="#delete{{$rw_item->rw_id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
                                 </td>
                             </tr>
                             @endforeach
@@ -77,4 +71,9 @@
 @section('script')
 <!-- Responsive-table-->
 
-@endsection`
+@endsection
+
+@include('includes.add_data_rw')
+@foreach($rw as $rw_item)
+    @include('includes.edit_delete_rw', ['rw' => $rw_item])
+@endforeach

@@ -315,4 +315,48 @@ class DasawismaController extends Controller
             return redirect()->back()->with('error', 'Gagal menghapus data dasawisma: ' . $e->getMessage());
         }
     }
+
+    public function storeMasterdata(Request $request)
+    {
+        $request->validate([
+            'nama_dasawisma' => 'required|string|max:255',
+            'alamat_dasawisma' => 'nullable|string|max:500'
+        ]);
+
+        Dasawisma::create([
+            'nama_dasawisma' => $request->nama_dasawisma,
+            'alamat_dasawisma' => $request->alamat_dasawisma
+        ]);
+
+        return redirect()->route('dasawisma.index')->with('success', 'Data Dasawisma berhasil ditambahkan!');
+    }
+
+    public function updateMasterdata(Request $request)
+    {
+        $request->validate([
+            'dasawisma_id' => 'required|integer',
+            'nama_dasawisma' => 'required|string|max:255',
+            'alamat_dasawisma' => 'nullable|string|max:500'
+        ]);
+
+        $dasawisma = Dasawisma::findOrFail($request->dasawisma_id);
+        $dasawisma->update([
+            'nama_dasawisma' => $request->nama_dasawisma,
+            'alamat_dasawisma' => $request->alamat_dasawisma
+        ]);
+
+        return redirect()->route('dasawisma.index')->with('success', 'Data Dasawisma berhasil diubah!');
+    }
+
+    public function deleteMasterdata(Request $request)
+    {
+        $request->validate([
+            'dasawisma_id' => 'required|integer'
+        ]);
+
+        $dasawisma = Dasawisma::findOrFail($request->dasawisma_id);
+        $dasawisma->delete();
+
+        return redirect()->route('dasawisma.index')->with('success', 'Data Dasawisma berhasil dihapus!');
+    }
 }

@@ -15,6 +15,8 @@
 </div>
 @endsection
 @section('button')
+<a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
+
 <!-- <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Tambah Data Bayi</a>
 <a href="/import" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Import Data Bayi</a>
 <form class="mt-1" action="" method="POST">
@@ -30,6 +32,7 @@
 
 <div class="row">
     <div class="col-12">
+
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
@@ -43,28 +46,48 @@
                                 <th data-priority="3">Nama Lengkap</th>
                                 <th data-priority="4">Jenis Kelamin</th>
                                 <th data-priority="5">Tanggal Lahir</th>
-                                <th data-priority="6">Nama Lengkap Orang Tua</th>
-                                <th data-priority="7">Jenis Kelamin Ortu</th>
-                                <th data-priority="8">Aksi</th>
+                                <th data-priority="6">Umur</th>
+                                <th data-priority="7">Nama Lengkap Orang Tua</th>
+                                <th data-priority="8">Jenis Kelamin Ortu</th>
+                                <th data-priority="9">Aksi</th>
 
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach( $balita as $balita)
-
-
+                            @foreach( $balita as $balita_item)
 
                             <tr>
                                 <td>{{$loop->iteration}}</td>
-                                <td>{{$balita->nik}}</td>
-                                <td>{{$balita->nama_lengkap}}</td>
-                                <td>{{$balita->jenis_kelamin}}</td>
-                                <td>{{$balita->tanggal_lahir}}</td>
-                                <td>{{$balita->nama_lengkap_ortu}}</td>
-                                <td>{{$balita->jenis_kelamin_ortu}}</td>
+                                <td>{{$balita_item->nik}}</td>
+                                <td>{{$balita_item->nama_lengkap}}</td>
+                                <td>{{$balita_item->jenis_kelamin}}</td>
+                                <td>{{$balita_item->tanggal_lahir ? $balita_item->tanggal_lahir->format('d-m-Y') : ''}}</td>
                                 <td>
-                                    <a href="#edit{{$balita->nik}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
-                                    <a href="#delete{{$balita->nik}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
+                                    @if($balita_item->tanggal_lahir)
+                                        @php
+                                            $birthDate = $balita_item->tanggal_lahir;
+                                            $today = \Carbon\Carbon::now();
+                                            $diffDays = $today->diffInDays($birthDate);
+                                            $years = floor($diffDays / 365);
+                                            $months = floor(($diffDays % 365) / 30);
+                                            $days = floor(($diffDays % 365) % 30);
+                                            
+                                            $ageText = '';
+                                            if ($years > 0) $ageText .= $years . ' tahun ';
+                                            if ($months > 0) $ageText .= $months . ' bulan ';
+                                            if ($days > 0 && $years === 0) $ageText .= $days . ' hari';
+                                            if ($ageText === '') $ageText = '0 hari';
+                                        @endphp
+                                        {{ trim($ageText) }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td>{{$balita_item->nama_lengkap_ortu}}</td>
+                                <td>{{$balita_item->jenis_kelamin_ortu}}</td>
+                                <td>
+                                    <a href="#edit{{$balita_item->nik}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
+                                    <a href="#delete{{$balita_item->nik}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
                                 </td>
                             </tr>
                             @endforeach
@@ -89,4 +112,9 @@
 @section('script')
 <!-- Responsive-table-->
 
-@endsection`
+@endsection
+
+@include('includes.add_data_balita')
+@foreach($balita as $balita_item)
+    @include('includes.edit_delete_balita', ['balita' => $balita_item])
+@endforeach

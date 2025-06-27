@@ -1,29 +1,22 @@
 <!-- Edit -->
-<div class="modal fade" id="edit{{$flat->flat_id}}">
+<div class="modal fade" id="edit{{$posyandu->posyandu_id}}">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><b>Edit Flat</b></h5>
+                <h5 class="modal-title"><b>Edit Posyandu</b></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span></button>
 
             </div>
             <div class="modal-body text-left">
-                <form class="form-horizontal" method="POST" action="{{ route('flat.update') }}">
+                <form class="form-horizontal" method="POST" action="{{ route('posyandu.update') }}">
                     @csrf
-                    <input type="hidden" name="_method" value="PUT">
-
+                    <input type="hidden" name="posyandu_id" value="{{ $posyandu->posyandu_id }}" />
+                    
                     <div class="form-group">
-                        <label for="name">ID</label>
-                        <input type="text" class="form-control"  id="flat_id" name="flat_id" readonly
-                        value="{{ $flat->flat_id }}" />
-                    </div>
-
-
-                    <div class="form-group">
-                        <label for="name">Nama Flat</label>
-                        <input type="text" class="form-control" placeholder="Masukkan nama flat" id="name" name="name"
-                            required value="{{ $flat->name }}" />
+                        <label for="nama_posyandu">Nama Posyandu</label>
+                        <input type="text" class="form-control" placeholder="Masukkan nama posyandu" id="nama_posyandu" name="nama_posyandu" 
+                        value="{{ $posyandu->nama_posyandu ?? '' }}" required />
                     </div>
 
                     <div class="modal-footer">
@@ -39,21 +32,20 @@
 </div>
 
 <!-- Delete -->
-<div class="modal fade" id="delete{{ $flat->flat_id }}">
+<div class="modal fade" id="delete{{ $posyandu->posyandu_id }}">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header " style="align-items: center">
-
-                <h4 class="modal-title "><span class="student_id">Delete Mahasiswa</span></h4>
+                <h4 class="modal-title "><span class="student_id">Delete Posyandu</span></h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
             <div class="modal-body">
-                <form class="form-horizontal" method="POST" action="{{ route('flat.delete', $flat->flat_id) }}">
+                <form class="form-horizontal" method="POST" action="{{ route('posyandu.delete') }}">
                     @csrf
-                    {{ method_field('DELETE') }}
+                    <input type="hidden" name="posyandu_id" value="{{ $posyandu->posyandu_id }}" />
                     <div class="text-center">
                         <h6>Are you sure you want to delete:</h6>
-                        <h2 class="bold del_employee_name">{{$flat->flat_id}}</h2>
+                        <h2 class="bold del_employee_name">{{ $posyandu->nama_posyandu }}</h2>
                     </div>
             </div>
             <div class="modal-footer">

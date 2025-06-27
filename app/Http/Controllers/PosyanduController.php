@@ -9,40 +9,47 @@ class PosyanduController extends Controller
 {
     public function index()
     {
-        $posyandus = Posyandu::all(); // Assuming you have a Posyandu model
-        // Logic to retrieve and display the list of Posyandu
+        $posyandus = Posyandu::all();
         return view('masterdata.posyandu', compact('posyandus'));
-    }
-
-    public function create()
-    {
-        // Logic to show the form for creating a new Posyandu
-        return view('posyandu.create');
     }
 
     public function store(Request $request)
     {
-        // Logic to store a new Posyandu in the database
-        // Validate and save the data
-        return redirect()->route('posyandu.index')->with('success', 'Posyandu created successfully.');
+        $request->validate([
+            'nama_posyandu' => 'required|string|max:255'
+        ]);
+
+        Posyandu::create([
+            'nama_posyandu' => $request->nama_posyandu
+        ]);
+
+        return redirect()->route('posyandu.index')->with('success', 'Data Posyandu berhasil ditambahkan!');
     }
 
-    public function edit($id)
+    public function update(Request $request)
     {
-        // Logic to show the form for editing an existing Posyandu
-        return view('posyandu.edit', compact('id'));
+        $request->validate([
+            'posyandu_id' => 'required|integer',
+            'nama_posyandu' => 'required|string|max:255'
+        ]);
+
+        $posyandu = Posyandu::findOrFail($request->posyandu_id);
+        $posyandu->update([
+            'nama_posyandu' => $request->nama_posyandu
+        ]);
+
+        return redirect()->route('posyandu.index')->with('success', 'Data Posyandu berhasil diubah!');
     }
 
-    public function update(Request $request, $id)
+    public function delete(Request $request)
     {
-        // Logic to update an existing Posyandu in the database
-        // Validate and update the data
-        return redirect()->route('posyandu.index')->with('success', 'Posyandu updated successfully.');
-    }
+        $request->validate([
+            'posyandu_id' => 'required|integer'
+        ]);
 
-    public function destroy($id)
-    {
-        // Logic to delete a Posyandu from the database
-        return redirect()->route('posyandu.index')->with('success', 'Posyandu deleted successfully.');
+        $posyandu = Posyandu::findOrFail($request->posyandu_id);
+        $posyandu->delete();
+
+        return redirect()->route('posyandu.index')->with('success', 'Data Posyandu berhasil dihapus!');
     }
 }

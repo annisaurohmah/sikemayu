@@ -87,17 +87,17 @@ class Sip3 extends Model
 		return $this->hasMany(Sip3Penimbangan::class, 'balita_id');
 	}
 	public function penimbangan() {
-    return $this->hasMany(Sip3Penimbangan::class, 'bayi_id');
+    return $this->hasMany(Sip3Penimbangan::class, 'balita_id');
 }
 
 public function pelayanan() {
-    return $this->hasMany(Sip3Pelayanan::class, 'bayi_id');
+    return $this->hasMany(Sip3Pelayanan::class, 'balita_id');
 }
 public function imunisasi() {
-    return $this->hasMany(Sip3Imunisasi::class, 'bayi_id');
+    return $this->hasMany(Sip3Imunisasi::class, 'balita_id');
 }
 public function keteranganBalita() {
-    return $this->hasOne(Sip3KeteranganBalita::class, 'bayi_id');
+    return $this->hasOne(Sip3KeteranganBalita::class, 'balita_id');
 }
 
 }

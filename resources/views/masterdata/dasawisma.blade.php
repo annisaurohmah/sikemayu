@@ -15,13 +15,7 @@
 </div>
 @endsection
 @section('button')
-<!-- <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Tambah Data Bayi</a>
-<a href="/import" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Import Data Bayi</a>
-<form class="mt-1" action="" method="POST">
-    @csrf
-    @method('DELETE')
-    <button type="submit" onclick="alert('Anda yakin menghapus seluruh data?')" class="btn btn-danger btn-sm btn-flat"><i class="mdi mdi-trash-can mr-2"></i>Hapus Semua Mahasiswa</button>
-</form> -->
+<a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Tambah Data Dasawisma</a>
 @endsection
 
 @section('content')
@@ -40,19 +34,21 @@
                             <tr>
                                 <th data-priority="1">No</th>
                                 <th data-priority="2">Nama Dasawisma</th>
-                                <th data-priority="3">Aksi</th>
+                                <th data-priority="3">Alamat Dasawisma</th>
+                                <th data-priority="4">Aksi</th>
 
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach( $dasawisma as $dasawisma)
+                            @foreach( $dasawisma as $dasawisma_item)
 
                             <tr>
                                 <td>{{$loop->iteration}}</td>
-                                <td>{{$dasawisma->nama_dasawisma}}</td>
+                                <td>{{$dasawisma_item->nama_dasawisma}}</td>
+                                <td>{{$dasawisma_item->alamat_dasawisma}}</td>
                                 <td>
-                                    <a href="#edit{{$dasawisma->dw_id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
-                                    <a href="#delete{{$dasawisma->dw_id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
+                                    <a href="#edit{{$dasawisma_item->dasawisma_id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
+                                    <a href="#delete{{$dasawisma_item->dasawisma_id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
                                 </td>
                             </tr>
                             @endforeach
@@ -77,4 +73,9 @@
 @section('script')
 <!-- Responsive-table-->
 
-@endsection`
+@endsection
+
+@include('includes.add_dasawisma_masterdata')
+@foreach($dasawisma as $dasawisma_item)
+    @include('includes.edit_delete_dasawisma', ['dasawisma' => $dasawisma_item])
+@endforeach

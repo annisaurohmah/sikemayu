@@ -1,7 +1,9 @@
 <!-- Tab 6: Format 6 -->
 <div class="tab-pane fade table-responsive" id="format6" role="tabpanel">
 
-    <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
+    <div class="alert alert-info mt-2 mb-2">
+        <i class="fa fa-info-circle"></i> Beberapa kolom data Format 6 diisi otomatis berdasarkan perhitungan dari Format 1-5. Tidak dapat ditambah manual.
+    </div>
 
     <table id="table-format6" class="table table-striped table-hover table-bordered dt-responsive nowrap">
         <thead class="thead-dark">
@@ -60,8 +62,8 @@
                     <a href="#edit{{$rekap->id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
                     <a href="#delete{{$rekap->id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
                 </td>
-
             </tr>
+            @include('sip.edit_delete_format6', ['sip6' => $rekap])
             @endforeach
             @else
             <tr>
@@ -71,3 +73,4 @@
         </tbody>
     </table>
 </div>
+

@@ -15,13 +15,7 @@
 </div>
 @endsection
 @section('button')
-<!-- <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Tambah Data Bayi</a>
-<a href="/import" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Import Data Bayi</a>
-<form class="mt-1" action="" method="POST">
-    @csrf
-    @method('DELETE')
-    <button type="submit" onclick="alert('Anda yakin menghapus seluruh data?')" class="btn btn-danger btn-sm btn-flat"><i class="mdi mdi-trash-can mr-2"></i>Hapus Semua Mahasiswa</button>
-</form> -->
+<a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat"><i class="mdi mdi-plus mr-2"></i>Tambah Data Penduduk</a>
 @endsection
 
 @section('content')
@@ -55,26 +49,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach( $penduduk as $penduduk)
+                            @foreach( $penduduk as $penduduk_item)
 
                             <tr>
                                 <td>{{$loop->iteration}}</td>
-                                <td>{{$penduduk->nik}}</td>
-                                <td>{{$penduduk->no_kk}}</td>
-                                <td>{{$penduduk->nama}}</td>
-                                <td>{{$penduduk->tanggal_lahir}}</td>
-                                <td>{{$penduduk->jenis_kelamin}}</td>
-                                <td>{{$penduduk->shdk}}</td>
-                                <td>{{$penduduk->bpjs}}</td>
-                                <td>{{$penduduk->faskes}}</td>
-                                <td>{{$penduduk->pendidikan}}</td>
-                                <td>{{$penduduk->pekerjaan}}</td>
-                                <td>{{$penduduk->alamat}}</td>
-                                <td>{{$penduduk->rt}}</td>
-                                <td>{{$penduduk->rw}}</td>
+                                <td>{{$penduduk_item->nik}}</td>
+                                <td>{{$penduduk_item->no_kk}}</td>
+                                <td>{{$penduduk_item->nama}}</td>
+                                <td>{{$penduduk_item->jenis_kelamin}}</td>
+                                <td>{{$penduduk_item->tanggal_lahir ? $penduduk_item->tanggal_lahir->format('d-m-Y') : ''}}</td>
+                                <td>{{$penduduk_item->shdk}}</td>
+                                <td>{{$penduduk_item->bpjs}}</td>
+                                <td>{{$penduduk_item->faskes}}</td>
+                                <td>{{$penduduk_item->pendidikan}}</td>
+                                <td>{{$penduduk_item->pekerjaan}}</td>
+                                <td>{{$penduduk_item->alamat}}</td>
+                                <td>{{$penduduk_item->rt}}</td>
+                                <td>{{$penduduk_item->rwData ? $penduduk_item->rwData->no_rw : $penduduk_item->rw}}</td>
                                 <td>
-                                    <a href="#edit{{$penduduk->nik}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
-                                    <a href="#delete{{$penduduk->nik}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
+                                    <a href="#edit{{$penduduk_item->nik}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
+                                    <a href="#delete{{$penduduk_item->nik}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
                                 </td>
                             </tr>
                             @endforeach
@@ -99,4 +93,9 @@
 @section('script')
 <!-- Responsive-table-->
 
-@endsection`
+@endsection
+
+@include('includes.add_data_penduduk')
+@foreach($penduduk as $penduduk_item)
+    @include('includes.edit_delete_penduduk', ['penduduk' => $penduduk_item, 'rw' => $rw])
+@endforeach

@@ -1,6 +1,20 @@
 @extends('layouts.master')
 
 @section('css')
+<!-- Select2 CSS -->
+<style>
+.select2-container .select2-selection--single {
+    height: 38px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+.select2-container--default .select2-selection--single .select2-rendered {
+    line-height: 36px;
+}
+.select2-container--default .select2-selection--single .select2-arrow {
+    height: 36px;
+}
+</style>
 @endsection
 
 
@@ -69,15 +83,24 @@
 </div> <!-- end row -->
 
 
-
+@include('sip.add_data_format1')
+@include('sip.add_data_format2')
+@include('sip.add_data_format3')
+@include('sip.add_data_format4')
+@include('sip.add_data_format5')
+@include('sip.add_data_format6')
+@include('sip.add_data_format7')
 
 @endsection
 
 
 @section('script')
+<!-- Select2 JS -->
+ 
 
 <script>
     $(document).ready(function() {
+        // Initialize DataTables
         $('#table-format1').DataTable({
             responsive: true
         });
@@ -101,6 +124,13 @@
         });
          $('#table-dokum').DataTable({
             responsive: true
+        });
+
+        // Initialize Select2 for searchable dropdowns
+        $('.select2').select2({
+            placeholder: "Pilih atau ketik untuk mencari...",
+            allowClear: true,
+            width: '100%'
         });
     });
 

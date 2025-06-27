@@ -1,7 +1,7 @@
 <!-- Tab 4: Format 4 -->
 <div class="tab-pane fade table-responsive" id="format4" role="tabpanel">
 
-    <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
+    <a href="#addnewformat4" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
 
     <table id="table-format4" class="table table-striped table-hover table-bordered dt-responsive nowrap">
         <thead class="thead-dark">
@@ -58,6 +58,7 @@
                     <a href="#delete{{$wuspus->wuspus_id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
                 </td>
             </tr>
+            @include('sip.edit_delete_format4', ['wuspus' => $wuspus])
             @endforeach
         </tbody>
     </table>

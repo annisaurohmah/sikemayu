@@ -71,12 +71,8 @@
                                 <td>{{$data->jumlah_KRT ?? 0}}</td>
                                 <td>{{$data->jumlah_KK ?? 0}}</td>
                                 <td>
-                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#edit{{$data->dw_id}}">
-                                        <i class="fa fa-edit"></i> Edit
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete{{$data->dw_id}}">
-                                        <i class="fa fa-trash"></i> Hapus
-                                    </button>
+                                    <a href="#edit{{$data->dw_id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
+                                    <a href="#delete{{$data->dw_id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
                                 </td>
                             </tr>
                             @endforeach
@@ -129,12 +125,8 @@
                                 <td>{{$data->tiga_buta_L ?? 0}}</td>
                                 <td>{{$data->tiga_buta_P ?? 0}}</td>
                                 <td>
-                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#edit{{$data->dw_id}}">
-                                        <i class="fa fa-edit"></i> Edit
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete{{$data->dw_id}}">
-                                        <i class="fa fa-trash"></i> Hapus
-                                    </button>
+                                    <a href="#edit{{$data->dw_id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
+                                    <a href="#delete{{$data->dw_id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
                                 </td>
                             </tr>
                             @endforeach
@@ -190,12 +182,8 @@
                                 <td>{{$data->beras ?? 0}}</td>
                                 <td>{{$data->non_beras ?? 0}}</td>
                                 <td>
-                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#edit{{$data->dw_id}}">
-                                        <i class="fa fa-edit"></i> Edit
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete{{$data->dw_id}}">
-                                        <i class="fa fa-trash"></i> Hapus
-                                    </button>
+                                    <a href="#edit{{$data->dw_id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
+                                    <a href="#delete{{$data->dw_id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
                                 </td>
                             </tr>
                             @endforeach
@@ -237,12 +225,8 @@
                                 <td>{{$data->kesling ?? 0}}</td>
                                 <td>{{$data->keterangan ?? '-'}}</td>
                                 <td>
-                                    <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#edit{{$data->dw_id}}">
-                                        <i class="fa fa-edit"></i> Edit
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete{{$data->dw_id}}">
-                                        <i class="fa fa-trash"></i> Hapus
-                                    </button>
+                                    <a href="#edit{{$data->dw_id}}" data-toggle="modal" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-edit'></i></a>
+                                    <a href="#delete{{$data->dw_id}}" data-toggle="modal" class="btn btn-danger btn-sm delete btn-flat"><i class='fa fa-trash'></i></a>
                                 </td>
                             </tr>
                             @endforeach
@@ -259,11 +243,11 @@
     </div> <!-- end col -->
     @endsection
 
-    @include('includes.add_dasawisma')
+    @include('dasawisma.add_dasawisma')
 
     @if($dasawisma->count() > 0)
     @foreach($dasawisma as $item)
-    @include('includes.edit_delete_dasawisma', ['data' => $item])
+    @include('dasawisma.edit_delete_dasawisma', ['data' => $item])
     @endforeach
     @endif
 

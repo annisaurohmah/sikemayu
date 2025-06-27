@@ -16,6 +16,7 @@ use App\Http\Controllers\PendudukController;
 use App\Models\User;
 use App\Http\Controllers\RWController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SIP6Controller;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,6 +59,31 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/sip/update/{id}', [SIPController::class, 'update'])->name('sip.update');
     Route::post('/sip/delete/{id}', [SIPController::class, 'delete'])->name('sip.delete');
 
+    // SIP1 Routes
+    Route::post('/sip1/store', [SIPController::class, 'storeSip1'])->name('sip1.store');
+    Route::put('/sip1/update/{id}', [SIPController::class, 'updateSip1'])->name('sip1.update');
+    Route::delete('/sip1/delete/{id}', [SIPController::class, 'deleteSip1'])->name('sip1.delete');
+
+    // SIP2 Routes (Bayi)
+    Route::post('/sip2/store', [SIPController::class, 'storeSip2'])->name('sip2.store');
+    Route::put('/sip2/update/{id}', [SIPController::class, 'updateSip2'])->name('sip2.update');
+    Route::delete('/sip2/delete/{id}', [SIPController::class, 'deleteSip2'])->name('sip2.delete');
+
+    // SIP3 Routes (Balita)
+    Route::post('/sip3/store', [SIPController::class, 'storeSip3'])->name('sip3.store');
+    Route::put('/sip3/update/{id}', [SIPController::class, 'updateSip3'])->name('sip3.update');
+    Route::delete('/sip3/delete/{id}', [SIPController::class, 'deleteSip3'])->name('sip3.delete');
+
+    // SIP4 Routes (WUS PUS)
+    Route::post('/sip4/store', [SIPController::class, 'storeSip4'])->name('sip4.store');
+    Route::put('/sip4/update/{id}', [SIPController::class, 'updateSip4'])->name('sip4.update');
+    Route::delete('/sip4/delete/{id}', [SIPController::class, 'deleteSip4'])->name('sip4.delete');
+
+    // SIP5 Routes (Ibu Hamil)
+    Route::post('/sip5/store', [SIPController::class, 'storeSip5'])->name('sip5.store');
+    Route::put('/sip5/update/{id}', [SIPController::class, 'updateSip5'])->name('sip5.update');
+    Route::delete('/sip5/delete/{id}', [SIPController::class, 'deleteSip5'])->name('sip5.delete');
+
     Route::get('/gizi', [GiziController::class, 'index'])->name('gizi.index');
     Route::get('/gizi/create', [GiziController::class, 'create'])->name('gizi.create');
     Route::post('/gizi/store', [GiziController::    class, 'store'])->name('gizi.store');
@@ -66,26 +92,27 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/gizi/delete/{id}', [GiziController::class, 'delete'])->name('gizi.delete');
 
     Route::get('/dasawisma', [DasawismaController::class, 'index'])->name('dasawisma.index');
-    Route::get('/dasawisma/create', [DasawismaController::class, 'create'])->name('dasawisma.create');
-    Route::post('/dasawisma/store', [DasawismaController::class, 'store'])->name('dasawisma.store');
-    Route::get('/dasawisma/edit/{id}', [DasawismaController::class, 'edit'])->name('dasawisma.edit');
-    Route::post('/dasawisma/update/{id}', [DasawismaController::class, 'update'])->name('dasawisma.update');
-    Route::post('/dasawisma/delete/{id}', [DasawismaController::class, 'delete'])->name('dasawisma.delete');
+    Route::post('/dasawisma/store', [DasawismaController::class, 'storeMasterdata'])->name('dasawisma.store');
+    Route::post('/dasawisma/update', [DasawismaController::class, 'updateMasterdata'])->name('dasawisma.update');
+    Route::post('/dasawisma/delete', [DasawismaController::class, 'deleteMasterdata'])->name('dasawisma.delete');
    
     Route::get('/anak/bayi', [BayiBalitaController::class, 'showBayi'])->name('bayi.show');
     Route::get('/anak/balita', [BayiBalitaController::class, 'showBalita'])->name('balita.show');
-    Route::get('/anak/create', [BayiBalitaController::class, 'create'])->name('bayi.create');
-    Route::post('/anak/store', [BayiBalitaController::class, 'store'])->name('bayi.store');
-    Route::get('/anak/edit/{id}', [BayiBalitaController::class, 'edit'])->name('bayi.edit');
-    Route::post('/anak/update/{id}', [BayiBalitaController::class, 'update'])->name('bayi.update');
-    Route::post('/anak/delete/{id}', [BayiBalitaController::class, 'delete'])->name('bayi.delete');
+    Route::post('/anak/store', [BayiBalitaController::class, 'store'])->name('anak.store');
+    Route::put('/anak/update/{nik}', [BayiBalitaController::class, 'update'])->name('anak.update');
+    Route::delete('/anak/delete/{nik}', [BayiBalitaController::class, 'destroy'])->name('anak.delete');
+    Route::put('/bayi/update/{nik}', [BayiBalitaController::class, 'update'])->name('bayi.update');
+    Route::delete('/bayi/delete/{nik}', [BayiBalitaController::class, 'destroy'])->name('bayi.delete');
+    
+    // Debug route
+    Route::get('/debug/anak/{nik}', function($nik) {
+        return 'NIK received: ' . $nik;
+    });
 
     Route::get('/posyandu', [PosyanduController::class, 'index'])->name('posyandu.index');
-    Route::get('/posyandu/create', [PosyanduController::class, 'create'])->name('posyandu.create');
     Route::post('/posyandu/store', [PosyanduController::class, 'store'])->name('posyandu.store');
-    Route::get('/posyandu/edit/{id}', [PosyanduController::class, 'edit'])->name('posyandu.edit');
-    Route::post('/posyandu/update/{id}', [PosyanduController::class, 'update'])->name('posyandu.update');
-    Route::post('/posyandu/delete/{id}', [PosyanduController::class, 'delete'])->name('posyandu.delete');
+    Route::post('/posyandu/update', [PosyanduController::class, 'update'])->name('posyandu.update');
+    Route::post('/posyandu/delete', [PosyanduController::class, 'delete'])->name('posyandu.delete');
 
     Route::get('/penduduk' , [PendudukController::class, 'index'])->name('penduduk.index');
     Route::get('/penduduk/create', [PendudukController::class, 'create'])->name('penduduk.create');
@@ -95,11 +122,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/penduduk/delete/{id}', [PendudukController::class, 'delete'])->name('penduduk.delete');
 
     Route::get('/user', [UserController::class, 'index'])->name('user.index');
-    Route::get('/user/create', [UserController::class, 'create'])->name('user.create');
     Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
-    Route::get('/user/edit/{id}', [UserController::class, 'edit'])->name('user.edit');
-    Route::post('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
-    Route::post('/user/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
+    Route::post('/user/update', [UserController::class, 'update'])->name('user.update');
+    Route::post('/user/delete', [UserController::class, 'delete'])->name('user.delete');
 
     Route::get('rekap/dasawisma', [DasawismaController::class, 'indexRekap'])->name('dasawisma.rekap');
     Route::get('rekap/dasawisma/create', [DasawismaController::class, 'createRekap'])->name('dasawisma.rekap.create');
@@ -109,11 +134,15 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('rekap/dasawisma/delete/{id}', [DasawismaController::class, 'deleteRekap'])->name('dasawisma.rekap.delete');
 
     Route::get('rw/', [RWController::class, 'index'])->name('rw.index');
-    Route::get('rw/create', [RWController::class, 'create'])->name('rw.create');
     Route::post('rw/store', [RWController::class, 'store'])->name('rw.store');
-    Route::get('rw/edit/{id}', [RWController::class, 'edit'])->name('rw.edit');
-    Route::post('rw/update/{id}', [RWController::class, 'update'])->name('rw.update');
-    Route::post('rw/delete/{id}', [RWController::class, 'delete'])->name('rw.delete');
+    Route::post('rw/update', [RWController::class, 'update'])->name('rw.update');
+    Route::post('rw/delete', [RWController::class, 'delete'])->name('rw.delete');
+
+    Route::get('/sip6', [SIP6Controller::class, 'index'])->name('sip6.index');
+    Route::post('/sip6/store', [SIP6Controller::class, 'store'])->name('sip6.store');
+    Route::put('/sip6/update/{id}', [SIP6Controller::class, 'update'])->name('sip6.update');
+    Route::delete('/sip6/delete/{id}', [SIP6Controller::class, 'delete'])->name('sip6.delete');
+
 
 });
 

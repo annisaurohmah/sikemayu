@@ -31,6 +31,8 @@ use Illuminate\Database\Eloquent\Model;
 class Penduduk extends Model
 {
 	protected $table = 'penduduk';
+	protected $primaryKey = 'nik';
+	protected $keyType = 'string';
 	public $incrementing = false;
 	public $timestamps = false;
 
@@ -55,4 +57,9 @@ class Penduduk extends Model
 		'rt',
 		'rw'
 	];
+
+	public function rwData()
+	{
+		return $this->belongsTo(Rw::class, 'rw', 'rw_id');
+	}
 }
