@@ -31,8 +31,7 @@ class Sip5Penimbanganibuhamil extends Model
 		'ibu_hamil_id' => 'int',
 		'bulan' => 'int',
 		'tahun' => 'int',
-		'tb_hasil_penimbangan' => 'float',
-		'bb_hasil_penimbangan' => 'float',
+		'berat_badan' => 'float',
 		'umur_kehamilan' => 'int'
 	];
 
@@ -40,13 +39,44 @@ class Sip5Penimbanganibuhamil extends Model
 		'ibu_hamil_id',
 		'bulan',
 		'tahun',
-		'tb_hasil_penimbangan',
-		'bb_hasil_penimbangan',
+		'berat_badan',
 		'umur_kehamilan'
 	];
 
 	public function sip5()
 	{
-		return $this->belongsTo(Sip5::class, 'ibu_hamil_id');
+		return $this->belongsTo(Sip5::class, 'ibu_hamil_id', 'ibu_hamil_id');
+	}
+
+	// Method untuk menghapus data dengan aman
+	public static function deleteByIbuHamilId($ibu_hamil_id)
+	{
+		return static::where('ibu_hamil_id', $ibu_hamil_id)->delete();
+	}
+
+	// Method untuk mengecek apakah ada data terkait
+	public static function hasDataForIbuHamil($ibu_hamil_id)
+	{
+		return static::where('ibu_hamil_id', $ibu_hamil_id)->exists();
+	}
+
+	// Accessor untuk kompatibilitas dengan view yang menggunakan tb_hasil_penimbangan
+	public function getTbHasilPenimbanganAttribute()
+	{
+		// Untuk ibu hamil, kita bisa menggunakan tinggi badan standar atau field terpisah
+		// Sementara return null karena tidak ada field TB untuk ibu hamil
+		return null;
+	}
+
+	// Accessor untuk kompatibilitas dengan view yang menggunakan bb_hasil_penimbangan  
+	public function getBbHasilPenimbanganAttribute()
+	{
+		return $this->berat_badan;
+	}
+
+	// Mutator untuk bb_hasil_penimbangan
+	public function setBbHasilPenimbanganAttribute($value)
+	{
+		$this->attributes['berat_badan'] = $value;
 	}
 }

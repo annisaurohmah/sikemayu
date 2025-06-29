@@ -20,8 +20,10 @@ use App\Models\Sip5Penimbanganibuhamil;
 use App\Models\Sip5Tablettambahdarah;
 use App\Models\Sip5Vitaminaibuhamil;
 use App\Models\Sip6;
+use App\Models\DokumentasiKegiatan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use App\Traits\HasYearFilter;
 use App\Traits\HasDataAccess;
 
@@ -196,30 +198,47 @@ class SIPController extends Controller
                 ->where('sip_4.posyandu_id', $posyandu_id)
                 ->count();
 
-            $jumlahBalita_S = Sip3::where('posyandu_id', $posyandu_id)
-                ->count();
+            $jumlahBalita_S = (Sip3::where('posyandu_id', $posyandu_id)
+                ->count())+(Sip2::where('posyandu_id', $posyandu_id)
+                ->count());
 
-            $jumlahBalita_K = Sip3::where('posyandu_id', $posyandu_id)
-                ->count();
+            $jumlahBalita_K = (Sip3::where('posyandu_id', $posyandu_id)
+                ->count())+(Sip2::where('posyandu_id', $posyandu_id)
+                ->count());
 
-            $jumlahBalita_D = Sip3::where('posyandu_id', $posyandu_id)->join('sip3_penimbangan', 'sip_3.balita_id', '=', 'sip3_penimbangan.balita_id')
+            $jumlahBalita_D = (Sip3::where('posyandu_id', $posyandu_id)->join('sip3_penimbangan', 'sip_3.balita_id', '=', 'sip3_penimbangan.balita_id')
                 ->where('sip3_penimbangan.bulan', $bulan)
                 ->where('sip3_penimbangan.tahun', $tahun)
                 ->where(function ($query) {
                     $query->whereNotNull('bb_hasil_penimbangan')
                         ->orWhereNotNull('tb_hasil_penimbangan');
                 })
-                ->count();
+                ->count())+(Sip2::where('posyandu_id', $posyandu_id)->join('sip2_penimbangan', 'sip_2.bayi_id', '=', 'sip2_penimbangan.bayi_id')
+                ->where('sip2_penimbangan.bulan', $bulan)
+                ->where('sip2_penimbangan.tahun', $tahun)
+                ->where(function ($query) {
+                    $query->whereNotNull('bb_hasil_penimbangan')
+                        ->orWhereNotNull('tb_hasil_penimbangan');
+                })
+                ->count());
 
             // Ambil semua penimbangan bulan sekarang
-            $dataBulanIni = Sip3::where('posyandu_id', $posyandu_id)
+            $dataBulanIniBayi = Sip2::where('posyandu_id', $posyandu_id)
+                ->join('sip2_penimbangan', 'sip_2.bayi_id', '=', 'sip2_penimbangan.bayi_id')
+                ->where('sip2_penimbangan.bulan', $bulan)
+                ->where('sip2_penimbangan.tahun', $tahun)
+                ->get();
+            
+            $dataBulanIniBalita = Sip3::where('posyandu_id', $posyandu_id)
                 ->join('sip3_penimbangan', 'sip_3.balita_id', '=', 'sip3_penimbangan.balita_id')
                 ->where('sip3_penimbangan.bulan', $bulan)
                 ->where('sip3_penimbangan.tahun', $tahun)
                 ->get();
 
+            
+
             // Hitung jumlah yang naik BB
-            $jumlahBalita_N = $dataBulanIni->filter(function ($item) use ($bulan, $tahun) {
+            $jumlahBalitaN_N = $dataBulanIniBalita->filter(function ($item) use ($bulan, $tahun) {
                 // Cek bulan sebelumnya
                 $prevBulan = $bulan - 1;
                 $prevTahun = $tahun;
@@ -235,10 +254,37 @@ class SIPController extends Controller
                     ->where('sip3_penimbangan.bulan', $prevBulan)
                     ->where('sip3_penimbangan.tahun', $prevTahun)
                     ->first();
+                    
 
                 // Jika ada data sebelumnya dan BB naik
                 return $prev && $item->bb_hasil_penimbangan > $prev->bb_hasil_penimbangan;
             })->count();
+
+            $jumlahBayiN_N = $dataBulanIniBayi->filter(function ($item) use ($bulan, $tahun) {
+                // Cek bulan sebelumnya
+                $prevBulan = $bulan - 1;
+                $prevTahun = $tahun;
+                if ($bulan == 1) {
+                    $prevBulan = 12;
+                    $prevTahun = $tahun - 1;
+                }
+
+                // Ambil data bulan sebelumnya dari balita yang sama
+                $prev = DB::table('sip_2')
+                    ->join('sip2_penimbangan', 'sip_2.bayi_id', '=', 'sip2_penimbangan.bayi_id')
+                    ->where('sip_2.bayi_id', $item->bayi_id)
+                    ->where('sip2_penimbangan.bulan', $prevBulan)
+                    ->where('sip2_penimbangan.tahun', $prevTahun)
+                    ->first();
+                    
+
+                // Jika ada data sebelumnya dan BB naik
+                return $prev && $item->bb_hasil_penimbangan > $prev->bb_hasil_penimbangan;
+            })->count();
+
+            $jumlahBalita_N = $jumlahBalitaN_N + $jumlahBayiN_N;
+
+
 
             $jumlahBayiBalitaMendapatVitA = (DB::table('sip_2')
                 ->join('sip2_pelayanan', 'sip_2.bayi_id', '=', 'sip2_pelayanan.bayi_id')
@@ -521,7 +567,12 @@ class SIPController extends Controller
             $dataN[] = $item->balita_naik ?? 0;
         }
 
-        return view('sip.index', compact('posyandu_id', 'posyandu', 'format1', 'bayiList', 'balitaList', 'wuspusList', 'ibuHamilList', 'sip6', 'sip7', 'dasawismaList', 'bayiList_master', 'balitaList_master', 'labels', 'persenK', 'persenD', 'persenN', 'dataS', 'dataK', 'dataD', 'dataN', 'tahun'));
+        //dokumentasi kegiatan
+        $dokumentasiList = DokumentasiKegiatan::where('posyandu_id', $posyandu_id)
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        return view('sip.index', compact('posyandu_id', 'posyandu', 'format1', 'bayiList', 'balitaList', 'wuspusList', 'ibuHamilList', 'sip6', 'sip7', 'dasawismaList', 'bayiList_master', 'balitaList_master', 'labels', 'persenK', 'persenD', 'persenN', 'dataS', 'dataK', 'dataD', 'dataN', 'tahun', 'dokumentasiList'));
     }
 
     // SIP1 CRUD Methods
@@ -584,21 +635,31 @@ class SIPController extends Controller
         $request->validate([
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
             'nama_bayi' => 'required|string|max:255',
+            'tgl_lahir' => 'nullable|date', // Bisa dari input manual atau otomatis dari database
             'bbl_kg' => 'required|numeric|min:0',
             'nama_ayah' => 'required|string|max:255',
             'nama_ibu' => 'required|string|max:255',
             'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
         ]);
 
-        // Ambil tanggal lahir dari data anak master berdasarkan nama
-        $anak = Anak::where('nama_lengkap', $request->nama_bayi)->first();
-        if (!$anak) {
-            return redirect()->back()->with('error', 'Data anak tidak ditemukan di database master.');
-        }
-
-        // Buat data dengan tanggal lahir dari master data
         $data = $request->all();
-        $data['tgl_lahir'] = $anak->tanggal_lahir;
+
+        // Jika tgl_lahir tidak dikirim dari form (input dari database), ambil dari master data
+        if (!$request->tgl_lahir) {
+            $anak = Anak::where('nama_lengkap', $request->nama_bayi)->first();
+            if (!$anak) {
+                return redirect()->back()->with('error', 'Data anak tidak ditemukan di database master. Silakan gunakan input manual atau pastikan data anak sudah terdaftar.');
+            }
+            $data['tgl_lahir'] = $anak->tanggal_lahir;
+        } else {
+            // Validasi bahwa usia bayi sesuai (0-12 bulan)
+            $tglLahir = \Carbon\Carbon::parse($request->tgl_lahir);
+            $monthsDiff = $tglLahir->diffInMonths(now());
+            
+            if ($monthsDiff > 12) {
+                return redirect()->back()->with('error', 'Tanggal lahir tidak sesuai untuk kategori bayi (harus 0-12 bulan).');
+            }
+        }
 
         Sip2::create($data);
 
@@ -762,25 +823,36 @@ class SIPController extends Controller
         $request->validate([
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
             'nama_balita' => 'required|string|max:255',
+            'tgl_lahir' => 'nullable|date', // Bisa dari input manual atau otomatis dari database
             'bbl_kg' => 'required|numeric|min:0',
             'nama_ayah' => 'required|string|max:255',
             'nama_ibu' => 'required|string|max:255',
             'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
         ]);
 
-        // Ambil tanggal lahir dari data anak master berdasarkan nama
-        $anak = Anak::where('nama_lengkap', $request->nama_balita)->first();
-        if (!$anak) {
-            return redirect()->back()->with('error', 'Data anak tidak ditemukan di database master.');
-        }
-
-        // Buat data dengan tanggal lahir dari master data
         $data = $request->all();
-        $data['tgl_lahir'] = $anak->tanggal_lahir;
+
+        // Jika tgl_lahir tidak dikirim dari form (input dari database), ambil dari master data
+        if (!$request->tgl_lahir) {
+            $anak = Anak::where('nama_lengkap', $request->nama_balita)->first();
+            if (!$anak) {
+                return redirect()->back()->with('error', 'Data anak tidak ditemukan di database master. Silakan gunakan input manual atau pastikan data anak sudah terdaftar.');
+            }
+            $data['tgl_lahir'] = $anak->tanggal_lahir;
+        } else {
+            // Validasi bahwa usia balita sesuai (1-5 tahun)
+            $tglLahir = \Carbon\Carbon::parse($request->tgl_lahir);
+            $yearsDiff = $tglLahir->diffInYears(now());
+            $monthsDiff = $tglLahir->diffInMonths(now());
+            
+            if ($monthsDiff <= 12 || $yearsDiff > 5) {
+                return redirect()->back()->with('error', 'Tanggal lahir tidak sesuai untuk kategori balita (harus 1-5 tahun).');
+            }
+        }
 
         Sip3::create($data);
 
-        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 3 berhasil ditambahkan.');
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 3 berhasil ditambahkan. Silakan edit untuk menambah data penimbangan dan imunisasi.');
     }
 
     public function updateSip3(Request $request, $id)
@@ -1015,8 +1087,8 @@ class SIPController extends Controller
             if ($request->filled($tbField) || $request->filled($bbField)) {
                 $sip5->penimbanganIbuHamil()->create([
                     'bulan' => $i,
-                    'tb_hasil_penimbangan' => $request->$tbField,
-                    'bb_hasil_penimbangan' => $request->$bbField
+                    'berat_badan' => $request->$bbField,
+                    'umur_kehamilan' => $request->umur_kehamilan
                 ]);
             }
         }
@@ -1086,8 +1158,8 @@ class SIPController extends Controller
                 $sip5->penimbanganIbuHamil()->updateOrCreate(
                     ['bulan' => $i],
                     [
-                        'tb_hasil_penimbangan' => $request->$tbField,
-                        'bb_hasil_penimbangan' => $request->$bbField
+                        'berat_badan' => $request->$bbField,
+                        'umur_kehamilan' => $request->umur_kehamilan
                     ]
                 );
             } else {
@@ -1147,6 +1219,112 @@ class SIPController extends Controller
         $sip5->delete();
 
         return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 5 untuk ' . $nama_ibu_hamil . ' berhasil dihapus.');
+    }
+
+    public function storeDokumentasi(Request $request)
+    {
+        $request->validate([
+            'posyandu_id' => 'required|exists:posyandu,posyandu_id',
+            'tanggal' => 'required|date|before_or_equal:today',
+            'nama_kegiatan' => 'required|string|max:255',
+            'file_gambar' => 'required|file|mimes:jpg,jpeg,png|max:5120', // 5MB max
+        ]);
+
+        try {
+            // Handle file upload
+            $file = $request->file('file_gambar');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('dokumentasi', $fileName, 'public');
+
+            // Debug: Log data yang akan disimpan
+            \Log::info('Saving dokumentasi with data:', [
+                'posyandu_id' => $request->posyandu_id,
+                'tanggal' => $request->tanggal,
+                'nama_kegiatan' => $request->nama_kegiatan,
+                'file_path' => $filePath,
+            ]);
+
+            // Create dokumentasi record
+            DokumentasiKegiatan::create([
+                'posyandu_id' => $request->posyandu_id,
+                'tanggal' => $request->tanggal,
+                'nama_kegiatan' => $request->nama_kegiatan,
+                'file_path' => $filePath,
+            ]);
+
+            return redirect()->route('sip.index', $request->posyandu_id)
+                ->with('success', 'Dokumentasi kegiatan berhasil ditambahkan.');
+
+        } catch (\Exception $e) {
+            \Log::error('Error saving dokumentasi: ' . $e->getMessage());
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal menyimpan dokumentasi: ' . $e->getMessage());
+        }
+    }
+
+    public function updateDokumentasi(Request $request, $id)
+    {
+        $dokumentasi = DokumentasiKegiatan::findOrFail($id);
+
+        $request->validate([
+            'tanggal' => 'required|date|before_or_equal:today',
+            'nama_kegiatan' => 'required|string|max:255',
+            'file_gambar' => 'nullable|file|mimes:jpg,jpeg,png|max:5120', // 5MB max
+        ]);
+
+        try {
+            $data = [
+                'tanggal' => $request->tanggal,
+                'nama_kegiatan' => $request->nama_kegiatan,
+            ];
+
+            // Handle file upload if provided
+            if ($request->hasFile('file_gambar')) {
+                // Delete old file
+                if ($dokumentasi->file_path && Storage::disk('public')->exists($dokumentasi->file_path)) {
+                    Storage::disk('public')->delete($dokumentasi->file_path);
+                }
+
+                // Upload new file
+                $file = $request->file('file_gambar');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('dokumentasi', $fileName, 'public');
+                $data['file_path'] = $filePath;
+            }
+
+            $dokumentasi->update($data);
+
+            return redirect()->route('sip.index', $dokumentasi->posyandu_id)
+                ->with('success', 'Dokumentasi kegiatan berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui dokumentasi: ' . $e->getMessage());
+        }
+    }
+
+    public function deleteDokumentasi($id)
+    {
+        try {
+            $dokumentasi = DokumentasiKegiatan::findOrFail($id);
+            $posyandu_id = $dokumentasi->posyandu_id;
+
+            // Delete file
+            if ($dokumentasi->file_path && Storage::disk('public')->exists($dokumentasi->file_path)) {
+                Storage::disk('public')->delete($dokumentasi->file_path);
+            }
+
+            $dokumentasi->delete();
+
+            return redirect()->route('sip.index', $posyandu_id)
+                ->with('success', 'Dokumentasi kegiatan berhasil dihapus.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus dokumentasi: ' . $e->getMessage());
+        }
     }
 
     // public function dashboard()

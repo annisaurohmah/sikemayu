@@ -146,6 +146,11 @@ Route::group(['middleware' => ['auth', 'role.access:admin_desa,admin_kader', 'da
     Route::post('/sip7/store', [SIP7Controller::class, 'store'])->name('sip7.store');
     Route::put('/sip7/update/{id}', [SIP7Controller::class, 'update'])->name('sip7.update');
     Route::delete('/sip7/delete/{id}', [SIP7Controller::class, 'delete'])->name('sip7.delete');
+
+    // Dokumentasi Routes
+    Route::post('/dokumentasi/store', [SIPController::class, 'storeDokumentasi'])->name('dokumentasi.store');
+    Route::put('/dokumentasi/update/{id}', [SIPController::class, 'updateDokumentasi'])->name('dokumentasi.update');
+    Route::delete('/dokumentasi/delete/{id}', [SIPController::class, 'deleteDokumentasi'])->name('dokumentasi.delete');
 });
 
 // Dasawisma routes - Admin and Kader RW

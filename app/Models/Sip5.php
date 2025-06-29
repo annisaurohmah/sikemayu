@@ -78,7 +78,7 @@ class Sip5 extends Model
 
 	public function penimbanganIbuHamil()
 	{
-		return $this->hasMany(Sip5Penimbanganibuhamil::class, 'ibu_hamil_id');
+		return $this->hasMany(Sip5Penimbanganibuhamil::class, 'ibu_hamil_id', 'ibu_hamil_id');
 	}
 
 	public function tabletTambahDarah()
@@ -89,5 +89,30 @@ class Sip5 extends Model
 	public function vitaminIbuHamil()
 	{
 		return $this->hasMany(Sip5Vitaminaibuhamil::class, 'ibu_hamil_id');
+	}
+
+	// Method untuk safe delete dengan cascade
+	public function safeDelete()
+	{
+		// Delete related records first
+		$this->penimbanganIbuHamil()->delete();
+		$this->imunisasittIbuHamil()->delete();
+		$this->tabletTambahDarah()->delete();
+		$this->vitaminIbuHamil()->delete();
+		
+		// Then delete main record
+		return $this->delete();
+	}
+
+	// Override delete method untuk automatic cascade
+	public function delete()
+	{
+		// Delete related records first to avoid foreign key constraint
+		$this->penimbanganIbuHamil()->delete();
+		$this->imunisasittIbuHamil()->delete();
+		$this->tabletTambahDarah()->delete();
+		$this->vitaminIbuHamil()->delete();
+		
+		return parent::delete();
 	}
 }

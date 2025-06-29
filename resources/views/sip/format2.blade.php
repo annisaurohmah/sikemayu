@@ -3,6 +3,8 @@
 
     <a href="#addnewformat2" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
 
+    
+
     <table id="table-format2" class="table table-striped table-hover table-bordered dt-responsive nowrap">
         <thead class="thead-dark">
             <tr>
@@ -94,6 +96,10 @@
         </tbody>
     </table>
 </div>
+
+{{-- Include Add Data Format 2 Modal --}}
+@include('sip.add_data_format2')
+
 @foreach($bayiList as $bayi)
 <!-- Edit Format 2 -->
 <div class="modal fade" id="editformat2{{ $bayi->bayi_id }}" tabindex="-1" role="dialog" aria-hidden="true">
@@ -398,3 +404,21 @@
     });
 </script>
 @endforeach
+
+<script>
+$(document).ready(function() {
+    // Initialize manual input for Format 2 when page loads
+    if (typeof initFormat2ManualInput === 'function') {
+        initFormat2ManualInput();
+        console.log('Format 2 manual input initialized');
+    } else {
+        console.error('initFormat2ManualInput function not found');
+    }
+    
+    // Force trigger the radio button change to ensure proper initial state
+    setTimeout(function() {
+        $('input[name="input_type"]:checked').trigger('change');
+    }, 100);
+});
+</script>
+

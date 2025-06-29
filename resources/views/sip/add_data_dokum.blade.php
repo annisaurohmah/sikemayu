@@ -1,171 +1,187 @@
 <!-- Add -->
-<div class="modal fade" id="addnewdokum">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade" id="addnewdokum" tabindex="-1" role="dialog" aria-labelledby="addModalDokum" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><b>Tambah Data Dokumentasi - SIP</b></h5>
+                <h5 class="modal-title" id="addModalDokum"><b>Tambah Data Dokumentasi Kegiatan - SIP</b></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span></button>
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
 
             <div class="modal-body">
-                <div class="card-body text-left">
-                    <form method="POST" action="{{ route('sip4.store') }}">
-                        @csrf
-                        <input type="hidden" name="posyandu_id" value="{{ $posyandu->posyandu_id ?? '' }}" />
+                <form id="form-add-dokumentasi" method="POST" action="{{ route('dokumentasi.store') }}" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="posyandu_id" value="{{ $posyandu->posyandu_id ?? '' }}" />
+                    
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle"></i> 
+                        <strong>Catatan:</strong> Unggah foto kegiatan posyandu dalam format JPG, JPEG, PNG dengan ukuran maksimal 5MB.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tanggal">Tanggal Kegiatan <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="tanggal" name="tanggal" required />
+                        <small class="form-text text-muted">Pilih tanggal pelaksanaan kegiatan posyandu</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nama_kegiatan">Nama Kegiatan <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" placeholder="Masukkan nama kegiatan (contoh: Posyandu Bulan Februari, Imunisasi Massal, dll)" 
+                               id="nama_kegiatan" name="nama_kegiatan" required maxlength="255" />
+                        <small class="form-text text-muted">Berikan nama yang deskriptif untuk kegiatan ini</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="file_gambar">File Gambar Dokumentasi <span class="text-danger">*</span></label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="file_gambar" name="file_gambar" 
+                                   accept="image/jpeg,image/jpg,image/png" required />
+                            <label class="custom-file-label" for="file_gambar">Pilih file gambar...</label>
+                        </div>
+                        <small class="form-text text-muted">
+                            <i class="fa fa-exclamation-triangle text-warning"></i>
+                            Format yang diizinkan: JPG, JPEG, PNG. Maksimal ukuran: 5MB
+                        </small>
                         
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="bulan">Bulan</label>
-                                    <select class="form-control" id="bulan" name="bulan" required>
-                                        <option value="">Pilih Bulan</option>
-                                        <option value="1">Januari</option>
-                                        <option value="2">Februari</option>
-                                        <option value="3">Maret</option>
-                                        <option value="4">April</option>
-                                        <option value="5">Mei</option>
-                                        <option value="6">Juni</option>
-                                        <option value="7">Juli</option>
-                                        <option value="8">Agustus</option>
-                                        <option value="9">September</option>
-                                        <option value="10">Oktober</option>
-                                        <option value="11">November</option>
-                                        <option value="12">Desember</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="tahun">Tahun</label>
-                                    <input type="number" class="form-control" placeholder="Masukkan tahun" id="tahun" name="tahun" min="1900" max="2100" required />
+                        <!-- Preview gambar -->
+                        <div id="image-preview" class="mt-3" style="display: none;">
+                            <label class="form-label">Preview Gambar:</label>
+                            <div class="border rounded p-2">
+                                <img id="preview-img" src="" alt="Preview" class="img-fluid" style="max-height: 200px;">
+                                <div class="mt-2">
+                                    <small id="file-info" class="text-muted"></small>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="nama">Nama WUS/PUS</label>
-                            <input type="text" class="form-control" placeholder="Masukkan nama WUS/PUS" id="nama" name="nama" required />
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="umur">Umur</label>
-                                    <input type="number" class="form-control" placeholder="Masukkan umur" id="umur" name="umur" required />
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="nama_suami">Nama Suami</label>
-                                    <input type="text" class="form-control" placeholder="Masukkan nama suami" id="nama_suami" name="nama_suami" required />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="tahapan_ks">Tahapan KS</label>
-                            <select class="form-control" id="tahapan_ks" name="tahapan_ks" required>
-                                <option value="">Pilih Tahapan KS</option>
-                                <option value="KS1">KS1</option>
-                                <option value="KS2">KS2</option>
-                                <option value="KS3">KS3</option>
-                                <option value="KS4">KS4</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="dasawisma_id">Dasawisma</label>
-                            <select class="form-control" id="dasawisma_id" name="dasawisma_id" required>
-                                <option value="">Pilih Dasawisma</option>
-                                @if(isset($dasawismaList))
-                                    @foreach($dasawismaList as $dasawisma)
-                                        <option value="{{ $dasawisma->dasawisma_id }}">{{ $dasawisma->nama_dasawisma }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="jumlah_anak_hidup">Jumlah Anak Hidup</label>
-                                    <input type="number" class="form-control" placeholder="Masukkan jumlah anak hidup" id="jumlah_anak_hidup" name="jumlah_anak_hidup" required />
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="anak_meninggal_umur">Anak Meninggal Umur</label>
-                                    <input type="text" class="form-control" placeholder="Masukkan umur anak meninggal (opsional)" id="anak_meninggal_umur" name="anak_meninggal_umur" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="ukuran_lila_cm">Ukuran LILA (cm)</label>
-                                    <input type="number" step="0.1" class="form-control" placeholder="Masukkan ukuran LILA" id="ukuran_lila_cm" name="ukuran_lila_cm" required />
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="lebih_23_5_cm">Lebih dari 23.5 cm?</label>
-                                    <select class="form-control" id="lebih_23_5_cm" name="lebih_23_5_cm" required>
-                                        <option value="">Pilih</option>
-                                        <option value="1">Ya</option>
-                                        <option value="0">Tidak</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="nama_ibu">Nama Ibu</label>
-                            <input type="text" class="form-control" placeholder="Masukkan nama ibu" id="nama_ibu" name="nama_ibu" required />
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="nama_bapak">Nama Bapak</label>
-                            <input type="text" class="form-control" placeholder="Masukkan nama bapak" id="nama_bapak" name="nama_bapak" required />
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="nama_bayi">Nama Bayi</label>
-                                    <input type="text" class="form-control" placeholder="Masukkan nama bayi" id="nama_bayi" name="nama_bayi" required />
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="tgl_lahir">Tanggal Lahir</label>
-                                    <input type="date" class="form-control" id="tgl_lahir" name="tgl_lahir" required />
-                                </div>
-                        <div class="form-group">
-                            <div>
-                                <button type="submit" class="btn btn-success waves-effect waves-light">
-                                    Submit
-                                </button>
-                                <button type="reset" class="btn btn-danger waves-effect m-l-5" data-dismiss="modal">
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fa fa-times"></i> Batal
+                </button>
+                <button type="submit" form="form-add-dokumentasi" class="btn btn-success">
+                    <i class="fa fa-upload"></i> Simpan Dokumentasi
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// Set tahun default ke tahun sekarang
 document.addEventListener('DOMContentLoaded', function() {
-    const tahunInput = document.getElementById('tahun');
-    if (tahunInput) {
-        tahunInput.value = new Date().getFullYear();
+    // Set tanggal maksimal ke hari ini
+    const tanggalInput = document.getElementById('tanggal');
+    if (tanggalInput) {
+        const today = new Date().toISOString().split('T')[0];
+        tanggalInput.setAttribute('max', today);
+        
+        // Set default ke hari ini
+        tanggalInput.value = today;
     }
+    
+    // Handle file input
+    const fileInput = document.getElementById('file_gambar');
+    const fileLabel = document.querySelector('.custom-file-label');
+    const imagePreview = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+    const fileInfo = document.getElementById('file-info');
+    
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            
+            if (file) {
+                // Update label
+                fileLabel.textContent = file.name;
+                
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Format file tidak didukung. Gunakan JPG, JPEG, atau PNG.');
+                    fileInput.value = '';
+                    fileLabel.textContent = 'Pilih file gambar...';
+                    imagePreview.style.display = 'none';
+                    return;
+                }
+                
+                // Validate file size (5MB max)
+                const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                if (file.size > maxSize) {
+                    alert('Ukuran file terlalu besar. Maksimal 5MB.');
+                    fileInput.value = '';
+                    fileLabel.textContent = 'Pilih file gambar...';
+                    imagePreview.style.display = 'none';
+                    return;
+                }
+                
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    fileInfo.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                fileLabel.textContent = 'Pilih file gambar...';
+                imagePreview.style.display = 'none';
+            }
+        });
+    }
+    
+    // Form validation
+    const form = document.getElementById('form-add-dokumentasi');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const tanggal = document.getElementById('tanggal').value;
+            const namaKegiatan = document.getElementById('nama_kegiatan').value.trim();
+            const fileGambar = document.getElementById('file_gambar').files[0];
+            
+            if (!tanggal) {
+                e.preventDefault();
+                alert('Tanggal kegiatan harus diisi!');
+                return;
+            }
+            
+            if (!namaKegiatan) {
+                e.preventDefault();
+                alert('Nama kegiatan harus diisi!');
+                return;
+            }
+            
+            if (!fileGambar) {
+                e.preventDefault();
+                alert('File gambar dokumentasi harus dipilih!');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Mengupload...';
+            }
+        });
+    }
+    
+    // Reset form when modal is closed
+    $('#addnewdokum').on('hidden.bs.modal', function() {
+        const form = document.getElementById('form-add-dokumentasi');
+        if (form) {
+            form.reset();
+            fileLabel.textContent = 'Pilih file gambar...';
+            imagePreview.style.display = 'none';
+            
+            // Reset submit button
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa fa-upload"></i> Simpan Dokumentasi';
+            }
+        }
+    });
 });
 </script>

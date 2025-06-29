@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Manual Input</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Test Manual Input for Format 2</h2>
+        
+        <div class="card">
+            <div class="card-body">
+                <form>
+                    <div class="form-group">
+                        <label><strong>Pilih Jenis Input Bayi</strong></label>
+                        <div class="mt-2">
+                            <div class="form-check form-check-inline">
+                                <input type="radio" class="form-check-input" id="input_database" name="input_type" value="database" checked>
+                                <label class="form-check-label" for="input_database">Pilih dari Database</label>
+                            </div>
+                            <div class="form-check form-check-inline ml-3">
+                                <input type="radio" class="form-check-input" id="input_manual" name="input_type" value="manual">
+                                <label class="form-check-label" for="input_manual">Input Manual</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input dari Database -->
+                    <div id="database_input" class="form-group">
+                        <label for="nama_bayi_db">Nama Bayi (dari Database)</label>
+                        <select class="form-control" id="nama_bayi_db" name="nama_bayi_db">
+                            <option value="">Pilih Bayi</option>
+                            <option value="Test Bayi 1">Test Bayi 1</option>
+                            <option value="Test Bayi 2">Test Bayi 2</option>
+                        </select>
+                        <small class="form-text text-muted">Pilih dari data bayi yang sudah terdaftar</small>
+                    </div>
+
+                    <!-- Input Manual -->
+                    <div id="manual_input" class="form-group" style="display: none; border: 2px dashed #007bff; padding: 15px; border-radius: 5px; background-color: #f8f9fa;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="nama_bayi_manual">Nama Bayi <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" placeholder="Masukkan nama bayi" id="nama_bayi_manual" name="nama_bayi_manual" />
+                                    <small class="form-text text-muted">Input nama bayi secara manual</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="tgl_lahir_manual">Tanggal Lahir <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="tgl_lahir_manual" name="tgl_lahir_manual" />
+                                    <small class="form-text text-muted">Tanggal lahir bayi</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary" onclick="debugFormState()">Debug</button>
+                        <button type="button" class="btn btn-warning" onclick="testManualInput()">Force Manual</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    $(document).ready(function() {
+        console.log('Test page loaded');
+        
+        // Toggle input type
+        $('input[name="input_type"]').on('change', function() {
+            const inputType = $(this).val();
+            console.log('Input type changed to:', inputType);
+            
+            if (inputType === 'database') {
+                $('#database_input').show();
+                $('#manual_input').hide();
+                console.log('Database input shown, manual input hidden');
+            } else {
+                $('#database_input').hide();
+                $('#manual_input').show();
+                console.log('Manual input shown, database input hidden');
+            }
+            
+            console.log('Database input visible:', $('#database_input').is(':visible'));
+            console.log('Manual input visible:', $('#manual_input').is(':visible'));
+        });
+        
+        // Debug function
+        window.debugFormState = function() {
+            console.log('=== DEBUG STATE ===');
+            console.log('Input type checked:', $('input[name="input_type"]:checked').val());
+            console.log('Database input visible:', $('#database_input').is(':visible'));
+            console.log('Manual input visible:', $('#manual_input').is(':visible'));
+            console.log('Manual input display:', $('#manual_input').css('display'));
+            console.log('==================');
+            
+            alert('Debug Info:\n' +
+                  'Input Type: ' + $('input[name="input_type"]:checked').val() + '\n' +
+                  'Manual Input Visible: ' + $('#manual_input').is(':visible') + '\n' +
+                  'Manual Input Display: ' + $('#manual_input').css('display'));
+        };
+        
+        // Test function
+        window.testManualInput = function() {
+            $('#input_manual').prop('checked', true);
+            $('#input_manual').trigger('change');
+            alert('Manual input should now be visible!');
+        };
+    });
+    </script>
+</body>
+</html>

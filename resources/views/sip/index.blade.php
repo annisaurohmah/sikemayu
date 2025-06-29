@@ -5,7 +5,7 @@
 <style>
     .select2-container .select2-selection--single {
         height: 38px;
-        border: 1px solidrgb(208, 219, 229);
+        border: 1px solid rgb(208, 219, 229);
         border-radius: 4px;
     }
 
@@ -93,7 +93,6 @@
             <!-- Tab Content -->
             <div class="tab-content mt-2" id="dataTabsContent">
                 @include('sip.dashboard')
-
                 @include('sip.format1')
                 @include('sip.format2')
                 @include('sip.format3')
@@ -116,6 +115,7 @@
 @include('sip.add_data_format5')
 @include('sip.add_data_format6')
 @include('sip.add_data_format7')
+@include('sip.add_data_dokum')
 
 
 
