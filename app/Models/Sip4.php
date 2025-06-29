@@ -84,4 +84,22 @@ class Sip4 extends Model
 	{
 		return $this->hasMany(Sip4Penggantiankontrasepsi::class, 'wuspus_id');
 	}
+
+	// Accessor for jenis_kontrasepsi
+	public function getJenisKontrasepsiAttribute()
+	{
+		return $this->kontrasepsi->first()->jenis_kontrasepsi ?? null;
+	}
+
+	// Accessor for tanggal_penggantian
+	public function getTanggalPenggantianAttribute()
+	{
+		return $this->penggantianKontrasepsi->first()->tanggal_penggantian ?? null;
+	}
+
+	// Accessor for jenis_kontrasepsi_pengganti
+	public function getJenisKontrasepsiPenggantiAttribute()
+	{
+		return $this->penggantianKontrasepsi->first()->jenis_baru ?? null;
+	}
 }

@@ -1,9 +1,9 @@
 <!-- Add -->
-<div class="modal fade" id="addnewformat4">
+<div class="modal fade" id="addnewdokum">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><b>Tambah Data Format 4 - SIP (WUS PUS)</b></h5>
+                <h5 class="modal-title"><b>Tambah Data Dokumentasi - SIP</b></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span></button>
             </div>
@@ -13,7 +13,7 @@
                     <form method="POST" action="{{ route('sip4.store') }}">
                         @csrf
                         <input type="hidden" name="posyandu_id" value="{{ $posyandu->posyandu_id ?? '' }}" />
-
+                        
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -42,7 +42,7 @@
                                 </div>
                             </div>
                         </div>
-
+                        
                         <div class="form-group">
                             <label for="nama">Nama WUS/PUS</label>
                             <input type="text" class="form-control" placeholder="Masukkan nama WUS/PUS" id="nama" name="nama" required />
@@ -79,9 +79,9 @@
                             <select class="form-control" id="dasawisma_id" name="dasawisma_id" required>
                                 <option value="">Pilih Dasawisma</option>
                                 @if(isset($dasawismaList))
-                                @foreach($dasawismaList as $dasawisma)
-                                <option value="{{ $dasawisma->dasawisma_id }}">{{ $dasawisma->nama_dasawisma }}</option>
-                                @endforeach
+                                    @foreach($dasawismaList as $dasawisma)
+                                        <option value="{{ $dasawisma->dasawisma_id }}">{{ $dasawisma->nama_dasawisma }}</option>
+                                    @endforeach
                                 @endif
                             </select>
                         </div>
@@ -118,68 +118,39 @@
                                     </select>
                                 </div>
                             </div>
-
-                        <!-- Pemberian Imunisasi TT -->
+                        </div>
+                        </div>
+                        
                         <div class="form-group">
-                            <label><strong>Pemberian Imunisasi TT</strong></label>
-                            <div class="row">
-                                @foreach(['I', 'II', 'III', 'IV', 'V'] as $tt_ke)
-                                <div class="col-md-2">
-                                    <label for="tt_{{ $tt_ke }}">TT {{ $tt_ke }}</label>
-                                    <input type="date" class="form-control" id="tt_{{ $tt_ke }}" name="tt_{{ $tt_ke }}" />
-                                </div>
-                                @endforeach
-                            </div>
+                            <label for="nama_ibu">Nama Ibu</label>
+                            <input type="text" class="form-control" placeholder="Masukkan nama ibu" id="nama_ibu" name="nama_ibu" required />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="nama_bapak">Nama Bapak</label>
+                            <input type="text" class="form-control" placeholder="Masukkan nama bapak" id="nama_bapak" name="nama_bapak" required />
                         </div>
 
-                        <!-- Kontrasepsi -->
-                        <div class="form-group">
-                            <label for="jenis_kontrasepsi">Jenis Kontrasepsi yang Dipakai</label>
-                            <select class="form-control" id="jenis_kontrasepsi" name="jenis_kontrasepsi">
-                                <option value="">Pilih Jenis Kontrasepsi</option>
-                                <option value="IUD">IUD</option>
-                                <option value="Suntik">Suntik</option>
-                                <option value="Pil">Pil</option>
-                                <option value="Kondom">Kondom</option>
-                                <option value="Implant">Implant</option>
-                                <option value="Sterilisasi">Sterilisasi</option>
-                                <option value="Lainnya">Lainnya</option>
-                            </select>
-                        </div>
-
-                        <!-- Penggantian Kontrasepsi -->
-                        <div class="form-group">
-                            <label><strong>Penggantian Kontrasepsi</strong></label>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label for="tanggal_penggantian">Tanggal Penggantian</label>
-                                    <input type="date" class="form-control" id="tanggal_penggantian" name="tanggal_penggantian" />
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="jenis_kontrasepsi_pengganti">Jenis Kontrasepsi Pengganti</label>
-                                    <select class="form-control" id="jenis_kontrasepsi_pengganti" name="jenis_kontrasepsi_pengganti">
-                                        <option value="">Pilih Jenis Kontrasepsi Pengganti</option>
-                                        <option value="IUD">IUD</option>
-                                        <option value="Suntik">Suntik</option>
-                                        <option value="Pil">Pil</option>
-                                        <option value="Kondom">Kondom</option>
-                                        <option value="Implant">Implant</option>
-                                        <option value="Sterilisasi">Sterilisasi</option>
-                                        <option value="Lainnya">Lainnya</option>
-                                    </select>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="nama_bayi">Nama Bayi</label>
+                                    <input type="text" class="form-control" placeholder="Masukkan nama bayi" id="nama_bayi" name="nama_bayi" required />
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                                <div>
-                                    <button type="submit" class="btn btn-success waves-effect waves-light">
-                                        Submit
-                                    </button>
-                                    <button type="reset" class="btn btn-danger waves-effect m-l-5" data-dismiss="modal">
-                                        Cancel
-                                    </button>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="tgl_lahir">Tanggal Lahir</label>
+                                    <input type="date" class="form-control" id="tgl_lahir" name="tgl_lahir" required />
                                 </div>
+                        <div class="form-group">
+                            <div>
+                                <button type="submit" class="btn btn-success waves-effect waves-light">
+                                    Submit
+                                </button>
+                                <button type="reset" class="btn btn-danger waves-effect m-l-5" data-dismiss="modal">
+                                    Cancel
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -187,22 +158,14 @@
             </div>
         </div>
     </div>
+</div>
 
-
-    <script>
-        // Set tahun default ke tahun sekarang dan batasi tanggal maksimal ke hari ini
-        document.addEventListener('DOMContentLoaded', function() {
-            const tahunInput = document.getElementById('tahun');
-            if (tahunInput) {
-                tahunInput.value = new Date().getFullYear();
-            }
-            
-            // Set tanggal maksimal ke hari ini untuk semua input tanggal
-            const today = new Date().toISOString().split('T')[0];
-            const dateInputs = document.querySelectorAll('#addnewformat4 input[type="date"]');
-            
-            dateInputs.forEach(function(input) {
-                input.setAttribute('max', today);
-            });
-        });
-    </script>
+<script>
+// Set tahun default ke tahun sekarang
+document.addEventListener('DOMContentLoaded', function() {
+    const tahunInput = document.getElementById('tahun');
+    if (tahunInput) {
+        tahunInput.value = new Date().getFullYear();
+    }
+});
+</script>

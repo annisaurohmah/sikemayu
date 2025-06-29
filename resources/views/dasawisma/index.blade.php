@@ -23,6 +23,11 @@
     <div class="col-12">
 
         <div class="container mt-2">
+            <div class="alert alert-info mt-2 mb-2">
+                <i class="fa fa-table"></i> Data Dasawisma - Catatan Dasawisma Desa Pangalengan
+                <span class="badge badge-primary ml-2">Tahun: {{ request()->get('tahun', date('Y')) }}</span>
+            </div>
+            
             <a href="#addnew" data-toggle="modal" class="btn btn-success btn-sm btn-flat mt-2 mb-2"><i class="mdi mdi-plus mr-2"></i>Tambah Data</a>
 
 
@@ -82,6 +87,17 @@
                             </tr>
                             @endif
                         </tbody>
+                        <tfoot class="table-dark">
+                            <tr>
+                                <th><strong>TOTAL</strong></th>
+                                <th><strong>-</strong></th>
+                                <th><strong>{{ $dasawisma->sum('jumlah_RT') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('jumlah_DW') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('jumlah_KRT') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('jumlah_KK') }}</strong></th>
+                                <th><strong>-</strong></th>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
 
@@ -136,6 +152,24 @@
                             </tr>
                             @endif
                         </tbody>
+                        <tfoot class="table-dark">
+                            <tr>
+                                <th><strong>TOTAL</strong></th>
+                                <th><strong>-</strong></th>
+                                <th><strong>{{ $dasawisma->sum('total_L') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('total_P') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('balita_L') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('balita_P') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('PUS') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('WUS') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('ibu_hamil') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('ibu_menyusui') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('lansia') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('tiga_buta_L') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('tiga_buta_P') }}</strong></th>
+                                <th><strong>-</strong></th>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
 
@@ -193,6 +227,25 @@
                             </tr>
                             @endif
                         </tbody>
+                        <tfoot class="table-dark">
+                            <tr>
+                                <th><strong>TOTAL</strong></th>
+                                <th><strong>-</strong></th>
+                                <th><strong>{{ $dasawisma->sum('sehat') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('krg_sehat') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('tempat_sampah') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('spal') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('stiker_pak') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('pdam') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('sumur') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('sungai') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('dll') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('jumlah_jamban') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('beras') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('non_beras') }}</strong></th>
+                                <th><strong>-</strong></th>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
 
@@ -236,6 +289,18 @@
                             </tr>
                             @endif
                         </tbody>
+                        <tfoot class="table-dark">
+                            <tr>
+                                <th><strong>TOTAL</strong></th>
+                                <th><strong>-</strong></th>
+                                <th><strong>{{ $dasawisma->sum('up2k') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('tanah_pkrgn') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('industri_rt') }}</strong></th>
+                                <th><strong>{{ $dasawisma->sum('kesling') }}</strong></th>
+                                <th><strong>-</strong></th>
+                                <th><strong>-</strong></th>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -258,16 +323,32 @@
     <script>
         $(document).ready(function() {
             $('#table-wilayah').DataTable({
-                responsive: true
+                responsive: true,
+                paging: false,
+                searching: false,
+                info: false,
+                order: []
             });
             $('#table-keluarga').DataTable({
-                responsive: true
+                responsive: true,
+                paging: false,
+                searching: false,
+                info: false,
+                order: []
             });
             $('#table-rumah').DataTable({
-                responsive: true
+                responsive: true,
+                paging: false,
+                searching: false,
+                info: false,
+                order: []
             });
             $('#table-kegiatan').DataTable({
-                responsive: true
+                responsive: true,
+                paging: false,
+                searching: false,
+                info: false,
+                order: []
             });
         });
 
@@ -281,5 +362,6 @@
                 .responsive.recalc();
         });
     </script>
+
 
     @endsection

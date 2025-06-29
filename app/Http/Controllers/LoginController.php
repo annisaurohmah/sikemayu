@@ -33,4 +33,10 @@ class LoginController extends Controller
             'username' => 'The provided credentials do not match our records.',
         ])->withInput();
     }
+
+    public function logout()
+    {
+        Auth::logout();
+        return redirect()->route('getLogin')->with('success', 'You have been logged out successfully.');
+    }
 }

@@ -1,22 +1,22 @@
 <!-- Add -->
-<div class="modal fade" id="addnewformat5">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade" id="addnewformat5" tabindex="-1" role="dialog" aria-labelledby="addModal5" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><b>Tambah Data Format 5 - SIP (Ibu Hamil)</b></h5>
+                <h5 class="modal-title" id="addModal5"><b>Tambah Data Format 5 - SIP (Ibu Hamil)</b></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span></button>
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
 
             <div class="modal-body">
-                <div class="card-body text-left">
-                    <form method="POST" action="{{ route('sip5.store') }}">
-                        @csrf
-                        <input type="hidden" name="posyandu_id" value="{{ $posyandu->posyandu_id ?? '' }}" />
+                <form id="form-add-format5" method="POST" action="{{ route('sip5.store') }}">
+                    @csrf
+                    <input type="hidden" name="posyandu_id" value="{{ $posyandu->posyandu_id ?? '' }}" />
                         
                         <div class="form-group">
-                            <label for="nama_ibu">Nama Ibu</label>
-                            <input type="text" class="form-control" placeholder="Masukkan nama ibu hamil" id="nama_ibu" name="nama_ibu" required />
+                            <label for="nama_ibu_hamil">Nama Ibu Hamil</label>
+                            <input type="text" class="form-control" placeholder="Masukkan nama ibu hamil" id="nama_ibu_hamil" name="nama_ibu_hamil" required />
                         </div>
 
                         <div class="row">
@@ -85,65 +85,182 @@
                             </div>
                         </div>
 
+                        <!-- Hasil Penimbangan (TB/BB) per Bulan -->
+                        <div class="form-group">
+                            <label><strong>Hasil Penimbangan (TB/BB) per Bulan (Opsional)</strong></label>
+                            <div class="row">
+                                @foreach(['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGS', 'SEP', 'OKT', 'NOV', 'DES'] as $index => $bulan)
+                                @php $bulanNumber = $index + 1; @endphp
+                                <div class="col-md-2 mb-2">
+                                    <label for="penimbangan_{{ $bulanNumber }}">{{ $bulan }}</label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="number" step="0.1" class="form-control form-control-sm" 
+                                                   placeholder="TB" id="tb_{{ $bulanNumber }}" name="tb_{{ $bulanNumber }}" />
+                                            <small class="text-muted">TB (cm)</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" step="0.1" class="form-control form-control-sm" 
+                                                   placeholder="BB" id="bb_{{ $bulanNumber }}" name="bb_{{ $bulanNumber }}" />
+                                            <small class="text-muted">BB (kg)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- Tablet Tambah Darah (BKS) -->
+                        <div class="form-group">
+                            <label><strong>Tablet Tambah Darah (BKS)</strong></label>
+                            <div class="row">
+                                @foreach(['I', 'II', 'III'] as $jenis)
+                                <div class="col-md-4">
+                                    <label for="tablet_{{ $jenis }}">Tablet {{ $jenis }}</label>
+                                    <input type="date" class="form-control" id="tablet_{{ $jenis }}" name="tablet_{{ $jenis }}" />
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- Imunisasi -->
+                        <div class="form-group">
+                            <label><strong>Imunisasi</strong></label>
+                            <div class="row">
+                                @foreach(['I', 'II', 'III', 'IV', 'V'] as $jenis)
+                                <div class="col-md-2">
+                                    <label for="imunisasi_{{ $jenis }}">Imunisasi {{ $jenis }}</label>
+                                    <input type="date" class="form-control" id="imunisasi_{{ $jenis }}" name="imunisasi_{{ $jenis }}" />
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- Vitamin A -->
+                        <div class="form-group">
+                            <label for="vitamin_a">Vitamin A</label>
+                            <input type="date" class="form-control" id="vitamin_a" name="vitamin_a" />
+                        </div>
+
                         <div class="form-group">
                             <label for="catatan">Catatan</label>
                             <textarea class="form-control" placeholder="Masukkan catatan (opsional)" id="catatan" name="catatan" rows="3"></textarea>
                         </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="nama_ibu">Nama Ibu</label>
-                            <input type="text" class="form-control" placeholder="Masukkan nama ibu" id="nama_ibu" name="nama_ibu" required />
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="nama_bapak">Nama Bapak</label>
-                            <input type="text" class="form-control" placeholder="Masukkan nama bapak" id="nama_bapak" name="nama_bapak" required />
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="nama_bayi">Nama Bayi</label>
-                                    <input type="text" class="form-control" placeholder="Masukkan nama bayi" id="nama_bayi" name="nama_bayi" required />
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="tgl_lahir">Tanggal Lahir</label>
-                                    <input type="date" class="form-control" id="tgl_lahir" name="tgl_lahir" required />
-                                </div>
-                        <div class="form-group">
-                            <div>
-                                <button type="submit" class="btn btn-success waves-effect waves-light">
-                                    Submit
-                                </button>
-                                <button type="reset" class="btn btn-danger waves-effect m-l-5" data-dismiss="modal">
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
                     </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fa fa-close"></i> Cancel
+                    </button>
+                    <button type="submit" form="form-add-format5" class="btn btn-success">
+                        <i class="fa fa-check"></i> Submit
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 <script>
-// Set tanggal maksimal ke hari ini
+// Set tanggal maksimal ke hari ini untuk semua input tanggal
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
-    const tanggalPendaftaranInput = document.getElementById('tanggal_pendaftaran');
+    const dateInputs = document.querySelectorAll('#addnewformat5 input[type="date"]');
     
-    if (tanggalPendaftaranInput) {
-        tanggalPendaftaranInput.setAttribute('max', today);
+    dateInputs.forEach(function(input) {
+        input.setAttribute('max', today);
+    });
+    
+    // Debug modal issues
+    console.log('Format 5 modal loaded');
+    
+    // Check if modal exists and is properly structured
+    const modal = document.getElementById('addnewformat5');
+    if (modal) {
+        console.log('Modal exists:', modal);
+        console.log('Modal HTML:', modal.outerHTML.substring(0, 200) + '...');
     }
     
-    // Set tahun default ke tahun sekarang
-    const tahunInput = document.getElementById('tahun');
-    if (tahunInput) {
-        tahunInput.value = new Date().getFullYear();
+    // Force modal to show when button is clicked with pure JavaScript
+    const modalButton = document.querySelector('[href="#addnewformat5"]');
+    if (modalButton) {
+        modalButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Format 5 button clicked - using pure JS');
+            
+            // Remove any existing backdrop
+            const existingBackdrops = document.querySelectorAll('.modal-backdrop');
+            existingBackdrops.forEach(backdrop => backdrop.remove());
+            
+            // Show modal manually
+            const modal = document.getElementById('addnewformat5');
+            if (modal) {
+                modal.style.display = 'block';
+                modal.classList.add('show');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('modal-open');
+                
+                // Add backdrop
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop fade show';
+                document.body.appendChild(backdrop);
+                
+                console.log('Modal should be visible now');
+            } else {
+                console.error('Modal not found!');
+            }
+        });
     }
+    
+    // Close modal function
+    function closeModal() {
+        const modal = document.getElementById('addnewformat5');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('modal-open');
+            
+            // Remove backdrop
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+        }
+    }
+    
+    // Add close event listeners
+    const closeButtons = document.querySelectorAll('#addnewformat5 [data-dismiss="modal"]');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', closeModal);
+    });
+    
+    // Close on backdrop click
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal-backdrop')) {
+            closeModal();
+        }
+    });
 });
 </script>
+
+<style>
+/* Ensure modal appears above everything */
+#addnewformat5 {
+    z-index: 1060 !important;
+}
+
+#addnewformat5 .modal-dialog {
+    margin: 1.75rem auto;
+    max-width: 1140px;
+}
+
+/* Ensure backdrop is below modal */
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+/* Force modal to be visible when show class is applied */
+#addnewformat5.show {
+    display: block !important;
+}
+</style>

@@ -58,6 +58,7 @@ class Rekapkegiatanposyandubulanan extends Model
 	protected $casts = [
 		'bulan' => 'int',
 		'tahun' => 'int',
+		'posyandu_id' => 'int',
 		'jml_ibu_hamil' => 'int',
 		'ibu_periksa' => 'int',
 		'ibu_mendapat_fe' => 'int',
@@ -95,6 +96,7 @@ class Rekapkegiatanposyandubulanan extends Model
 	protected $fillable = [
 		'bulan',
 		'tahun',
+		'posyandu_id',
 		'jml_ibu_hamil',
 		'ibu_periksa',
 		'ibu_mendapat_fe',

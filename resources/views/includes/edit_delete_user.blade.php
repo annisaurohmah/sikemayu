@@ -26,24 +26,36 @@
 
                     <div class="form-group">
                         <label for="role">Role</label>
-                        <select class="form-control" id="role" name="role" required>
+                        <select class="form-control" id="role_edit_{{ $user->user_id }}" name="role" required>
                             <option value="" selected>- Pilih -</option>
-                            <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
-                            <option value="kader" {{ $user->role == 'kader' ? 'selected' : '' }}>Kader</option>
-                            <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>User</option>
+                            <option value="admin_desa" {{ $user->role == 'admin_desa' ? 'selected' : '' }}>Admin Desa</option>
+                            <option value="admin_kader" {{ $user->role == 'admin_kader' ? 'selected' : '' }}>Admin Kader</option>
+                            <option value="admin_rw" {{ $user->role == 'admin_rw' ? 'selected' : '' }}>Admin RW</option>
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="rw_group_edit_{{ $user->user_id }}" @if($user->role == 'admin_rw') style="display: block;" @else style="display: none;" @endif>
                         <label for="no_rw">Nomor RW</label>
-                        <input type="text" class="form-control" placeholder="Contoh: 01" id="no_rw" name="no_rw" 
-                        value="{{ $user->no_rw ?? '' }}" />
+                        <select class="form-control" id="no_rw_edit_{{ $user->user_id }}" name="no_rw">
+                            <option value="">- Pilih RW -</option>
+                            @if(isset($rwList) && $rwList->count() > 0)
+                                @foreach($rwList as $rw)
+                                    <option value="{{ $rw->no_rw }}" {{ $user->no_rw == $rw->no_rw ? 'selected' : '' }}>RW {{ $rw->no_rw }}</option>
+                                @endforeach
+                            @endif
+                        </select>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="posyandu_group_edit_{{ $user->user_id }}" @if($user->role == 'admin_kader') style="display: block;" @else style="display: none;" @endif>
                         <label for="nama_posyandu">Nama Posyandu</label>
-                        <input type="text" class="form-control" placeholder="Masukkan nama posyandu" id="nama_posyandu" name="nama_posyandu" 
-                        value="{{ $user->nama_posyandu ?? '' }}" />
+                        <select class="form-control" id="nama_posyandu_edit_{{ $user->user_id }}" name="nama_posyandu">
+                            <option value="">- Pilih Posyandu -</option>
+                            @if(isset($posyanduList) && $posyanduList->count() > 0)
+                                @foreach($posyanduList as $posyandu)
+                                    <option value="{{ $posyandu->nama_posyandu }}" {{ $user->nama_posyandu == $posyandu->nama_posyandu ? 'selected' : '' }}>{{ $posyandu->nama_posyandu }}</option>
+                                @endforeach
+                            @endif
+                        </select>
                     </div>
 
                     <div class="modal-footer">
@@ -84,3 +96,44 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userId = '{{ $user->user_id }}';
+    const roleSelect = document.getElementById('role_edit_' + userId);
+    const rwGroup = document.getElementById('rw_group_edit_' + userId);
+    const posyanduGroup = document.getElementById('posyandu_group_edit_' + userId);
+    const rwSelect = document.getElementById('no_rw_edit_' + userId);
+    const posyanduSelect = document.getElementById('nama_posyandu_edit_' + userId);
+
+    function toggleEditDropdowns() {
+        if (!roleSelect) return;
+        
+        const selectedRole = roleSelect.value;
+        
+        // Hide all dropdowns first
+        if (rwGroup) rwGroup.style.display = 'none';
+        if (posyanduGroup) posyanduGroup.style.display = 'none';
+        
+        // Show appropriate dropdown based on role
+        if (selectedRole === 'admin_rw') {
+            if (rwGroup) rwGroup.style.display = 'block';
+            // Clear posyandu if switching to RW
+            if (posyanduSelect) posyanduSelect.value = '';
+        } else if (selectedRole === 'admin_kader') {
+            if (posyanduGroup) posyanduGroup.style.display = 'block';
+            // Clear RW if switching to Kader
+            if (rwSelect) rwSelect.value = '';
+        } else if (selectedRole === 'admin_desa') {
+            // Clear both if admin_desa
+            if (rwSelect) rwSelect.value = '';
+            if (posyanduSelect) posyanduSelect.value = '';
+        }
+    }
+
+    // Add event listener for role change
+    if (roleSelect) {
+        roleSelect.addEventListener('change', toggleEditDropdowns);
+    }
+});
+</script>

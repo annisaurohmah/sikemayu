@@ -10,6 +10,8 @@ use App\Models\Sip1;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Sip2;
+use App\Models\Sip2Penimbangan;
+use App\Models\Sip2Imunisasi;
 use App\Models\Sip3;
 use App\Models\Sip4;
 use App\Models\Sip5;
@@ -19,22 +21,54 @@ use App\Models\Sip5Tablettambahdarah;
 use App\Models\Sip5Vitaminaibuhamil;
 use App\Models\Sip6;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use App\Traits\HasYearFilter;
+use App\Traits\HasDataAccess;
 
 class SIPController extends Controller
 {
-    public function index($posyandu_id)
+    use HasYearFilter, HasDataAccess;
+    public function index($posyandu_id, Request $request)
     {
+        // Check data access
+        $access = $this->getDataAccess();
+        $posyandu = Posyandu::find($posyandu_id);
+        
+        // Validate access
+        if (!$access['can_access_all'] && $access['can_access_posyandu_only']) {
+            if ($posyandu->nama_posyandu !== $access['posyandu']) {
+                abort(403, 'Anda tidak memiliki akses ke posyandu ini');
+            }
+        }
+        
+        // Ambil tahun dari parameter URL atau gunakan tahun sekarang sebagai default
+        $tahun = $this->getSelectedYear($request);
+        
         //sip format 1
         $format1 = Sip1::where('posyandu_id', $posyandu_id)->get();
         $posyandu = Posyandu::find($posyandu_id);
-        
+
         // Get data for dropdowns
         $dasawismaList = Dasawisma::all();
-        
+
         // Filter bayi (0-12 bulan) dan balita (1-5 tahun) berdasarkan umur dari tanggal lahir
         $today = now();
-        $bayiList_master = Anak::whereRaw('TIMESTAMPDIFF(MONTH, tanggal_lahir, ?) <= 12', [$today])->get();
-        $balitaList_master = Anak::whereRaw('TIMESTAMPDIFF(MONTH, tanggal_lahir, ?) > 12 AND TIMESTAMPDIFF(YEAR, tanggal_lahir, ?) <= 5', [$today, $today])->get();
+        
+        // Ambil nama bayi yang sudah terdaftar di SIP Format 2 untuk posyandu ini
+        $registeredBayi = Sip2::where('posyandu_id', $posyandu_id)->pluck('nama_bayi')->toArray();
+        
+        // Ambil nama balita yang sudah terdaftar di SIP Format 3 untuk posyandu ini
+        $registeredBalita = Sip3::where('posyandu_id', $posyandu_id)->pluck('nama_balita')->toArray();
+        
+        // Filter bayi yang belum terdaftar di SIP Format 2
+        $bayiList_master = Anak::whereRaw('TIMESTAMPDIFF(MONTH, tanggal_lahir, ?) <= 12', [$today])
+            ->whereNotIn('nama_lengkap', $registeredBayi)
+            ->get();
+            
+        // Filter balita yang belum terdaftar di SIP Format 3
+        $balitaList_master = Anak::whereRaw('TIMESTAMPDIFF(MONTH, tanggal_lahir, ?) > 12 AND TIMESTAMPDIFF(YEAR, tanggal_lahir, ?) <= 5', [$today, $today])
+            ->whereNotIn('nama_lengkap', $registeredBalita)
+            ->get();
 
         //sip format 2
         $bayiList = Sip2::with([
@@ -73,27 +107,31 @@ class SIPController extends Controller
         ])->where('posyandu_id', $posyandu_id)->get();
 
         //sip format 6
-        $tahun = now()->year;
+        // $tahun = now()->year; // Hapus ini karena sudah diambil dari parameter
 
         for ($bulan = 1; $bulan <= 12; $bulan++) {
 
             $bayi012 = Sip2::whereRaw("TIMESTAMPDIFF(MONTH, tgl_lahir, ?) <= 12", [Carbon::create($tahun, $bulan, 1)])
+                ->where('posyandu_id', $posyandu_id)
                 ->count();
 
             $balita15 = Sip2::whereRaw("TIMESTAMPDIFF(MONTH, tgl_lahir, ?) > 12 AND TIMESTAMPDIFF(YEAR, tgl_lahir, ?) <= 5", [
                 Carbon::create($tahun, $bulan, 1),
                 Carbon::create($tahun, $bulan, 1)
-            ])->count();
+            ])->where('posyandu_id', $posyandu_id)->count();
 
             $jumlahBayiLahir = Sip1::whereMonth('tgl_lahir', $bulan)
                 ->whereYear('tgl_lahir', $tahun)
+                ->where('posyandu_id', $posyandu_id)
                 ->count();
             $jumlahBayiMeninggal = Sip1::whereMonth('tgl_meninggal_bayi', $bulan)
                 ->whereYear('tgl_meninggal_bayi', $tahun)
+                ->where('posyandu_id', $posyandu_id)
                 ->count();
 
             $jumlahIbuHamil = Sip5::whereMonth('tanggal_pendaftaran', $bulan)
                 ->whereYear('tanggal_pendaftaran', $tahun)
+                ->where('posyandu_id', $posyandu_id)
                 ->count();
 
             Sip6::updateOrCreate(
@@ -154,23 +192,19 @@ class SIPController extends Controller
                 ->join('sip4_kontrasepsi', 'sip_4.wuspus_id', '=', 'sip4_kontrasepsi.wuspus_id')
                 ->where('sip_4.bulan', $bulan)
                 ->where('sip_4.tahun', $tahun)
-                ->where('sip4_kontrasepsi.jenis_kontrasepsi', 'Pil')
+                ->where('sip4_kontrasepsi.jenis_kontrasepsi', 'Suntik')
                 ->where('sip_4.posyandu_id', $posyandu_id)
                 ->count();
 
             $jumlahBalita_S = Sip3::where('posyandu_id', $posyandu_id)
-                ->whereMonth('tgl_lahir', $bulan)
-                ->whereYear('tgl_lahir', $tahun)
                 ->count();
 
             $jumlahBalita_K = Sip3::where('posyandu_id', $posyandu_id)
-                ->whereMonth('tgl_lahir', $bulan)
-                ->whereYear('tgl_lahir', $tahun)
                 ->count();
 
             $jumlahBalita_D = Sip3::where('posyandu_id', $posyandu_id)->join('sip3_penimbangan', 'sip_3.balita_id', '=', 'sip3_penimbangan.balita_id')
-                ->whereMonth('tgl_lahir', $bulan)
-                ->whereYear('tgl_lahir', $tahun)
+                ->where('sip3_penimbangan.bulan', $bulan)
+                ->where('sip3_penimbangan.tahun', $tahun)
                 ->where(function ($query) {
                     $query->whereNotNull('bb_hasil_penimbangan')
                         ->orWhereNotNull('tb_hasil_penimbangan');
@@ -179,8 +213,9 @@ class SIPController extends Controller
 
             // Ambil semua penimbangan bulan sekarang
             $dataBulanIni = Sip3::where('posyandu_id', $posyandu_id)
-                ->whereMonth('tgl_lahir', $bulan)
-                ->whereYear('tgl_lahir', $tahun)
+                ->join('sip3_penimbangan', 'sip_3.balita_id', '=', 'sip3_penimbangan.balita_id')
+                ->where('sip3_penimbangan.bulan', $bulan)
+                ->where('sip3_penimbangan.tahun', $tahun)
                 ->get();
 
             // Hitung jumlah yang naik BB
@@ -194,9 +229,11 @@ class SIPController extends Controller
                 }
 
                 // Ambil data bulan sebelumnya dari balita yang sama
-                $prev = Sip3::where('balita_id', $item->balita_id)
-                    ->whereMonth('tgl_lahir', $prevBulan)
-                    ->whereYear('tgl_lahir', $prevTahun)
+                $prev = DB::table('sip_3')
+                    ->join('sip3_penimbangan', 'sip_3.balita_id', '=', 'sip3_penimbangan.balita_id')
+                    ->where('sip_3.balita_id', $item->balita_id)
+                    ->where('sip3_penimbangan.bulan', $prevBulan)
+                    ->where('sip3_penimbangan.tahun', $prevTahun)
                     ->first();
 
                 // Jika ada data sebelumnya dan BB naik
@@ -205,94 +242,94 @@ class SIPController extends Controller
 
             $jumlahBayiBalitaMendapatVitA = (DB::table('sip_2')
                 ->join('sip2_pelayanan', 'sip_2.bayi_id', '=', 'sip2_pelayanan.bayi_id')
-                ->whereMonth('sip_2.tgl_lahir', $bulan)
-                ->whereYear('sip_2.tgl_lahir', $tahun)
+                ->whereMonth('sip2_pelayanan.tanggal_diberikan', $bulan)
+                ->whereYear('sip2_pelayanan.tanggal_diberikan', $tahun)
                 ->where('sip2_pelayanan.jenis', 'Vitamin A')
                 ->where('posyandu_id', $posyandu_id)
                 ->count()) + (DB::table('sip_3')
                 ->join('sip3_pelayanan', 'sip_3.balita_id', '=', 'sip3_pelayanan.balita_id')
-                ->whereMonth('sip_3.tgl_lahir', $bulan)
-                ->whereYear('sip_3.tgl_lahir', $tahun)
+                ->whereMonth('sip3_pelayanan.tanggal_diberikan', $bulan)
+                ->whereYear('sip3_pelayanan.tanggal_diberikan', $tahun)
                 ->where('sip3_pelayanan.jenis', 'Vitamin A')
                 ->where('posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahBayiHBNol = (DB::table('sip_2')
                 ->join('sip2_imunisasi', 'sip_2.bayi_id', '=', 'sip2_imunisasi.bayi_id')
-                ->whereMonth('sip_2.tgl_lahir', $bulan)
-                ->whereYear('sip_2.tgl_lahir', $tahun)
+                ->whereMonth('sip2_imunisasi.tanggal_diberikan', $bulan)
+                ->whereYear('sip2_imunisasi.tanggal_diberikan', $tahun)
                 ->where('sip2_imunisasi.jenis', 'HB Nol')
                 ->where('posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahBayiBCG = (DB::table('sip_2')
                 ->join('sip2_imunisasi', 'sip_2.bayi_id', '=', 'sip2_imunisasi.bayi_id')
-                ->whereMonth('sip_2.tgl_lahir', $bulan)
-                ->whereYear('sip_2.tgl_lahir', $tahun)
+                ->whereMonth('sip2_imunisasi.tanggal_diberikan', $bulan)
+                ->whereYear('sip2_imunisasi.tanggal_diberikan', $tahun)
                 ->where('sip2_imunisasi.jenis', 'BCG')
                 ->where('posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahBayi_PolioI = (DB::table('sip_2')
                 ->join('sip2_imunisasi', 'sip_2.bayi_id', '=', 'sip2_imunisasi.bayi_id')
-                ->whereMonth('sip_2.tgl_lahir', $bulan)
-                ->whereYear('sip_2.tgl_lahir', $tahun)
+                ->whereMonth('sip2_imunisasi.tanggal_diberikan', $bulan)
+                ->whereYear('sip2_imunisasi.tanggal_diberikan', $tahun)
                 ->where('sip2_imunisasi.jenis', 'Polio I')
                 ->where('posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahBayi_PolioII = (DB::table('sip_2')
                 ->join('sip2_imunisasi', 'sip_2.bayi_id', '=', 'sip2_imunisasi.bayi_id')
-                ->whereMonth('sip_2.tgl_lahir', $bulan)
-                ->whereYear('sip_2.tgl_lahir', $tahun)
+                ->whereMonth('sip2_imunisasi.tanggal_diberikan', $bulan)
+                ->whereYear('sip2_imunisasi.tanggal_diberikan', $tahun)
                 ->where('sip2_imunisasi.jenis', 'Polio II')
                 ->where('posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahBayi_PolioIII = (DB::table('sip_2')
                 ->join('sip2_imunisasi', 'sip_2.bayi_id', '=', 'sip2_imunisasi.bayi_id')
-                ->whereMonth('sip_2.tgl_lahir', $bulan)
-                ->whereYear('sip_2.tgl_lahir', $tahun)
+                ->whereMonth('sip2_imunisasi.tanggal_diberikan', $bulan)
+                ->whereYear('sip2_imunisasi.tanggal_diberikan', $tahun)
                 ->where('sip2_imunisasi.jenis', 'Polio III')
                 ->where('posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahBayi_PolioIV = (DB::table('sip_2')
                 ->join('sip2_imunisasi', 'sip_2.bayi_id', '=', 'sip2_imunisasi.bayi_id')
-                ->whereMonth('sip_2.tgl_lahir', $bulan)
-                ->whereYear('sip_2.tgl_lahir', $tahun)
+                ->whereMonth('sip2_imunisasi.tanggal_diberikan', $bulan)
+                ->whereYear('sip2_imunisasi.tanggal_diberikan', $tahun)
                 ->where('sip2_imunisasi.jenis', 'Polio IV')
                 ->where('posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahBayi_DPTI = (DB::table('sip_2')
                 ->join('sip2_imunisasi', 'sip_2.bayi_id', '=', 'sip2_imunisasi.bayi_id')
-                ->whereMonth('sip_2.tgl_lahir', $bulan)
-                ->whereYear('sip_2.tgl_lahir', $tahun)
+               ->whereMonth('sip2_imunisasi.tanggal_diberikan', $bulan)
+                ->whereYear('sip2_imunisasi.tanggal_diberikan', $tahun)
                 ->where('sip2_imunisasi.jenis', 'DPT/HB I')
                 ->where('posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahBayi_DPTII = (DB::table('sip_2')
                 ->join('sip2_imunisasi', 'sip_2.bayi_id', '=', 'sip2_imunisasi.bayi_id')
-                ->whereMonth('sip_2.tgl_lahir', $bulan)
-                ->whereYear('sip_2.tgl_lahir', $tahun)
+               ->whereMonth('sip2_imunisasi.tanggal_diberikan', $bulan)
+                ->whereYear('sip2_imunisasi.tanggal_diberikan', $tahun)
                 ->where('sip2_imunisasi.jenis', 'DPT/HB II')
                 ->where('posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahBayi_DPTIII = (DB::table('sip_2')
                 ->join('sip2_imunisasi', 'sip_2.bayi_id', '=', 'sip2_imunisasi.bayi_id')
-                ->whereMonth('sip_2.tgl_lahir', $bulan)
-                ->whereYear('sip_2.tgl_lahir', $tahun)
+               ->whereMonth('sip2_imunisasi.tanggal_diberikan', $bulan)
+                ->whereYear('sip2_imunisasi.tanggal_diberikan', $tahun)
                 ->where('sip2_imunisasi.jenis', 'DPT/HB III')
                 ->where('posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahBayi_Campak = (DB::table('sip_2')
                 ->join('sip2_imunisasi', 'sip_2.bayi_id', '=', 'sip2_imunisasi.bayi_id')
-                ->whereMonth('sip_2.tgl_lahir', $bulan)
-                ->whereYear('sip_2.tgl_lahir', $tahun)
+               ->whereMonth('sip2_imunisasi.tanggal_diberikan', $bulan)
+                ->whereYear('sip2_imunisasi.tanggal_diberikan', $tahun)
                 ->where('sip2_imunisasi.jenis', 'Campak')
                 ->where('posyandu_id', $posyandu_id)
                 ->count());
@@ -301,87 +338,85 @@ class SIPController extends Controller
                 ->join('sip4_imunisasitt', 'sip_4.wuspus_id', '=', 'sip4_imunisasitt.wuspus_id')
                 ->whereMonth('sip4_imunisasitt.tanggal_pemberian', $bulan)
                 ->whereYear('sip4_imunisasitt.tanggal_pemberian', $tahun)
-                ->where('posyandu_id', $posyandu_id)
+                ->where('sip_4.posyandu_id', $posyandu_id)
                 ->where('sip4_imunisasitt.tt_ke', 'I')
                 ->count()) + (DB::table('sip_5')
                 ->join('sip5_imunisasittibuhamil', 'sip_5.ibu_hamil_id', '=', 'sip5_imunisasittibuhamil.ibu_hamil_id')
                 ->whereMonth('sip5_imunisasittibuhamil.tanggal_pemberian', $bulan)
                 ->whereYear('sip5_imunisasittibuhamil.tanggal_pemberian', $tahun)
-                ->where('sip5_imunisasittibuhamil.tt_ke', 'IV')
                 ->where('sip5_imunisasittibuhamil.tt_ke', 'I')
-                ->where('posyandu_id', $posyandu_id)
+                ->where('sip_5.posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahImunisasiTT_II = (DB::table('sip_4')
                 ->join('sip4_imunisasitt', 'sip_4.wuspus_id', '=', 'sip4_imunisasitt.wuspus_id')
                 ->whereMonth('sip4_imunisasitt.tanggal_pemberian', $bulan)
                 ->whereYear('sip4_imunisasitt.tanggal_pemberian', $tahun)
-                ->where('posyandu_id', $posyandu_id)
-                ->where('sip4_imunisasitt.tt_ke', 'I')
+                ->where('sip_4.posyandu_id', $posyandu_id)
+                ->where('sip4_imunisasitt.tt_ke', 'II')
                 ->count()) + (DB::table('sip_5')
                 ->join('sip5_imunisasittibuhamil', 'sip_5.ibu_hamil_id', '=', 'sip5_imunisasittibuhamil.ibu_hamil_id')
                 ->whereMonth('sip5_imunisasittibuhamil.tanggal_pemberian', $bulan)
                 ->whereYear('sip5_imunisasittibuhamil.tanggal_pemberian', $tahun)
-                ->where('sip5_imunisasittibuhamil.tt_ke', 'IV')
                 ->where('sip5_imunisasittibuhamil.tt_ke', 'II')
-                ->where('posyandu_id', $posyandu_id)
+                ->where('sip_5.posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahImunisasiTT_III = (DB::table('sip_4')
                 ->join('sip4_imunisasitt', 'sip_4.wuspus_id', '=', 'sip4_imunisasitt.wuspus_id')
                 ->whereMonth('sip4_imunisasitt.tanggal_pemberian', $bulan)
                 ->whereYear('sip4_imunisasitt.tanggal_pemberian', $tahun)
-                ->where('posyandu_id', $posyandu_id)
+                ->where('sip_4.posyandu_id', $posyandu_id)
                 ->where('sip4_imunisasitt.tt_ke', 'III')
                 ->count()) + (DB::table('sip_5')
                 ->join('sip5_imunisasittibuhamil', 'sip_5.ibu_hamil_id', '=', 'sip5_imunisasittibuhamil.ibu_hamil_id')
                 ->whereMonth('sip5_imunisasittibuhamil.tanggal_pemberian', $bulan)
                 ->whereYear('sip5_imunisasittibuhamil.tanggal_pemberian', $tahun)
-                ->where('sip5_imunisasittibuhamil.tt_ke', 'I')
-                ->where('posyandu_id', $posyandu_id)
+                ->where('sip5_imunisasittibuhamil.tt_ke', 'III')
+                ->where('sip_5.posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahImunisasiTT_IV = (DB::table('sip_4')
                 ->join('sip4_imunisasitt', 'sip_4.wuspus_id', '=', 'sip4_imunisasitt.wuspus_id')
                 ->whereMonth('sip4_imunisasitt.tanggal_pemberian', $bulan)
                 ->whereYear('sip4_imunisasitt.tanggal_pemberian', $tahun)
-                ->where('posyandu_id', $posyandu_id)
-                ->where('sip4_imunisasitt.tt_ke', 'I')
+                ->where('sip_4.posyandu_id', $posyandu_id)
+                ->where('sip4_imunisasitt.tt_ke', 'IV')
                 ->count()) + (DB::table('sip_5')
                 ->join('sip5_imunisasittibuhamil', 'sip_5.ibu_hamil_id', '=', 'sip5_imunisasittibuhamil.ibu_hamil_id')
                 ->whereMonth('sip5_imunisasittibuhamil.tanggal_pemberian', $bulan)
                 ->whereYear('sip5_imunisasittibuhamil.tanggal_pemberian', $tahun)
                 ->where('sip5_imunisasittibuhamil.tt_ke', 'IV')
-                ->where('posyandu_id', $posyandu_id)
+                ->where('sip_5.posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahImunisasiTT_V = (DB::table('sip_4')
                 ->join('sip4_imunisasitt', 'sip_4.wuspus_id', '=', 'sip4_imunisasitt.wuspus_id')
                 ->whereMonth('sip4_imunisasitt.tanggal_pemberian', $bulan)
                 ->whereYear('sip4_imunisasitt.tanggal_pemberian', $tahun)
-                ->where('posyandu_id', $posyandu_id)
-                ->where('sip4_imunisasitt.tt_ke', 'I')
+                ->where('sip_4.posyandu_id', $posyandu_id)
+                ->where('sip4_imunisasitt.tt_ke', 'V')
                 ->count()) + (DB::table('sip_5')
                 ->join('sip5_imunisasittibuhamil', 'sip_5.ibu_hamil_id', '=', 'sip5_imunisasittibuhamil.ibu_hamil_id')
                 ->whereMonth('sip5_imunisasittibuhamil.tanggal_pemberian', $bulan)
                 ->whereYear('sip5_imunisasittibuhamil.tanggal_pemberian', $tahun)
-                ->where('sip5_imunisasittibuhamil.tt_ke', 'IV')
                 ->where('sip5_imunisasittibuhamil.tt_ke', 'V')
-                ->where('posyandu_id', $posyandu_id)
+                ->where('sip_5.posyandu_id', $posyandu_id)
                 ->count());
 
             $jumlahBalitaOralit = DB::table('sip_3')
                 ->join('sip3_pelayanan', 'sip_3.balita_id', '=', 'sip3_pelayanan.balita_id')
                 ->whereMonth('sip3_pelayanan.tanggal_diberikan', $bulan)
                 ->whereYear('sip3_pelayanan.tanggal_diberikan', $tahun)
-                ->where('posyandu_id', $posyandu_id)
+                ->where('sip_3.posyandu_id', $posyandu_id)
                 ->where('sip3_pelayanan.jenis', 'Oralit')
                 ->count();
 
-
+            
             Rekapkegiatanposyandubulanan::updateOrCreate(
-                ['bulan' => $bulan, 'tahun' => $tahun],
+                ['bulan' => $bulan, 'tahun' => $tahun, 'posyandu_id' => $posyandu_id],
                 [
+                    'posyandu_id' => $posyandu_id,
                     'jml_ibu_hamil' => $jumlahIbuHamil,
                     'ibu_periksa' => $jumlahIbuMemeriksa,
                     'ibu_mendapat_fe' => $jumlahIbuMendapatFE,
@@ -415,15 +450,78 @@ class SIPController extends Controller
             );
         }
 
+        Log::info("Selesai generate data rekap untuk posyandu_id: $posyandu_id");
+
         $sip7 = Rekapkegiatanposyandubulanan::where('tahun', $tahun)->get();
 
+        // Data untuk dashboard SKDN
+        $rekap = Rekapkegiatanposyandubulanan::where('posyandu_id', $posyandu_id)
+            ->orderBy('tahun', 'asc')
+            ->orderBy('bulan', 'asc')
+            ->limit(12) // Batasi hanya 12 bulan terakhir
+            ->get();
 
+        // Debug: Log jumlah data rekap yang ditemukan
+        Log::info("Posyandu ID: $posyandu_id, Jumlah data rekap: " . $rekap->count());
 
+        // Siapkan label dan data persentase untuk dashboard
+        $labels = [];
+        $persenK = [];
+        $persenD = [];
+        $persenN = [];
 
+        // Data absolut untuk chart SKDN
+        $dataS = [];
+        $dataK = [];
+        $dataD = [];
+        $dataN = [];
 
+        // Jika tidak ada data rekap, buat data dummy untuk menghindari chart kosong
+        if ($rekap->isEmpty()) {
+            Log::warning("Tidak ada data rekap untuk posyandu_id: $posyandu_id");
+            // Buat data dummy untuk 12 bulan terakhir
+            for ($i = 11; $i >= 0; $i--) {
+                $bulan = now()->subMonths($i)->month;
+                $tahun = now()->subMonths($i)->year;
+                
+                $bulanNama = [
+                    1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'Mei', 6 => 'Jun',
+                    7 => 'Jul', 8 => 'Agu', 9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
+                ];
+                
+                $labels[] = $bulanNama[$bulan] . '-' . substr($tahun, -2);
+                $persenK[] = 0;
+                $persenD[] = 0;
+                $persenN[] = 0;
+                $dataS[] = 0;
+                $dataK[] = 0;
+                $dataD[] = 0;
+                $dataN[] = 0;
+            }
+        }
 
+        foreach ($rekap as $item) {
+            $s = $item->balita_sasaran ?: 1; // hindari pembagi 0
 
-        return view('sip.index', compact('posyandu_id', 'posyandu', 'format1', 'bayiList', 'balitaList', 'wuspusList', 'ibuHamilList', 'sip6', 'sip7', 'dasawismaList', 'bayiList_master', 'balitaList_master'));
+            // Format label yang lebih pendek: "Jan-25" atau "Feb-25"
+            $bulanNama = [
+                1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'Mei', 6 => 'Jun',
+                7 => 'Jul', 8 => 'Agu', 9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
+            ];
+            $labels[] = $bulanNama[$item->bulan] . '-' . substr($item->tahun, -2);
+
+            $persenK[] = round(($item->balita_punya_buku / $s) * 100, 1);
+            $persenD[] = round(($item->balita_ditimbang / $s) * 100, 1);
+            $persenN[] = round(($item->balita_naik / $s) * 100, 1);
+
+            // Data absolut
+            $dataS[] = $item->balita_sasaran ?? 0;
+            $dataK[] = $item->balita_punya_buku ?? 0;
+            $dataD[] = $item->balita_ditimbang ?? 0;
+            $dataN[] = $item->balita_naik ?? 0;
+        }
+
+        return view('sip.index', compact('posyandu_id', 'posyandu', 'format1', 'bayiList', 'balitaList', 'wuspusList', 'ibuHamilList', 'sip6', 'sip7', 'dasawismaList', 'bayiList_master', 'balitaList_master', 'labels', 'persenK', 'persenD', 'persenN', 'dataS', 'dataK', 'dataD', 'dataN', 'tahun'));
     }
 
     // SIP1 CRUD Methods
@@ -450,7 +548,7 @@ class SIPController extends Controller
     public function updateSip1(Request $request, $id)
     {
         $sip1 = Sip1::findOrFail($id);
-        
+
         $request->validate([
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
             'tahun' => 'required|integer|min:1900|max:2100',
@@ -474,7 +572,7 @@ class SIPController extends Controller
         $sip1 = Sip1::findOrFail($id);
         $posyandu_id = $sip1->posyandu_id;
         $nama_bayi = $sip1->nama_bayi;
-        
+
         $sip1->delete();
 
         return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 1 untuk ' . $nama_bayi . ' berhasil dihapus.');
@@ -486,35 +584,165 @@ class SIPController extends Controller
         $request->validate([
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
             'nama_bayi' => 'required|string|max:255',
-            'tgl_lahir' => 'required|date',
             'bbl_kg' => 'required|numeric|min:0',
             'nama_ayah' => 'required|string|max:255',
             'nama_ibu' => 'required|string|max:255',
             'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
         ]);
 
-        Sip2::create($request->all());
+        // Ambil tanggal lahir dari data anak master berdasarkan nama
+        $anak = Anak::where('nama_lengkap', $request->nama_bayi)->first();
+        if (!$anak) {
+            return redirect()->back()->with('error', 'Data anak tidak ditemukan di database master.');
+        }
 
-        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 2 berhasil ditambahkan.');
+        // Buat data dengan tanggal lahir dari master data
+        $data = $request->all();
+        $data['tgl_lahir'] = $anak->tanggal_lahir;
+
+        Sip2::create($data);
+
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 2 berhasil ditambahkan. Silakan edit untuk menambah data penimbangan dan imunisasi.');
     }
 
     public function updateSip2(Request $request, $id)
     {
         $sip2 = Sip2::findOrFail($id);
-        
+
         $request->validate([
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
             'nama_bayi' => 'required|string|max:255',
-            'tgl_lahir' => 'required|date',
             'bbl_kg' => 'required|numeric|min:0',
             'nama_ayah' => 'required|string|max:255',
             'nama_ibu' => 'required|string|max:255',
-            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id',
+            // Validasi data penimbangan (opsional)
+            'tb_penimbangan.*' => 'nullable|numeric|min:0',
+            'bb_penimbangan.*' => 'nullable|numeric|min:0',
+            // Validasi data ASI, pelayanan, imunisasi (opsional)
+            'asi.*' => 'nullable|date|before_or_equal:today',
+            'pelayanan.*' => 'nullable|date|before_or_equal:today',
+            'imunisasi.*' => 'nullable|date|before_or_equal:today',
+            'tanggal_meninggal' => 'nullable|date|before_or_equal:today',
+            'catatan' => 'nullable|string|max:1000'
         ]);
 
-        $sip2->update($request->all());
+        try {
+            DB::beginTransaction();
 
-        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 2 berhasil diperbarui.');
+            // Ambil tanggal lahir dari data anak master berdasarkan nama
+            $anak = Anak::where('nama_lengkap', $request->nama_bayi)->first();
+            if (!$anak) {
+                return redirect()->back()->with('error', 'Data anak tidak ditemukan di database master.');
+            }
+
+            // Update data bayi dengan tanggal lahir dari master data
+            $sip2->update([
+                'posyandu_id' => $request->posyandu_id,
+                'nama_bayi' => $request->nama_bayi,
+                'tgl_lahir' => $anak->tanggal_lahir,
+                'bbl_kg' => $request->bbl_kg,
+                'nama_ayah' => $request->nama_ayah,
+                'nama_ibu' => $request->nama_ibu,
+                'dasawisma_id' => $request->dasawisma_id
+            ]);
+
+            // Update atau create data penimbangan jika ada input
+            if ($request->has('tb_penimbangan') || $request->has('bb_penimbangan')) {
+                for ($bulan = 1; $bulan <= 12; $bulan++) {
+                    $tb = $request->input("tb_penimbangan.{$bulan}");
+                    $bb = $request->input("bb_penimbangan.{$bulan}");
+                    
+                    if (!empty($tb) || !empty($bb)) {
+                        Sip2Penimbangan::updateOrCreate(
+                            [
+                                'bayi_id' => $sip2->bayi_id,
+                                'bulan' => $bulan,
+                                'tahun' => now()->year
+                            ],
+                            [
+                                'tb_hasil_penimbangan' => $tb ?: null,
+                                'bb_hasil_penimbangan' => $bb ?: null
+                            ]
+                        );
+                    }
+                }
+            }
+
+            // Update atau create data ASI
+            if ($request->has('asi')) {
+                foreach ($request->input('asi') as $jenis => $tanggal) {
+                    if (!empty($tanggal)) {
+                        \App\Models\Sip2Pemberianasi::updateOrCreate(
+                            [
+                                'bayi_id' => $sip2->bayi_id,
+                                'jenis' => $jenis
+                            ],
+                            [
+                                'tanggal_diberikan' => $tanggal
+                            ]
+                        );
+                    }
+                }
+            }
+
+            // Update atau create data pelayanan
+            if ($request->has('pelayanan')) {
+                foreach ($request->input('pelayanan') as $jenis => $tanggal) {
+                    if (!empty($tanggal)) {
+                        \App\Models\Sip2Pelayanan::updateOrCreate(
+                            [
+                                'bayi_id' => $sip2->bayi_id,
+                                'jenis' => $jenis
+                            ],
+                            [
+                                'tanggal_diberikan' => $tanggal
+                            ]
+                        );
+                    }
+                }
+            }
+
+            // Update atau create data imunisasi
+            if ($request->has('imunisasi')) {
+                foreach ($request->input('imunisasi') as $jenis => $tanggal) {
+                    if (!empty($tanggal)) {
+                        Sip2Imunisasi::updateOrCreate(
+                            [
+                                'bayi_id' => $sip2->bayi_id,
+                                'jenis' => $jenis
+                            ],
+                            [
+                                'tanggal_diberikan' => $tanggal
+                            ]
+                        );
+                    }
+                }
+            }
+
+            // Update atau create keterangan balita
+            if ($request->filled('tanggal_meninggal') || $request->filled('catatan')) {
+                \App\Models\Sip2KeteranganBalita::updateOrCreate(
+                    ['bayi_id' => $sip2->bayi_id],
+                    [
+                        'tanggal_meninggal' => $request->input('tanggal_meninggal') ?: null,
+                        'catatan' => $request->input('catatan') ?: null
+                    ]
+                );
+            }
+
+            DB::commit();
+
+            return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 2 beserta penimbangan dan imunisasi berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Error updating SIP2 data: ' . $e->getMessage());
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan saat memperbarui data: ' . $e->getMessage());
+        }
     }
 
     public function deleteSip2($id)
@@ -522,7 +750,7 @@ class SIPController extends Controller
         $sip2 = Sip2::findOrFail($id);
         $posyandu_id = $sip2->posyandu_id;
         $nama_bayi = $sip2->nama_bayi;
-        
+
         $sip2->delete();
 
         return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 2 untuk ' . $nama_bayi . ' berhasil dihapus.');
@@ -534,14 +762,23 @@ class SIPController extends Controller
         $request->validate([
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
             'nama_balita' => 'required|string|max:255',
-            'tgl_lahir' => 'required|date',
             'bbl_kg' => 'required|numeric|min:0',
             'nama_ayah' => 'required|string|max:255',
             'nama_ibu' => 'required|string|max:255',
             'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
         ]);
 
-        Sip3::create($request->all());
+        // Ambil tanggal lahir dari data anak master berdasarkan nama
+        $anak = Anak::where('nama_lengkap', $request->nama_balita)->first();
+        if (!$anak) {
+            return redirect()->back()->with('error', 'Data anak tidak ditemukan di database master.');
+        }
+
+        // Buat data dengan tanggal lahir dari master data
+        $data = $request->all();
+        $data['tgl_lahir'] = $anak->tanggal_lahir;
+
+        Sip3::create($data);
 
         return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 3 berhasil ditambahkan.');
     }
@@ -549,18 +786,32 @@ class SIPController extends Controller
     public function updateSip3(Request $request, $id)
     {
         $sip3 = Sip3::findOrFail($id);
-        
+
         $request->validate([
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
             'nama_balita' => 'required|string|max:255',
-            'tgl_lahir' => 'required|date',
             'bbl_kg' => 'required|numeric|min:0',
             'nama_ayah' => 'required|string|max:255',
             'nama_ibu' => 'required|string|max:255',
             'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
         ]);
 
-        $sip3->update($request->all());
+        // Ambil tanggal lahir dari data anak master berdasarkan nama
+        $anak = Anak::where('nama_lengkap', $request->nama_balita)->first();
+        if (!$anak) {
+            return redirect()->back()->with('error', 'Data anak tidak ditemukan di database master.');
+        }
+
+        // Update dengan tanggal lahir dari master data
+        $sip3->update([
+            'posyandu_id' => $request->posyandu_id,
+            'nama_balita' => $request->nama_balita,
+            'tgl_lahir' => $anak->tanggal_lahir,
+            'bbl_kg' => $request->bbl_kg,
+            'nama_ayah' => $request->nama_ayah,
+            'nama_ibu' => $request->nama_ibu,
+            'dasawisma_id' => $request->dasawisma_id
+        ]);
 
         return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 3 berhasil diperbarui.');
     }
@@ -570,7 +821,7 @@ class SIPController extends Controller
         $sip3 = Sip3::findOrFail($id);
         $posyandu_id = $sip3->posyandu_id;
         $nama_balita = $sip3->nama_balita;
-        
+
         $sip3->delete();
 
         return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 3 untuk ' . $nama_balita . ' berhasil dihapus.');
@@ -583,13 +834,63 @@ class SIPController extends Controller
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
             'tahun' => 'required|integer|min:1900|max:2100',
             'bulan' => 'required|string|max:20',
-            'nama_wuspus' => 'required|string|max:255',
+            'nama' => 'required|string|max:255',  // Changed from nama_wuspus to nama
             'nama_suami' => 'required|string|max:255',
             'umur' => 'required|integer|min:0',
-            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id',
+            'tahapan_ks' => 'nullable|string|max:10',
+            'jumlah_anak_hidup' => 'nullable|integer|min:0',
+            'anak_meninggal_umur' => 'nullable|string|max:100',
+            'ukuran_lila_cm' => 'nullable|numeric|min:0',
+            'lebih_23_5_cm' => 'nullable|boolean',
+            // Optional fields handled through related models
+            'jenis_kontrasepsi' => 'nullable|string|max:100',
+            'tanggal_penggantian' => 'nullable|date',
+            'jenis_kontrasepsi_pengganti' => 'nullable|string|max:100',
+            'tt_*' => 'nullable|date',
         ]);
 
-        Sip4::create($request->all());
+        // Create main SIP4 record (without contraception fields)
+        $sip4 = Sip4::create([
+            'posyandu_id' => $request->posyandu_id,
+            'tahun' => $request->tahun,
+            'bulan' => $request->bulan,
+            'nama' => $request->nama,  // Use nama directly
+            'nama_suami' => $request->nama_suami,
+            'umur' => $request->umur,
+            'dasawisma_id' => $request->dasawisma_id,
+            'tahapan_ks' => $request->tahapan_ks,
+            'jumlah_anak_hidup' => $request->jumlah_anak_hidup,
+            'anak_meninggal_umur' => $request->anak_meninggal_umur,
+            'ukuran_lila_cm' => $request->ukuran_lila_cm,
+            'lebih_23_5_cm' => $request->lebih_23_5_cm
+        ]);
+
+        // Handle TT immunizations
+        foreach(['I', 'II', 'III', 'IV', 'V'] as $tt_ke) {
+            $fieldName = 'tt_' . $tt_ke;
+            if ($request->filled($fieldName)) {
+                $sip4->imunisasitt()->create([
+                    'tt_ke' => $tt_ke,
+                    'tanggal_pemberian' => $request->$fieldName
+                ]);
+            }
+        }
+
+        // Handle contraception
+        if ($request->filled('jenis_kontrasepsi')) {
+            $sip4->kontrasepsi()->create([
+                'jenis_kontrasepsi' => $request->jenis_kontrasepsi
+            ]);
+        }
+
+        // Handle contraception replacement
+        if ($request->filled('tanggal_penggantian') || $request->filled('jenis_kontrasepsi_pengganti')) {
+            $sip4->penggantianKontrasepsi()->create([
+                'tanggal_penggantian' => $request->tanggal_penggantian,
+                'jenis_baru' => $request->jenis_kontrasepsi_pengganti
+            ]);
+        }
 
         return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 4 berhasil ditambahkan.');
     }
@@ -597,18 +898,71 @@ class SIPController extends Controller
     public function updateSip4(Request $request, $id)
     {
         $sip4 = Sip4::findOrFail($id);
-        
+
         $request->validate([
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
             'tahun' => 'required|integer|min:1900|max:2100',
             'bulan' => 'required|string|max:20',
-            'nama_wuspus' => 'required|string|max:255',
+            'nama' => 'required|string|max:255',
             'nama_suami' => 'required|string|max:255',
             'umur' => 'required|integer|min:0',
-            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id',
+            'tahapan_ks' => 'required|string|max:10',
+            'jumlah_anak_hidup' => 'required|integer|min:0',
+            'ukuran_lila_cm' => 'required|numeric|min:0',
+            'lebih_23_5_cm' => 'required|boolean',
+            // Optional fields handled through related models
+            'jenis_kontrasepsi' => 'nullable|string|max:100',
+            'tanggal_penggantian' => 'nullable|date',
+            'jenis_kontrasepsi_pengganti' => 'nullable|string|max:100',
+            'tt_*' => 'nullable|date',
         ]);
 
-        $sip4->update($request->all());
+        // Update main SIP4 record (without contraception fields)
+        $sip4->update($request->only([
+            'posyandu_id', 'tahun', 'bulan', 'nama', 'nama_suami', 'umur', 
+            'dasawisma_id', 'tahapan_ks', 'jumlah_anak_hidup', 'anak_meninggal_umur',
+            'ukuran_lila_cm', 'lebih_23_5_cm'
+        ]));
+
+        // Handle TT immunizations
+        foreach(['I', 'II', 'III', 'IV', 'V'] as $tt_ke) {
+            $fieldName = 'tt_' . $tt_ke;
+            if ($request->filled($fieldName)) {
+                $sip4->imunisasitt()->updateOrCreate(
+                    ['tt_ke' => $tt_ke],
+                    ['tanggal_pemberian' => $request->$fieldName]
+                );
+            } else {
+                // Remove if empty
+                $sip4->imunisasitt()->where('tt_ke', $tt_ke)->delete();
+            }
+        }
+
+        // Handle contraception
+        if ($request->filled('jenis_kontrasepsi')) {
+            $sip4->kontrasepsi()->updateOrCreate(
+                ['wuspus_id' => $sip4->wuspus_id],
+                ['jenis_kontrasepsi' => $request->jenis_kontrasepsi]
+            );
+        } else {
+            // Remove if empty
+            $sip4->kontrasepsi()->delete();
+        }
+
+        // Handle contraception replacement
+        if ($request->filled('tanggal_penggantian') || $request->filled('jenis_kontrasepsi_pengganti')) {
+            $sip4->penggantianKontrasepsi()->updateOrCreate(
+                ['wuspus_id' => $sip4->wuspus_id],
+                [
+                    'tanggal_penggantian' => $request->tanggal_penggantian,
+                    'jenis_baru' => $request->jenis_kontrasepsi_pengganti
+                ]
+            );
+        } else {
+            // Remove if both are empty
+            $sip4->penggantianKontrasepsi()->delete();
+        }
 
         return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 4 berhasil diperbarui.');
     }
@@ -617,8 +971,8 @@ class SIPController extends Controller
     {
         $sip4 = Sip4::findOrFail($id);
         $posyandu_id = $sip4->posyandu_id;
-        $nama_wuspus = $sip4->nama_wuspus;
-        
+        $nama_wuspus = $sip4->nama;
+
         $sip4->delete();
 
         return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 4 untuk ' . $nama_wuspus . ' berhasil dihapus.');
@@ -629,16 +983,72 @@ class SIPController extends Controller
     {
         $request->validate([
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
-            'tahun' => 'required|integer|min:1900|max:2100',
-            'bulan' => 'required|string|max:20',
             'nama_ibu_hamil' => 'required|string|max:255',
-            'nama_suami' => 'required|string|max:255',
             'umur' => 'required|integer|min:0',
             'tanggal_pendaftaran' => 'required|date',
-            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id',
+            'umur_kehamilan' => 'nullable|integer|min:0',
+            'hamil_ke' => 'nullable|integer|min:1',
+            'ukuran_lila' => 'nullable|numeric|min:0',
+            'pmt_pemulihan' => 'nullable|boolean',
         ]);
 
-        Sip5::create($request->all());
+        // Create main SIP5 record
+        $sip5 = Sip5::create([
+            'posyandu_id' => $request->posyandu_id,
+            'nama_ibu' => $request->nama_ibu_hamil,  // Map nama_ibu_hamil to nama_ibu
+            'umur' => $request->umur,
+            'tanggal_pendaftaran' => $request->tanggal_pendaftaran,
+            'dasawisma_id' => $request->dasawisma_id,
+            'umur_kehamilan' => $request->umur_kehamilan,
+            'hamil_ke' => $request->hamil_ke,
+            'ukuran_lila' => $request->ukuran_lila,
+            'pmt_pemulihan' => $request->pmt_pemulihan,
+            'catatan' => $request->catatan
+        ]);
+
+        // Handle monthly weighing results (TB/BB)
+        for($i = 1; $i <= 12; $i++) {
+            $tbField = 'tb_' . $i;
+            $bbField = 'bb_' . $i;
+            
+            if ($request->filled($tbField) || $request->filled($bbField)) {
+                $sip5->penimbanganIbuHamil()->create([
+                    'bulan' => $i,
+                    'tb_hasil_penimbangan' => $request->$tbField,
+                    'bb_hasil_penimbangan' => $request->$bbField
+                ]);
+            }
+        }
+
+        // Handle tablet tambah darah (BKS)
+        foreach(['I', 'II', 'III'] as $jenis) {
+            $fieldName = 'tablet_' . $jenis;
+            if ($request->filled($fieldName)) {
+                $sip5->tabletTambahDarah()->create([
+                    'jenis' => $jenis,
+                    'tanggal_diberikan' => $request->$fieldName
+                ]);
+            }
+        }
+
+        // Handle immunizations
+        foreach(['I', 'II', 'III', 'IV', 'V'] as $jenis) {
+            $fieldName = 'imunisasi_' . $jenis;
+            if ($request->filled($fieldName)) {
+                $sip5->imunisasittIbuHamil()->create([
+                    'jenis' => $jenis,
+                    'tanggal_diberikan' => $request->$fieldName
+                ]);
+            }
+        }
+
+        // Handle vitamin A
+        if ($request->filled('vitamin_a')) {
+            $sip5->vitaminIbuHamil()->create([
+                'tanggal_pemberian' => $request->vitamin_a
+            ]);
+        }
 
         return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 5 berhasil ditambahkan.');
     }
@@ -646,19 +1056,84 @@ class SIPController extends Controller
     public function updateSip5(Request $request, $id)
     {
         $sip5 = Sip5::findOrFail($id);
-        
+
         $request->validate([
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
-            'tahun' => 'required|integer|min:1900|max:2100',
-            'bulan' => 'required|string|max:20',
-            'nama_ibu_hamil' => 'required|string|max:255',
-            'nama_suami' => 'required|string|max:255',
+            'nama_ibu' => 'required|string|max:255',
             'umur' => 'required|integer|min:0',
+            'alamat_kelompok' => 'required|string|max:255',
+            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id',
             'tanggal_pendaftaran' => 'required|date',
-            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+            'umur_kehamilan' => 'required|integer|min:0',
+            'hamil_ke' => 'required|integer|min:1',
+            'ukuran_lila' => 'required|numeric|min:0',
+            'pmt_pemulihan' => 'required|boolean',
         ]);
 
-        $sip5->update($request->all());
+        // Update main SIP5 record
+        $sip5->update($request->only([
+            'posyandu_id', 'nama_ibu', 'umur', 'alamat_kelompok', 'dasawisma_id',
+            'tanggal_pendaftaran', 'umur_kehamilan', 'hamil_ke', 'ukuran_lila', 
+            'pmt_pemulihan', 'catatan'
+        ]));
+
+        // Handle monthly weighing results (TB/BB)
+        for($i = 1; $i <= 12; $i++) {
+            $tbField = 'tb_' . $i;
+            $bbField = 'bb_' . $i;
+            
+            if ($request->filled($tbField) || $request->filled($bbField)) {
+                $sip5->penimbanganIbuHamil()->updateOrCreate(
+                    ['bulan' => $i],
+                    [
+                        'tb_hasil_penimbangan' => $request->$tbField,
+                        'bb_hasil_penimbangan' => $request->$bbField
+                    ]
+                );
+            } else {
+                // Remove if both are empty
+                $sip5->penimbanganIbuHamil()->where('bulan', $i)->delete();
+            }
+        }
+
+        // Handle tablet tambah darah (BKS)
+        foreach(['I', 'II', 'III'] as $jenis) {
+            $fieldName = 'tablet_' . $jenis;
+            if ($request->filled($fieldName)) {
+                $sip5->tabletTambahDarah()->updateOrCreate(
+                    ['jenis' => $jenis],
+                    ['tanggal_diberikan' => $request->$fieldName]
+                );
+            } else {
+                // Remove if empty
+                $sip5->tabletTambahDarah()->where('jenis', $jenis)->delete();
+            }
+        }
+
+        // Handle immunizations
+        foreach(['I', 'II', 'III', 'IV', 'V'] as $jenis) {
+            $fieldName = 'imunisasi_' . $jenis;
+            if ($request->filled($fieldName)) {
+                $sip5->imunisasittIbuHamil()->updateOrCreate(
+                    ['jenis' => $jenis],
+                    ['tanggal_diberikan' => $request->$fieldName]
+                );
+            } else {
+                // Remove if empty
+                $sip5->imunisasittIbuHamil()->where('jenis', $jenis)->delete();
+            }
+        }
+
+        // Handle vitamin A
+        if ($request->filled('vitamin_a')) {
+            $sip5->vitaminIbuHamil()->updateOrCreate(
+                ['ibu_hamil_id' => $sip5->ibu_hamil_id],
+                ['tanggal_pemberian' => $request->vitamin_a]
+            );
+        } else {
+            // Remove if empty
+            $sip5->vitaminIbuHamil()->delete();
+        }
 
         return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 5 berhasil diperbarui.');
     }
@@ -667,10 +1142,50 @@ class SIPController extends Controller
     {
         $sip5 = Sip5::findOrFail($id);
         $posyandu_id = $sip5->posyandu_id;
-        $nama_ibu_hamil = $sip5->nama_ibu_hamil;
-        
+        $nama_ibu_hamil = $sip5->nama_ibu;
+
         $sip5->delete();
 
         return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 5 untuk ' . $nama_ibu_hamil . ' berhasil dihapus.');
     }
+
+    // public function dashboard()
+    // {
+    //     $formats = Posyandu::all()->pluck('nama_posyandu', 'posyandu_id')->toArray();
+
+    //     // Ambil posyandu pertama sebagai default atau buat object kosong untuk menghindari error
+    //     $posyandu = Posyandu::first();
+    //     if (!$posyandu) {
+    //         $posyandu = (object) ['nama_posyandu' => 'Belum ada posyandu'];
+    //     }
+
+    //     return view('sip.dashboard', compact('formats', 'posyandu'));
+    // }
+
+    // public function showChart($posyandu_id)
+    // {
+    //     $tahun = 2025; // Sesuaikan tahun yang ingin ditampilkan
+
+    //     // Ambil data per bulan untuk posyandu tertentu
+    //     $data = Rekapkegiatanposyandubulanan::where('tahun', $tahun)
+    //         ->where('posyandu_id', $posyandu_id)
+    //         ->orderBy('bulan')
+    //         ->get(['bulan', 'balita_sasaran', 'balita_punya_buku', 'balita_ditimbang', 'balita_naik']);
+
+    //     $labels = [];
+    //     $dataS = [];
+    //     $dataK = [];
+    //     $dataD = [];
+    //     $dataN = [];
+
+    //     foreach ($data as $item) {
+    //         $labels[] = \Carbon\Carbon::create()->month($item->bulan)->format('M'); // ex: JAN, FEB
+    //         $dataS[] = $item->balita_sasaran ?? 0;
+    //         $dataK[] = $item->balita_punya_buku ?? 0;
+    //         $dataD[] = $item->balita_ditimbang ?? 0;
+    //         $dataN[] = $item->balita_naik ?? 0;
+    //     }
+
+    //     return view('sip.in', compact('labels', 'dataS', 'dataK', 'dataD', 'dataN'));
+    // }
 }

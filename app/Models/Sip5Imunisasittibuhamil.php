@@ -28,13 +28,13 @@ class Sip5Imunisasittibuhamil extends Model
 
 	protected $casts = [
 		'ibu_hamil_id' => 'int',
-		'tanggal_pemberian' => 'datetime'
+		'tanggal_diberikan' => 'datetime'
 	];
 
 	protected $fillable = [
 		'ibu_hamil_id',
-		'tt_ke',
-		'tanggal_pemberian'
+		'jenis',
+		'tanggal_diberikan'
 	];
 
 	public function sip5()

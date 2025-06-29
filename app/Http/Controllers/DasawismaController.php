@@ -6,12 +6,18 @@ use App\Models\Dasawisma;
 use App\Models\Dw;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Traits\HasYearFilter;
+use App\Traits\HasDataAccess;
 
 class DasawismaController extends Controller
 {
+    use HasYearFilter, HasDataAccess;
+    
     public function index()
     {
-        $dasawisma = Dasawisma::all(); // Retrieve all dasawisma records
+        $query = Dasawisma::query();
+        $dasawisma = $this->applyDataFilter($query, 'dasawisma')->get();
+        
         // Logic to retrieve and display dasawisma data
         return view('masterdata.dasawisma', compact('dasawisma'));
     }
@@ -65,16 +71,30 @@ class DasawismaController extends Controller
         return view('dasawisma.show', compact('id'));
     }
 
-    public function indexRekap()
+    public function indexRekap(Request $request)
     {
-        $dasawisma = DB::table('dw')
+        // Ambil tahun dari parameter URL atau gunakan tahun sekarang sebagai default
+        $tahun = $this->getSelectedYear($request);
+        
+        // Get access data
+        $access = $this->getDataAccess();
+        
+        // Build query with joins
+        $query = DB::table('dw')
             ->leftJoin('dw_jak', 'dw.dw_id', '=', 'dw_jak.dw_id')
             ->leftJoin('dw_kr', 'dw.dw_id', '=', 'dw_kr.dw_id')
             ->leftJoin('dw_mp', 'dw.dw_id', '=', 'dw_mp.dw_id')
             ->leftJoin('dw_sak', 'dw.dw_id', '=', 'dw_sak.dw_id')
             ->leftJoin('dw_wmk', 'dw.dw_id', '=', 'dw_wmk.dw_id')
             ->leftJoin('rw', 'rw.rw_id', '=', 'dw.rw_id')
-            ->select(
+            ->where('dw.tahun', $tahun); // Filter berdasarkan tahun yang dipilih
+            
+        // Apply data access filter
+        if (!$access['can_access_all'] && $access['can_access_rw_only']) {
+            $query->where('rw.no_rw', $access['rw']);
+        }
+        
+        $dasawisma = $query->select(
                 'dw.dw_id',
                 'dw.bulan',
                 'dw.tahun',
@@ -116,7 +136,7 @@ class DasawismaController extends Controller
             ->get();
 
         // Logic to show the rekapitulasi of dasawisma
-        return view('dasawisma.index', compact('dasawisma'));
+        return view('dasawisma.index', compact('dasawisma', 'tahun'));
     }
     public function createRekap()
     {

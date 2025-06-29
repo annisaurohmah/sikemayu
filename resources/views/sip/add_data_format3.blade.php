@@ -34,14 +34,21 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="tgl_lahir">Tanggal Lahir</label>
-                                    <input type="date" class="form-control" id="tgl_lahir" name="tgl_lahir" required />
+                                    <label for="bbl_kg">Berat Badan Lahir (kg)</label>
+                                    <input type="number" step="0.1" class="form-control" placeholder="Masukkan berat badan lahir" id="bbl_kg" name="bbl_kg" required />
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="bbl_kg">Berat Badan Lahir (kg)</label>
-                                    <input type="number" step="0.1" class="form-control" placeholder="Masukkan berat badan lahir" id="bbl_kg" name="bbl_kg" required />
+                                    <label for="dasawisma_id">Dasawisma</label>
+                                    <select class="form-control" id="dasawisma_id" name="dasawisma_id" required>
+                                        <option value="">Pilih Dasawisma</option>
+                                        @if(isset($dasawismaList))
+                                        @foreach($dasawismaList as $dasawisma)
+                                        <option value="{{ $dasawisma->dasawisma_id }}">{{ $dasawisma->nama_dasawisma }}</option>
+                                        @endforeach
+                                        @endif
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -54,18 +61,6 @@
                         <div class="form-group">
                             <label for="nama_ibu">Nama Ibu</label>
                             <input type="text" class="form-control" placeholder="Masukkan nama ibu" id="nama_ibu" name="nama_ibu" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label for="dasawisma_id">Dasawisma</label>
-                            <select class="form-control" id="dasawisma_id" name="dasawisma_id" required>
-                                <option value="">Pilih Dasawisma</option>
-                                @if(isset($dasawismaList))
-                                @foreach($dasawismaList as $dasawisma)
-                                <option value="{{ $dasawisma->dasawisma_id }}">{{ $dasawisma->nama_dasawisma }}</option>
-                                @endforeach
-                                @endif
-                            </select>
                         </div>
                 </div>
 
@@ -88,22 +83,6 @@
 </div>
 
 <script>
-// Set tanggal maksimal ke hari ini
-document.addEventListener('DOMContentLoaded', function() {
-    const today = new Date().toISOString().split('T')[0];
-    const tglLahirInput = document.getElementById('tgl_lahir');
-
-    if (tglLahirInput) {
-        tglLahirInput.setAttribute('max', today);
-    }
-    
-    // Set tahun default ke tahun sekarang
-    const tahunInput = document.getElementById('tahun');
-    if (tahunInput) {
-        tahunInput.value = new Date().getFullYear();
-    }
-});
-
 // Auto-fill data ketika balita dipilih
 $(document).ready(function() {
     $('#nama_balita').on('change', function() {
@@ -111,16 +90,24 @@ $(document).ready(function() {
         const tglLahir = selectedOption.data('tgl');
         const namaOrangtua = selectedOption.data('orangtua');
         
-        if (tglLahir) {
-            // Format tanggal untuk input date (YYYY-MM-DD)
-            const date = new Date(tglLahir);
-            const formattedDate = date.toISOString().split('T')[0];
-            $('#tgl_lahir').val(formattedDate);
-        }
-        
         if (namaOrangtua) {
-            $('#nama_orangtua').val(namaOrangtua);
+            // Split nama orangtua jika ada format "Nama Ayah / Nama Ibu"
+            const orangtuaParts = namaOrangtua.split('/');
+            if (orangtuaParts.length >= 2) {
+                $('#nama_ayah').val(orangtuaParts[0].trim());
+                $('#nama_ibu').val(orangtuaParts[1].trim());
+            } else {
+                // Jika hanya satu nama, masukkan ke nama orangtua
+                $('#nama_ayah').val(namaOrangtua);
+                $('#nama_ibu').val('');
+            }
         }
     });
+    
+    // Set tahun default ke tahun sekarang jika ada input tahun
+    const tahunInput = document.getElementById('tahun');
+    if (tahunInput) {
+        tahunInput.value = new Date().getFullYear();
+    }
 });
 </script>

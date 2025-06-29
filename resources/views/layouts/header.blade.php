@@ -13,6 +13,24 @@
 
 <nav class="navbar-custom">
     <ul class="navbar-right d-flex list-inline float-right mb-0">
+        <!-- Dropdown Pilihan Tahun -->
+        <li class="dropdown notification-list mr-3">
+            <div class="form-group mb-0">
+                <label for="yearSelector" style="color: white; font-size: 11px; margin-bottom: 3px; display: block;">Tahun:</label>
+                <select class="form-control form-control-sm" id="yearSelector" style="min-width: 80px; height: 30px; background-color: white; border: 1px solid #ddd; color: #333; font-size: 12px;">
+                    @php
+                        $currentYear = date('Y');
+                        $selectedYear = request()->get('tahun', $currentYear);
+                    @endphp
+                    @for($year = $currentYear; $year >= ($currentYear - 10); $year--)
+                        <option value="{{ $year }}" {{ $selectedYear == $year ? 'selected' : '' }}>
+                            {{ $year }}
+                        </option>
+                    @endfor
+                </select>
+            </div>
+        </li>
+        
         <!-- full screen -->
         <li class="dropdown notification-list d-none d-md-block">
             <a class="nav-link waves-effect" href="#" id="btn-fullscreen">
@@ -71,3 +89,30 @@
 
 </div>
 <!-- Top Bar End -->
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const yearSelector = document.getElementById('yearSelector');
+    
+    if (yearSelector) {
+        console.log('Year selector found:', yearSelector);
+        
+        yearSelector.addEventListener('change', function() {
+            const selectedYear = this.value;
+            console.log('Year selected:', selectedYear);
+            
+            const currentUrl = new URL(window.location);
+            
+            // Update URL parameter
+            currentUrl.searchParams.set('tahun', selectedYear);
+            
+            console.log('Redirecting to:', currentUrl.toString());
+            
+            // Redirect dengan parameter tahun yang baru
+            window.location.href = currentUrl.toString();
+        });
+    } else {
+        console.error('Year selector not found!');
+    }
+});
+</script>

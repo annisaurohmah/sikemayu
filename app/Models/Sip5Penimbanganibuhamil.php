@@ -31,7 +31,8 @@ class Sip5Penimbanganibuhamil extends Model
 		'ibu_hamil_id' => 'int',
 		'bulan' => 'int',
 		'tahun' => 'int',
-		'berat_badan' => 'float',
+		'tb_hasil_penimbangan' => 'float',
+		'bb_hasil_penimbangan' => 'float',
 		'umur_kehamilan' => 'int'
 	];
 
@@ -39,7 +40,8 @@ class Sip5Penimbanganibuhamil extends Model
 		'ibu_hamil_id',
 		'bulan',
 		'tahun',
-		'berat_badan',
+		'tb_hasil_penimbangan',
+		'bb_hasil_penimbangan',
 		'umur_kehamilan'
 	];
 
