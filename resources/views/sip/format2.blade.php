@@ -97,9 +97,6 @@
     </table>
 </div>
 
-{{-- Include Add Data Format 2 Modal --}}
-@include('sip.add_data_format2')
-
 @foreach($bayiList as $bayi)
 <!-- Edit Format 2 -->
 <div class="modal fade" id="editformat2{{ $bayi->bayi_id }}" tabindex="-1" role="dialog" aria-hidden="true">
@@ -404,21 +401,4 @@
     });
 </script>
 @endforeach
-
-<script>
-$(document).ready(function() {
-    // Initialize manual input for Format 2 when page loads
-    if (typeof initFormat2ManualInput === 'function') {
-        initFormat2ManualInput();
-        console.log('Format 2 manual input initialized');
-    } else {
-        console.error('initFormat2ManualInput function not found');
-    }
-    
-    // Force trigger the radio button change to ensure proper initial state
-    setTimeout(function() {
-        $('input[name="input_type"]:checked').trigger('change');
-    }, 100);
-});
-</script>
 

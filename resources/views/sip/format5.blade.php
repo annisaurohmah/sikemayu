@@ -359,7 +359,7 @@
     #addnewformat5.show {
         display: block !important;
     }
-</style>d
+</style>
 
 
 @foreach($ibuHamilList as $ibuHamil)

@@ -47,7 +47,9 @@ class SIPController extends Controller
         $tahun = $this->getSelectedYear($request);
         
         //sip format 1
-        $format1 = Sip1::where('posyandu_id', $posyandu_id)->get();
+        $format1 = Sip1::where('posyandu_id', $posyandu_id)
+            ->where('tahun', $tahun)
+            ->get();
         $posyandu = Posyandu::find($posyandu_id);
 
         // Get data for dropdowns
@@ -56,11 +58,15 @@ class SIPController extends Controller
         // Filter bayi (0-12 bulan) dan balita (1-5 tahun) berdasarkan umur dari tanggal lahir
         $today = now();
         
-        // Ambil nama bayi yang sudah terdaftar di SIP Format 2 untuk posyandu ini
-        $registeredBayi = Sip2::where('posyandu_id', $posyandu_id)->pluck('nama_bayi')->toArray();
+        // Ambil nama bayi yang sudah terdaftar di SIP Format 2 untuk posyandu ini (filter berdasarkan tahun lahir)
+        $registeredBayi = Sip2::where('posyandu_id', $posyandu_id)
+            ->whereYear('tgl_lahir', $tahun)
+            ->pluck('nama_bayi')->toArray();
         
-        // Ambil nama balita yang sudah terdaftar di SIP Format 3 untuk posyandu ini
-        $registeredBalita = Sip3::where('posyandu_id', $posyandu_id)->pluck('nama_balita')->toArray();
+        // Ambil nama balita yang sudah terdaftar di SIP Format 3 untuk posyandu ini (filter berdasarkan tahun lahir)
+        $registeredBalita = Sip3::where('posyandu_id', $posyandu_id)
+            ->whereYear('tgl_lahir', $tahun)
+            ->pluck('nama_balita')->toArray();
         
         // Filter bayi yang belum terdaftar di SIP Format 2
         $bayiList_master = Anak::whereRaw('TIMESTAMPDIFF(MONTH, tanggal_lahir, ?) <= 12', [$today])
@@ -72,7 +78,7 @@ class SIPController extends Controller
             ->whereNotIn('nama_lengkap', $registeredBalita)
             ->get();
 
-        //sip format 2
+        //sip format 2 (filter berdasarkan tahun lahir)
         $bayiList = Sip2::with([
             'penimbangan',
             'asi',
@@ -80,47 +86,67 @@ class SIPController extends Controller
             'imunisasi',
             'keteranganBalita',
             'dasawisma',
-        ])->where('posyandu_id', $posyandu_id)->get();
+        ])->where('posyandu_id', $posyandu_id)
+          ->whereYear('tgl_lahir', $tahun)
+          ->get();
 
-        //sip format 3
+        //sip format 3 (filter berdasarkan tahun lahir)
         $balitaList = Sip3::with([
             'penimbangan',
             'pelayanan',
             'imunisasi',
             'keteranganBalita',
             'dasawisma',
-        ])->where('posyandu_id', $posyandu_id)->get();
+        ])->where('posyandu_id', $posyandu_id)
+          ->whereYear('tgl_lahir', $tahun)
+          ->get();
 
-        //sip format 4
+        //sip format 4 (filter berdasarkan tahun)
         $wuspusList = Sip4::with([
             'imunisasitt',
             'kontrasepsi',
             'penggantianKontrasepsi',
             'dasawisma',
-        ])->where('posyandu_id', $posyandu_id)->get();
+        ])->where('posyandu_id', $posyandu_id)
+          ->where('tahun', $tahun)
+          ->get();
 
-        //sip format 5
+        //sip format 5 (filter berdasarkan tahun)
         $ibuHamilList = Sip5::with([
             'imunisasittIbuHamil',
             'penimbanganIbuHamil',
             'tabletTambahDarah',
             'vitaminIbuHamil',
             'dasawisma',
-        ])->where('posyandu_id', $posyandu_id)->get();
+        ])->where('posyandu_id', $posyandu_id)
+          ->whereYear('tanggal_pendaftaran', $tahun)
+          ->get();
 
         //sip format 6
         // $tahun = now()->year; // Hapus ini karena sudah diambil dari parameter
 
         for ($bulan = 1; $bulan <= 12; $bulan++) {
-
-            $bayi012 = Sip2::whereRaw("TIMESTAMPDIFF(MONTH, tgl_lahir, ?) <= 12", [Carbon::create($tahun, $bulan, 1)])
+            // Tanggal acuan untuk bulan dan tahun yang dipilih
+            $tanggalAcuan = Carbon::create($tahun, $bulan, 1);
+            
+            // Hitung bayi 0-12 bulan pada bulan tertentu di tahun yang dipilih
+            // Hanya menghitung bayi yang terdaftar dan aktif pada periode tersebut
+            $bayi012 = Sip2::whereRaw("TIMESTAMPDIFF(MONTH, tgl_lahir, ?) <= 12", [$tanggalAcuan])
+                ->whereRaw("TIMESTAMPDIFF(MONTH, tgl_lahir, ?) >= 0", [$tanggalAcuan])
                 ->where('posyandu_id', $posyandu_id)
+                ->whereYear('tgl_lahir', '>=', $tahun - 1) // Filter: hanya bayi lahir maksimal 1 tahun sebelum tahun dipilih
+                ->whereYear('tgl_lahir', '<=', $tahun) // Filter: hanya bayi lahir sampai tahun dipilih
                 ->count();
 
-            $balita15 = Sip2::whereRaw("TIMESTAMPDIFF(MONTH, tgl_lahir, ?) > 12 AND TIMESTAMPDIFF(YEAR, tgl_lahir, ?) <= 5", [
-                Carbon::create($tahun, $bulan, 1),
-                Carbon::create($tahun, $bulan, 1)
-            ])->where('posyandu_id', $posyandu_id)->count();
+            // Hitung balita 1-5 tahun pada bulan tertentu di tahun yang dipilih
+            // Hanya menghitung balita yang terdaftar dan aktif pada periode tersebut
+            $balita15 = Sip3::whereRaw("TIMESTAMPDIFF(MONTH, tgl_lahir, ?) > 12 AND TIMESTAMPDIFF(YEAR, tgl_lahir, ?) <= 5", [
+                $tanggalAcuan,
+                $tanggalAcuan
+            ])->where('posyandu_id', $posyandu_id)
+              ->whereYear('tgl_lahir', '>=', $tahun - 5) // Filter: hanya balita lahir maksimal 5 tahun sebelum tahun dipilih
+              ->whereYear('tgl_lahir', '<=', $tahun) // Filter: hanya balita lahir sampai tahun dipilih
+              ->count();
 
             $jumlahBayiLahir = Sip1::whereMonth('tgl_lahir', $bulan)
                 ->whereYear('tgl_lahir', $tahun)
@@ -137,8 +163,9 @@ class SIPController extends Controller
                 ->count();
 
             Sip6::updateOrCreate(
-                ['bulan' => $bulan, 'tahun' => $tahun],
+                ['bulan' => $bulan, 'tahun' => $tahun, 'posyandu_id' => $posyandu_id],
                 [
+                    'posyandu_id' => $posyandu_id,
                     'jumlah_lahir' => $jumlahBayiLahir,
                     'jumlah_meninggal' => $jumlahBayiMeninggal,
                     'bayi_0_12_bulan' => $bayi012,
@@ -147,8 +174,10 @@ class SIPController extends Controller
             );
         }
 
-        // Retrieve the latest SIP6 record for the current year
-        $sip6 = Sip6::where('tahun', $tahun)->get();
+        // Retrieve the latest SIP6 record for the current year and posyandu
+        $sip6 = Sip6::where('tahun', $tahun)
+            ->where('posyandu_id', $posyandu_id)
+            ->get();
 
         //sip format 7
         for ($bulan = 1; $bulan <= 12; $bulan++) {
@@ -496,19 +525,20 @@ class SIPController extends Controller
             );
         }
 
-        Log::info("Selesai generate data rekap untuk posyandu_id: $posyandu_id");
+        // \Log::info("Selesai generate data rekap untuk posyandu_id: $posyandu_id");
 
-        $sip7 = Rekapkegiatanposyandubulanan::where('tahun', $tahun)->get();
+        $sip7 = Rekapkegiatanposyandubulanan::where('tahun', $tahun)
+            ->where('posyandu_id', $posyandu_id)
+            ->get();
 
-        // Data untuk dashboard SKDN
+        // Data untuk dashboard SKDN (filter berdasarkan tahun yang dipilih)
         $rekap = Rekapkegiatanposyandubulanan::where('posyandu_id', $posyandu_id)
-            ->orderBy('tahun', 'asc')
+            ->where('tahun', $tahun)
             ->orderBy('bulan', 'asc')
-            ->limit(12) // Batasi hanya 12 bulan terakhir
             ->get();
 
         // Debug: Log jumlah data rekap yang ditemukan
-        Log::info("Posyandu ID: $posyandu_id, Jumlah data rekap: " . $rekap->count());
+        // \Log::info("Posyandu ID: $posyandu_id, Jumlah data rekap: " . $rekap->count());
 
         // Siapkan label dan data persentase untuk dashboard
         $labels = [];
@@ -524,7 +554,7 @@ class SIPController extends Controller
 
         // Jika tidak ada data rekap, buat data dummy untuk menghindari chart kosong
         if ($rekap->isEmpty()) {
-            Log::warning("Tidak ada data rekap untuk posyandu_id: $posyandu_id");
+            // \Log::warning("Tidak ada data rekap untuk posyandu_id: $posyandu_id");
             // Buat data dummy untuk 12 bulan terakhir
             for ($i = 11; $i >= 0; $i--) {
                 $bulan = now()->subMonths($i)->month;
@@ -567,8 +597,9 @@ class SIPController extends Controller
             $dataN[] = $item->balita_naik ?? 0;
         }
 
-        //dokumentasi kegiatan
+        //dokumentasi kegiatan (filter berdasarkan tahun)
         $dokumentasiList = DokumentasiKegiatan::where('posyandu_id', $posyandu_id)
+            ->whereYear('tanggal', $tahun)
             ->orderBy('tanggal', 'desc')
             ->get();
 
@@ -593,7 +624,7 @@ class SIPController extends Controller
 
         Sip1::create($request->all());
 
-        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 1 berhasil ditambahkan.');
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 1 berhasil ditambahkan.')->with('activeTab', 'format1');
     }
 
     public function updateSip1(Request $request, $id)
@@ -615,7 +646,7 @@ class SIPController extends Controller
 
         $sip1->update($request->all());
 
-        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 1 berhasil diperbarui.');
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 1 berhasil diperbarui.')->with('activeTab', 'format1');
     }
 
     public function deleteSip1($id)
@@ -626,44 +657,70 @@ class SIPController extends Controller
 
         $sip1->delete();
 
-        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 1 untuk ' . $nama_bayi . ' berhasil dihapus.');
+        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 1 untuk ' . $nama_bayi . ' berhasil dihapus.')->with('activeTab', 'format1');
     }
 
     // SIP2 CRUD Methods
     public function storeSip2(Request $request)
     {
+        // Debug: Log semua data yang diterima
+        /*
+        \Log::info('SIP2 Store Request Data:', [
+            'nama_bayi' => $request->nama_bayi,
+            'nama_bayi_manual' => $request->nama_bayi_manual,
+            'tgl_lahir' => $request->tgl_lahir,
+            'tgl_lahir_manual' => $request->tgl_lahir_manual,
+            'all_data' => $request->all()
+        ]);
+        */
+        
         $request->validate([
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
-            'nama_bayi' => 'required|string|max:255',
+            'nama_bayi' => 'nullable|string|max:255', // Bisa kosong jika menggunakan manual
+            'nama_bayi_manual' => 'nullable|string|max:255', // Bisa kosong jika menggunakan database
             'tgl_lahir' => 'nullable|date', // Bisa dari input manual atau otomatis dari database
+            'tgl_lahir_manual' => 'nullable|date', // Bisa kosong jika menggunakan database
             'bbl_kg' => 'required|numeric|min:0',
             'nama_ayah' => 'required|string|max:255',
             'nama_ibu' => 'required|string|max:255',
             'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
         ]);
+        
+        // Pastikan ada minimal satu nama bayi (dari database atau manual)
+        if (!$request->nama_bayi && !$request->nama_bayi_manual) {
+            return redirect()->back()->with('error', 'Nama bayi harus diisi, baik dari database atau input manual.');
+        }
 
         $data = $request->all();
 
         // Jika tgl_lahir tidak dikirim dari form (input dari database), ambil dari master data
-        if (!$request->tgl_lahir) {
+        if (!$request->tgl_lahir && !$request->tgl_lahir_manual) {
             $anak = Anak::where('nama_lengkap', $request->nama_bayi)->first();
             if (!$anak) {
                 return redirect()->back()->with('error', 'Data anak tidak ditemukan di database master. Silakan gunakan input manual atau pastikan data anak sudah terdaftar.');
             }
             $data['tgl_lahir'] = $anak->tanggal_lahir;
         } else {
+            // Prioritas: tgl_lahir_manual (dari input manual) atau tgl_lahir (dari hidden field)
+            $tanggalLahir = $request->tgl_lahir_manual ?: $request->tgl_lahir;
+            
             // Validasi bahwa usia bayi sesuai (0-12 bulan)
-            $tglLahir = \Carbon\Carbon::parse($request->tgl_lahir);
+            $tglLahir = \Carbon\Carbon::parse($tanggalLahir);
             $monthsDiff = $tglLahir->diffInMonths(now());
             
             if ($monthsDiff > 12) {
                 return redirect()->back()->with('error', 'Tanggal lahir tidak sesuai untuk kategori bayi (harus 0-12 bulan).');
             }
+            
+            $data['tgl_lahir'] = $tanggalLahir;
         }
+        
+        // Prioritas nama: nama_bayi_manual (input manual) atau nama_bayi (dari database/hidden field)
+        $data['nama_bayi'] = $request->nama_bayi_manual ?: $request->nama_bayi;
 
         Sip2::create($data);
 
-        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 2 berhasil ditambahkan. Silakan edit untuk menambah data penimbangan dan imunisasi.');
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 2 berhasil ditambahkan. Silakan edit untuk menambah data penimbangan dan imunisasi.')->with('activeTab', 'format2');
     }
 
     public function updateSip2(Request $request, $id)
@@ -794,11 +851,11 @@ class SIPController extends Controller
 
             DB::commit();
 
-            return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 2 beserta penimbangan dan imunisasi berhasil diperbarui.');
+            return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 2 beserta penimbangan dan imunisasi berhasil diperbarui.')->with('activeTab', 'format2');
 
         } catch (\Exception $e) {
             DB::rollback();
-            Log::error('Error updating SIP2 data: ' . $e->getMessage());
+            // \Log::error('Error updating SIP2 data: ' . $e->getMessage());
             
             return redirect()->back()
                 ->withInput()
@@ -814,45 +871,81 @@ class SIPController extends Controller
 
         $sip2->delete();
 
-        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 2 untuk ' . $nama_bayi . ' berhasil dihapus.');
+        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 2 untuk ' . $nama_bayi . ' berhasil dihapus.')->with('activeTab', 'format2');
     }
 
     // SIP3 CRUD Methods
     public function storeSip3(Request $request)
     {
+        // Debug: Log semua data yang diterima
+        /*
+        dd([
+            'nama_balita' => $request->nama_balita,
+            'nama_balita_manual' => $request->nama_balita_manual,
+            'tgl_lahir' => $request->tgl_lahir,
+            'tgl_lahir_manual' => $request->tgl_lahir_manual,
+            'all_data' => $request->all()
+        ]);
+        */
+        
         $request->validate([
-            'posyandu_id' => 'required|exists:posyandu,posyandu_id',
-            'nama_balita' => 'required|string|max:255',
-            'tgl_lahir' => 'nullable|date', // Bisa dari input manual atau otomatis dari database
-            'bbl_kg' => 'required|numeric|min:0',
-            'nama_ayah' => 'required|string|max:255',
-            'nama_ibu' => 'required|string|max:255',
             'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
         ]);
+        
+        // Pastikan ada minimal satu nama balita (dari database atau manual)
+        if (!$request->nama_balita && !$request->nama_balita_manual) {
+            return redirect()->back()->with('error', 'Nama balita wajib diisi!');
+        }
 
         $data = $request->all();
 
-        // Jika tgl_lahir tidak dikirim dari form (input dari database), ambil dari master data
-        if (!$request->tgl_lahir) {
-            $anak = Anak::where('nama_lengkap', $request->nama_balita)->first();
-            if (!$anak) {
-                return redirect()->back()->with('error', 'Data anak tidak ditemukan di database master. Silakan gunakan input manual atau pastikan data anak sudah terdaftar.');
-            }
-            $data['tgl_lahir'] = $anak->tanggal_lahir;
-        } else {
-            // Validasi bahwa usia balita sesuai (1-5 tahun)
-            $tglLahir = \Carbon\Carbon::parse($request->tgl_lahir);
-            $yearsDiff = $tglLahir->diffInYears(now());
-            $monthsDiff = $tglLahir->diffInMonths(now());
-            
-            if ($monthsDiff <= 12 || $yearsDiff > 5) {
-                return redirect()->back()->with('error', 'Tanggal lahir tidak sesuai untuk kategori balita (harus 1-5 tahun).');
+        // Gunakan nama balita dari hidden field (yang sudah diisi oleh JavaScript)
+        // atau fallback ke manual jika hidden field kosong
+        $data['nama_balita'] = $request->nama_balita ?: $request->nama_balita_manual;
+        
+        // Gunakan tanggal lahir dari hidden field atau manual
+        $data['tgl_lahir'] = $request->tgl_lahir ?: $request->tgl_lahir_manual;
+
+        // Jika masih tidak ada tanggal lahir dan nama dari database, cari di master data
+        if (!$data['tgl_lahir'] && $request->nama_balita_db) {
+            $anak = Anak::where('nama_lengkap', $request->nama_balita_db)->first();
+            if ($anak) {
+                $data['tgl_lahir'] = $anak->tanggal_lahir;
             }
         }
 
+        // Validasi final
+        if (!$data['nama_balita']) {
+            return redirect()->back()->with('error', 'Nama balita tidak valid!');
+        }
+        
+        if (!$data['tgl_lahir']) {
+            return redirect()->back()->with('error', 'Tanggal lahir wajib diisi!');
+        }
+
+        // Validasi bahwa usia balita sesuai (1-5 tahun)
+        $tglLahir = \Carbon\Carbon::parse($data['tgl_lahir']);
+        $yearsDiff = $tglLahir->diffInYears(now());
+        $monthsDiff = $tglLahir->diffInMonths(now());
+        
+        if ($monthsDiff <= 12) {
+            return redirect()->back()->with('error', 'Tanggal lahir tidak sesuai untuk kategori balita (harus lebih dari 1 tahun).');
+        }
+        
+        if ($yearsDiff > 5) {
+            return redirect()->back()->with('error', 'Tanggal lahir tidak sesuai untuk kategori balita (harus kurang dari 5 tahun).');
+        }
+
+        // Validasi field wajib lainnya
+        $request->validate([
+            'bbl_kg' => 'required|numeric|min:0',
+            'nama_ayah' => 'required|string|max:255',
+            'nama_ibu' => 'required|string|max:255'
+        ]);
+
         Sip3::create($data);
 
-        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 3 berhasil ditambahkan. Silakan edit untuk menambah data penimbangan dan imunisasi.');
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 3 berhasil ditambahkan. Silakan edit untuk menambah data penimbangan dan imunisasi.')->with('activeTab', 'format3');
     }
 
     public function updateSip3(Request $request, $id)
@@ -885,7 +978,7 @@ class SIPController extends Controller
             'dasawisma_id' => $request->dasawisma_id
         ]);
 
-        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 3 berhasil diperbarui.');
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 3 berhasil diperbarui.')->with('activeTab', 'format3');
     }
 
     public function deleteSip3($id)
@@ -896,7 +989,7 @@ class SIPController extends Controller
 
         $sip3->delete();
 
-        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 3 untuk ' . $nama_balita . ' berhasil dihapus.');
+        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 3 untuk ' . $nama_balita . ' berhasil dihapus.')->with('activeTab', 'format3');
     }
 
     // SIP4 CRUD Methods
@@ -964,7 +1057,7 @@ class SIPController extends Controller
             ]);
         }
 
-        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 4 berhasil ditambahkan.');
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 4 berhasil ditambahkan.')->with('activeTab', 'format4');
     }
 
     public function updateSip4(Request $request, $id)
@@ -1036,7 +1129,7 @@ class SIPController extends Controller
             $sip4->penggantianKontrasepsi()->delete();
         }
 
-        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 4 berhasil diperbarui.');
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 4 berhasil diperbarui.')->with('activeTab', 'format4');
     }
 
     public function deleteSip4($id)
@@ -1047,7 +1140,7 @@ class SIPController extends Controller
 
         $sip4->delete();
 
-        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 4 untuk ' . $nama_wuspus . ' berhasil dihapus.');
+        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 4 untuk ' . $nama_wuspus . ' berhasil dihapus.')->with('activeTab', 'format4');
     }
 
     // SIP5 CRUD Methods
@@ -1122,7 +1215,7 @@ class SIPController extends Controller
             ]);
         }
 
-        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 5 berhasil ditambahkan.');
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 5 berhasil ditambahkan.')->with('activeTab', 'format5');
     }
 
     public function updateSip5(Request $request, $id)
@@ -1207,7 +1300,7 @@ class SIPController extends Controller
             $sip5->vitaminIbuHamil()->delete();
         }
 
-        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 5 berhasil diperbarui.');
+        return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 5 berhasil diperbarui.')->with('activeTab', 'format5');
     }
 
     public function deleteSip5($id)
@@ -1218,7 +1311,7 @@ class SIPController extends Controller
 
         $sip5->delete();
 
-        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 5 untuk ' . $nama_ibu_hamil . ' berhasil dihapus.');
+        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 5 untuk ' . $nama_ibu_hamil . ' berhasil dihapus.')->with('activeTab', 'format5');
     }
 
     public function storeDokumentasi(Request $request)
@@ -1237,12 +1330,14 @@ class SIPController extends Controller
             $filePath = $file->storeAs('dokumentasi', $fileName, 'public');
 
             // Debug: Log data yang akan disimpan
+            /*
             \Log::info('Saving dokumentasi with data:', [
                 'posyandu_id' => $request->posyandu_id,
                 'tanggal' => $request->tanggal,
                 'nama_kegiatan' => $request->nama_kegiatan,
                 'file_path' => $filePath,
             ]);
+            */
 
             // Create dokumentasi record
             DokumentasiKegiatan::create([
@@ -1253,10 +1348,11 @@ class SIPController extends Controller
             ]);
 
             return redirect()->route('sip.index', $request->posyandu_id)
-                ->with('success', 'Dokumentasi kegiatan berhasil ditambahkan.');
+                ->with('success', 'Dokumentasi kegiatan berhasil ditambahkan.')
+                ->with('activeTab', 'dokum');
 
         } catch (\Exception $e) {
-            \Log::error('Error saving dokumentasi: ' . $e->getMessage());
+            // \Log::error('Error saving dokumentasi: ' . $e->getMessage());
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Gagal menyimpan dokumentasi: ' . $e->getMessage());
@@ -1296,7 +1392,8 @@ class SIPController extends Controller
             $dokumentasi->update($data);
 
             return redirect()->route('sip.index', $dokumentasi->posyandu_id)
-                ->with('success', 'Dokumentasi kegiatan berhasil diperbarui.');
+                ->with('success', 'Dokumentasi kegiatan berhasil diperbarui.')
+                ->with('activeTab', 'dokum');
 
         } catch (\Exception $e) {
             return redirect()->back()
@@ -1319,7 +1416,8 @@ class SIPController extends Controller
             $dokumentasi->delete();
 
             return redirect()->route('sip.index', $posyandu_id)
-                ->with('success', 'Dokumentasi kegiatan berhasil dihapus.');
+                ->with('success', 'Dokumentasi kegiatan berhasil dihapus.')
+                ->with('activeTab', 'dokum');
 
         } catch (\Exception $e) {
             return redirect()->back()

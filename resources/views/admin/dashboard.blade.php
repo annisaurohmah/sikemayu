@@ -174,14 +174,14 @@
     <div class="col-lg-3 col-md-6">
         <div class="stat-card" style="background: linear-gradient(135deg, #5a189a 0%, #3c096c 100%);">
             <div class="stat-number">{{ $stats['total_bayi'] ?? 0 }}</div>
-            <div class="stat-label">Total Bayi</div>
+            <div class="stat-label">Total Bayi (Real-time)</div>
         </div>
     </div>
     
     <div class="col-lg-3 col-md-6">
         <div class="stat-card" style="background: linear-gradient(135deg, #c77dff 0%, #9d4edd 100%);">
             <div class="stat-number">{{ $stats['total_balita'] ?? 0 }}</div>
-            <div class="stat-label">Total Balita</div>
+            <div class="stat-label">Total Balita (Real-time)</div>
         </div>
     </div>
     @endif
@@ -192,9 +192,9 @@
             <div class="stat-number">{{ $stats['total_dasawisma'] ?? 0 }}</div>
             <div class="stat-label">
                 @if($access['can_access_all'])
-                    Total Dasawisma
+                    Total Dasawisma (Keseluruhan)
                 @else
-                    Dasawisma RW Saya
+                    Total Dasawisma RW Saya
                 @endif
             </div>
         </div>
@@ -207,9 +207,9 @@
             <div class="stat-number">{{ ($stats['total_sip1'] ?? 0) + ($stats['total_sip2'] ?? 0) + ($stats['total_sip3'] ?? 0) }}</div>
             <div class="stat-label">
                 @if($access['can_access_all'])
-                    Total SIP
+                    Total Data SIP (Keseluruhan)
                 @else
-                    SIP Posyandu Saya
+                    Total Data SIP Posyandu Saya
                 @endif
             </div>
         </div>

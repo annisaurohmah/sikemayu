@@ -55,10 +55,10 @@ class DashboardController extends Controller
                 $stats['total_balita'] = 0;
             }
             
-            // Dasawisma data
+            // Dasawisma data (count all, not filtered by year for dashboard cards)
             if ($access['can_access_all'] || $access['can_access_rw_only']) {
                 try {
-                    $dwQuery = Dw::where('tahun', $tahun);
+                    $dwQuery = Dw::query(); // Remove year filter for total count
                     if ($access['can_access_rw_only']) {
                         try {
                             $dwQuery->whereHas('rw', function($q) use ($access) {
@@ -67,7 +67,6 @@ class DashboardController extends Controller
                         } catch (\Exception $e) {
                             // If relationship doesn't work, try direct join
                             $dwQuery = Dw::join('rw', 'rw.rw_id', '=', 'dw.rw_id')
-                                     ->where('dw.tahun', $tahun)
                                      ->where('rw.no_rw', $access['rw'])
                                      ->select('dw.*');
                         }
@@ -80,7 +79,7 @@ class DashboardController extends Controller
                 $stats['total_dasawisma'] = 0;
             }
             
-            // SIP data
+            // SIP data (count all records, not filtered by year for dashboard cards)
             if ($access['can_access_all'] || $access['can_access_posyandu_only']) {
                 $posyanduFilter = $access['can_access_posyandu_only'] ? 
                     Posyandu::where('nama_posyandu', $access['posyandu'])->first() : null;

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  * Class Sip6
  * 
  * @property int $id
+ * @property int|null $posyandu_id
  * @property int|null $bulan
  * @property int|null $tahun
  * @property int|null $bayi_0_12_bulan
@@ -38,6 +39,7 @@ class Sip6 extends Model
 	public $timestamps = false;
 
 	protected $casts = [
+		'posyandu_id' => 'int',
 		'bulan' => 'int',
 		'tahun' => 'int',
 		'bayi_0_12_bulan' => 'int',
@@ -57,6 +59,7 @@ class Sip6 extends Model
 	];
 
 	protected $fillable = [
+		'posyandu_id',
 		'bulan',
 		'tahun',
 		'bayi_0_12_bulan',
@@ -75,4 +78,9 @@ class Sip6 extends Model
 		'medis_paramedis',
 		'keterangan'
 	];
+
+	public function posyandu()
+	{
+		return $this->belongsTo(Posyandu::class, 'posyandu_id');
+	}
 }

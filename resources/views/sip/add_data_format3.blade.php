@@ -16,51 +16,61 @@
                         @csrf
                         <input type="hidden" name="posyandu_id" value="{{ $posyandu->posyandu_id ?? '' }}" />
 
+                        <!-- Input Mode Selection with Tabs -->
                         <div class="form-group">
                             <label><strong>Pilih Jenis Input Balita</strong></label>
-                            <div class="mt-2">
-                                <div class="form-check form-check-inline">
-                                    <input type="radio" class="form-check-input" id="input_database_balita" name="input_type" value="database" checked>
-                                    <label class="form-check-label" for="input_database_balita">Pilih dari Database</label>
-                                </div>
-                                <div class="form-check form-check-inline ml-3">
-                                    <input type="radio" class="form-check-input" id="input_manual_balita" name="input_type" value="manual">
-                                    <label class="form-check-label" for="input_manual_balita">Input Manual</label>
-                                </div>
-                            </div>
+                            <ul class="nav nav-tabs mt-2" id="inputTab-balita" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="db-tab-balita" data-toggle="tab" href="#database_input_balita" role="tab" aria-controls="database_input_balita" aria-selected="true">
+                                        <i class="mdi mdi-database mr-1"></i> Dari Database
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="manual-tab-balita" data-toggle="tab" href="#manual_input_balita" role="tab" aria-controls="manual_input_balita" aria-selected="false">
+                                        <i class="mdi mdi-pencil mr-1"></i> Input Manual
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
 
-                        <!-- Input dari Database -->
-                        <div id="database_input_balita" class="form-group">
-                            <label for="nama_balita_db">Nama Balita (dari Database)</label>
-                            <select class="form-control select2" id="nama_balita_db" name="nama_balita_db">
-                                <option value="">Pilih Balita</option>
-                                @if(isset($balitaList_master))
-                                    @foreach($balitaList_master as $balita)
+                        <!-- Tab Content -->
+                        <div class="tab-content" id="inputTabContent-balita">
+                            <!-- Input dari Database -->
+                            <div class="tab-pane fade show active" id="database_input_balita" role="tabpanel" aria-labelledby="db-tab-balita">
+                                <div class="form-group mt-3">
+                                    <label for="nama_balita_db">Nama Balita (dari Database)</label>
+                                    <select class="form-control select2" id="nama_balita_db" name="nama_balita_db">
+                                        <option value="">Pilih Balita</option>
+                                        @if(isset($balitaList_master))
+                                        @foreach($balitaList_master as $balita)
                                         <option value="{{ $balita->nama_lengkap }}" data-nik="{{ $balita->nik }}" data-tgl="{{ $balita->tanggal_lahir }}" data-orangtua="{{ $balita->nama_lengkap_ortu }}">
                                             {{ $balita->nama_lengkap }} - {{ $balita->nama_lengkap_ortu }} ({{ $balita->tanggal_lahir ? $balita->tanggal_lahir->format('d-m-Y') : '' }})
                                         </option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <small class="form-text text-muted">Pilih dari data balita yang sudah terdaftar atau ketik untuk mencari</small>
-                        </div>
-
-                        <!-- Input Manual -->
-                        <div id="manual_input_balita" class="form-group" style="display: none; border: 2px dashed #28a745; padding: 15px; border-radius: 5px; background-color: #f8f9fa;">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="nama_balita_manual">Nama Balita <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" placeholder="Masukkan nama balita" id="nama_balita_manual" name="nama_balita_manual" />
-                                        <small class="form-text text-muted">Input nama balita secara manual</small>
-                                    </div>
+                                        @endforeach
+                                        @endif
+                                    </select>
+                                    <small class="form-text text-muted">Pilih dari data balita yang sudah terdaftar atau ketik untuk mencari</small>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="tgl_lahir_manual_balita">Tanggal Lahir <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control" id="tgl_lahir_manual_balita" name="tgl_lahir_manual" max="{{ date('Y-m-d') }}" />
-                                        <small class="form-text text-muted">Tanggal lahir balita (1-5 tahun yang lalu)</small>
+                            </div>
+
+                            <!-- Input Manual -->
+                            <div class="tab-pane fade" id="manual_input_balita" role="tabpanel" aria-labelledby="manual-tab-balita">
+                                <div class="form-group mt-3" style="border: 2px dashed #28a745; padding: 15px; border-radius: 5px; background-color: #f8f9fa;">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="nama_balita_manual">Nama Balita <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" placeholder="Masukkan nama balita" id="nama_balita_manual" name="nama_balita_manual" />
+                                                <small class="form-text text-muted">Input nama balita secara manual</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="tgl_lahir_manual_balita">Tanggal Lahir <span class="text-danger">*</span></label>
+                                                <input type="date" class="form-control" id="tgl_lahir_manual_balita" name="tgl_lahir_manual" max="{{ date('Y-m-d') }}" />
+                                                <small class="form-text text-muted">Tanggal lahir balita (1-5 tahun yang lalu)</small>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -68,7 +78,7 @@
 
                         <!-- Hidden field untuk nama balita yang akan dikirim -->
                         <input type="hidden" id="nama_balita" name="nama_balita" />
-                        <input type="hidden" id="tgl_lahir_balita" name="tgl_lahir" />
+                        <input type="hidden" id="tgl_lahir" name="tgl_lahir" />
 
                         <div class="row">
                             <div class="col-md-6">
@@ -103,54 +113,46 @@
                         </div>
                 </div>
 
-                
-                    <div class="form-group">
-                        <div>
-                            <button type="submit" class="btn btn-success waves-effect waves-light">
-                                Submit
-                            </button>
-                            <button type="reset" class="btn btn-danger waves-effect m-l-5" data-dismiss="modal">
-                                Cancel
-                            </button>
-                        </div>
+
+                <div class="form-group">
+                    <div>
+                        <button type="submit" class="btn btn-success waves-effect waves-light">
+                            Submit
+                        </button>
+                        <button type="reset" class="btn btn-danger waves-effect m-l-5" data-dismiss="modal">
+                            Cancel
+                        </button>
                     </div>
-                    </form>
                 </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
+</div>
 
 <script>
-$(document).ready(function() {
-    // Initialize Select2 for database input
-    $('#nama_balita_db').select2({
-        placeholder: 'Pilih atau ketik nama balita...',
-        allowClear: true
-    });
+    // Define functions outside of document.ready so they can be called globally
+    function setupTabToggleBalita() {
+        // Handle tab switching for balita
+        $('#inputTab-balita a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+            const targetTab = $(e.target).attr('href');
+            console.log('Balita tab switched to:', targetTab);
 
-    // Toggle input type untuk balita
-    $('input[name="input_type"]').on('change', function() {
-        const inputType = $(this).val();
-        
-        if (inputType === 'database') {
-            $('#database_input_balita').show();
-            $('#manual_input_balita').hide();
-            
-            // Clear manual inputs and remove required
-            $('#nama_balita_manual').val('').removeAttr('required');
-            $('#tgl_lahir_manual_balita').val('').removeAttr('required');
-            
-            // Set database input as required
-            $('#nama_balita_db').attr('required', 'required');
-            
-            // Clear hidden fields
+            if (targetTab === '#database_input_balita') {
+                // Database mode
+                // Clear manual inputs and remove required
+                $('#nama_balita_manual').val('').removeAttr('required');
+                $('#tgl_lahir_manual_balita').val('').removeAttr('required');
+
+                // Set database input as required
+                $('#nama_balita_db').attr('required', 'required');            // Clear hidden fields
             $('#nama_balita').val('');
-            $('#tgl_lahir_balita').val('');
-        } else {
-            $('#database_input_balita').hide();
-            $('#manual_input_balita').show();
+            $('#tgl_lahir').val('');
             
+            console.log('Switched to database mode for balita');
+        } else if (targetTab === '#manual_input_balita') {
+            // Manual mode
             // Clear database inputs and remove required
             $('#nama_balita_db').val(null).trigger('change').removeAttr('required');
             
@@ -164,154 +166,180 @@ $(document).ready(function() {
             
             // Clear hidden fields
             $('#nama_balita').val('');
-            $('#tgl_lahir_balita').val('');
-        }
-    });
+            $('#tgl_lahir').val('');
+
+                console.log('Switched to manual mode for balita');
+            }
+        });
+    }
 
     // Auto-fill data ketika balita dari database dipilih
-    $('#nama_balita_db').on('change', function() {
-        const selectedOption = $(this).find(':selected');
-        const namaOrangtua = selectedOption.data('orangtua');
-        const tglLahir = selectedOption.data('tgl');
-        
-        // Set hidden fields
-        $('#nama_balita').val($(this).val());
-        
-        // Handle tanggal lahir
-        if (tglLahir) {
-            // Format tanggal jika perlu
-            let formattedDate = tglLahir;
-            if (typeof tglLahir === 'object') {
-                // Jika object date, format ke YYYY-MM-DD
-                formattedDate = tglLahir.toISOString().split('T')[0];
-            } else if (typeof tglLahir === 'string') {
-                // Jika string, pastikan formatnya benar
-                const dateObj = new Date(tglLahir);
-                if (!isNaN(dateObj.getTime())) {
-                    formattedDate = dateObj.toISOString().split('T')[0];
-                }
-            }
-            $('#tgl_lahir_balita').val(formattedDate);
+    function setupDatabaseAutoFillBalita() {
+        $('#nama_balita_db').off('change').on('change', function() {
+            const selectedOption = $(this).find(':selected');
+            const namaOrangtua = selectedOption.data('orangtua');
+            const tglLahir = selectedOption.data('tgl');
+
+            // Set hidden fields
+            $('#nama_balita').val($(this).val());
+
+            // Handle tanggal lahir
+            if (tglLahir) {
+                let formattedDate = tglLahir;
+                if (typeof tglLahir === 'object') {
+                    formattedDate = tglLahir.toISOString().split('T')[0];
+                } else if (typeof tglLahir === 'string') {
+                    const dateObj = new Date(tglLahir);
+                    if (!isNaN(dateObj.getTime())) {
+                        formattedDate = dateObj.toISOString().split('T')[0];
+                    }            }
+            $('#tgl_lahir').val(formattedDate);
         }
         
         if (namaOrangtua) {
-            // Split nama orangtua jika ada format "Nama Ayah / Nama Ibu"
-            const orangtuaParts = namaOrangtua.split('/');
-            if (orangtuaParts.length >= 2) {
-                $('#nama_ayah').val(orangtuaParts[0].trim());
-                $('#nama_ibu').val(orangtuaParts[1].trim());
-            } else {
-                // Jika hanya satu nama, masukkan ke nama ayah dan kosongkan nama ibu
-                $('#nama_ayah').val(namaOrangtua);
-                $('#nama_ibu').val('');
-            }
-        }
-    });
-    
-    // Handle manual input untuk balita - real time update
-    $('#nama_balita_manual').on('input', function() {
-        $('#nama_balita').val($(this).val());
-        console.log('Manual nama balita updated:', $(this).val());
-    });
-    
-    $('#tgl_lahir_manual_balita').on('change', function() {
-        $('#tgl_lahir_balita').val($(this).val());
-        console.log('Manual tgl lahir balita updated:', $(this).val());
-    });
-    
-    // Form validation before submit
-    $('form').on('submit', function(e) {
-        const inputType = $('input[name="input_type"]:checked').val();
-        let isValid = true;
-        let errorMessage = '';
-        
-        console.log('Form submit - Input type:', inputType);
-        console.log('Hidden nama_balita value:', $('#nama_balita').val());
-        console.log('Hidden tgl_lahir_balita value:', $('#tgl_lahir_balita').val());
-        
-        if (inputType === 'database') {
-            if (!$('#nama_balita_db').val()) {
-                errorMessage = 'Silakan pilih balita dari database!';
-                isValid = false;
-            }
-        } else {
-            const namaBalita = $('#nama_balita_manual').val().trim();
-            const tglLahir = $('#tgl_lahir_manual_balita').val();
-            
-            if (!namaBalita || !tglLahir) {
-                errorMessage = 'Silakan lengkapi nama balita dan tanggal lahir!';
-                isValid = false;
-            } else {
-                // Validate date (must be within 1-5 years old)
-                const tglLahirDate = new Date(tglLahir);
-                const today = new Date();
-                const yearsDiff = today.getFullYear() - tglLahirDate.getFullYear();
-                const monthsDiff = (today.getFullYear() - tglLahirDate.getFullYear()) * 12 + (today.getMonth() - tglLahirDate.getMonth());
-                
-                if (tglLahirDate > today) {
-                    errorMessage = 'Tanggal lahir tidak boleh di masa depan!';
-                    isValid = false;
-                } else if (monthsDiff <= 12) {
-                    errorMessage = 'Umur balita harus lebih dari 12 bulan (1 tahun)!';
-                    isValid = false;
-                } else if (yearsDiff > 5) {
-                    errorMessage = 'Umur balita tidak boleh lebih dari 5 tahun!';
-                    isValid = false;
+                const orangtuaParts = namaOrangtua.split('/');
+                if (orangtuaParts.length >= 2) {
+                    $('#nama_ayah').val(orangtuaParts[0].trim());
+                    $('#nama_ibu').val(orangtuaParts[1].trim());
+                } else {
+                    $('#nama_ayah').val(namaOrangtua);
+                    $('#nama_ibu').val('');
                 }
             }
-            
-            // Update hidden fields one more time before submit
+        });
+    }
+
+    // Handle manual input - real time update
+    function setupManualInputBalita() {
+        $('#nama_balita_manual').off('input').on('input', function() {
+            $('#nama_balita').val($(this).val());
+            console.log('Manual nama balita updated:', $(this).val());
+        });
+
+    $('#tgl_lahir_manual_balita').off('change').on('change', function() {
+        $('#tgl_lahir').val($(this).val());
+        console.log('Manual tgl lahir balita updated:', $(this).val());
+    });
+    }
+
+    // Form validation before submit
+    function setupFormValidationBalita() {
+        $('#addnewformat3 form').off('submit').on('submit', function(e) {
+            const activeTab = $('#inputTab-balita .nav-link.active').attr('href');
+            let isValid = true;
+            let errorMessage = '';
+
+            console.log('Form submitting with active tab:', activeTab);
+
+            if (activeTab === '#database_input_balita') {
+                if (!$('#nama_balita_db').val()) {
+                    errorMessage = 'Silakan pilih balita dari database!';
+                    isValid = false;
+                }
+            } else {
+                const namaBalita = $('#nama_balita_manual').val().trim();
+                const tglLahir = $('#tgl_lahir_manual_balita').val();
+
+                console.log('Manual input values:', {
+                    namaBalita,
+                    tglLahir
+                });
+
+                if (!namaBalita || !tglLahir) {
+                    errorMessage = 'Silakan lengkapi nama balita dan tanggal lahir!';
+                    isValid = false;
+                } else {
+                    // Validate date (must be within 1-5 years old)
+                    const tglLahirDate = new Date(tglLahir);
+                    const today = new Date();
+                    const monthsDiff = (today.getFullYear() - tglLahirDate.getFullYear()) * 12 + (today.getMonth() - tglLahirDate.getMonth());
+
+                    if (tglLahirDate > today) {
+                        errorMessage = 'Tanggal lahir tidak boleh di masa depan!';
+                        isValid = false;
+                    } else if (monthsDiff < 12) {
+                        errorMessage = 'Tanggal lahir harus lebih dari 12 bulan yang lalu untuk kategori balita!';
+                        isValid = false;
+                    } else if (monthsDiff > 60) {
+                        errorMessage = 'Tanggal lahir harus dalam rentang 1-5 tahun dari sekarang untuk kategori balita!';
+                        isValid = false;
+                    }
+                }            // Update hidden fields one more time before submit
             $('#nama_balita').val(namaBalita);
-            $('#tgl_lahir_balita').val(tglLahir);
+            $('#tgl_lahir').val(tglLahir);
         }
         
         if (!isValid) {
-            e.preventDefault();
-            alert(errorMessage);
-            return false;
-        }
+                e.preventDefault();
+                alert(errorMessage);
+                return false;
+            }
+
+            // Final check - make sure hidden fields have values
+            if (!$('#nama_balita').val()) {
+                e.preventDefault();
+                alert('Error: Nama balita tidak terdeteksi. Silakan coba lagi.');
+                return false;
+            }
+
+            console.log('Form validation passed, submitting...');
+            return true;
+        });
+    }
+
+    // Set max and min date for manual input
+    function setupDateLimitsBalita() {
+        // Untuk balita (1-5 tahun): max = 1 tahun yang lalu, min = 5 tahun yang lalu
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+        const maxDate = oneYearAgo.toISOString().split('T')[0];
+        $('#tgl_lahir_manual_balita').attr('max', maxDate);
         
-        // Final check - make sure hidden fields have values
-        if (!$('#nama_balita').val()) {
-            e.preventDefault();
-            alert('Error: Nama balita tidak terdeteksi. Silakan coba lagi.');
-            return false;
-        }
-        
-        return true;
+        const fiveYearsAgo = new Date();
+        fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+        const minDate = fiveYearsAgo.toISOString().split('T')[0];
+        $('#tgl_lahir_manual_balita').attr('min', minDate);
+    }
+
+    // Initialize when document is ready
+    $(document).ready(function() {
+        console.log('Format 3 Add Modal Script Loaded');
+
+        // Initialize Select2 for database input
+        $('#nama_balita_db').select2({
+            placeholder: 'Pilih atau ketik nama balita...',
+            allowClear: true
+        });
+
+        // Initialize all functions when document is ready
+        setupTabToggleBalita();
+        setupDatabaseAutoFillBalita();
+        setupManualInputBalita();
+        setupFormValidationBalita();
+        setupDateLimitsBalita();
+
+        console.log('All Format 3 functions initialized');
     });
-    
-    // Debug function to show current form state
-    function debugFormState() {
-        console.log('=== FORM DEBUG STATE (Format 3) ===');
-        console.log('Input type checked:', $('input[name="input_type"]:checked').val());
-        console.log('Database nama value:', $('#nama_balita_db').val());
-        console.log('Manual nama value:', $('#nama_balita_manual').val());
-        console.log('Manual tgl lahir value:', $('#tgl_lahir_manual_balita').val());
-        console.log('Hidden nama_balita value:', $('#nama_balita').val());
-        console.log('Hidden tgl_lahir_balita value:', $('#tgl_lahir_balita').val());
-        console.log('==================================');
+
+    // Initialize modal event for when modal is shown
+    $('#addnewformat3').on('shown.bs.modal', function() {
+        console.log('Format 3 modal shown, re-initializing...');
+        if (typeof initFormat3ManualInput === 'function') {
+            initFormat3ManualInput();
+        }
+    });
+
+    // Global function that can be called from parent page
+    function initFormat3ManualInput() {
+        console.log('Global initFormat3ManualInput called');
+
+        // Re-initialize all functions
+        setupTabToggleBalita();
+        setupDatabaseAutoFillBalita();
+        setupManualInputBalita();
+        setupFormValidationBalita();
+        setupDateLimitsBalita();
+
+        console.log('Format 3 manual input re-initialized');
     }
-    
-    // Add debug button for testing (remove in production)
-    if (window.location.search.includes('debug=1')) {
-        $('form').append('<button type="button" class="btn btn-info" onclick="debugFormState()">Debug Form</button>');
-    }
-    
-    // Set tahun default ke tahun sekarang jika ada input tahun
-    const tahunInput = document.getElementById('tahun');
-    if (tahunInput) {
-        tahunInput.value = new Date().getFullYear();
-    }
-    
-    // Set max date for manual input (today)
-    const today = new Date().toISOString().split('T')[0];
-    $('#tgl_lahir_manual_balita').attr('max', today);
-    
-    // Set min date for manual input (5 years ago)
-    const fiveYearsAgo = new Date();
-    fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
-    const minDate = fiveYearsAgo.toISOString().split('T')[0];
-    $('#tgl_lahir_manual_balita').attr('min', minDate);
-});
 </script>

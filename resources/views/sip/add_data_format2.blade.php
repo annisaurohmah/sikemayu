@@ -13,52 +13,74 @@
                     <form method="POST" action="{{ route('sip2.store') }}">
                         @csrf
                         <input type="hidden" name="posyandu_id" value="{{ $posyandu->posyandu_id ?? '' }}" />
-                        
+
                         <div class="form-group">
                             <label><strong>Pilih Jenis Input Bayi</strong></label>
-                            <div class="mt-2">
-                                <div class="form-check form-check-inline">
-                                    <input type="radio" class="form-check-input" id="input_database" name="input_type" value="database" checked onchange="toggleInputType()">
-                                    <label class="form-check-label" for="input_database">Pilih dari Database</label>
-                                </div>
-                                <div class="form-check form-check-inline ml-3">
-                                    <input type="radio" class="form-check-input" id="input_manual" name="input_type" value="manual" onchange="toggleInputType()">
-                                    <label class="form-check-label" for="input_manual">Input Manual</label>
-                                </div>
-                            </div>
-                        </div>
+                            <!-- Tab Navigation -->
+                            <ul class="nav nav-tabs mt-2" id="inputTypeTab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="database-tab" data-toggle="tab" href="#database_input" role="tab" aria-controls="database_input" aria-selected="true">
+                                        <i class="mdi mdi-database mr-1"></i>Dari Database
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="manual-tab" data-toggle="tab" href="#manual_input" role="tab" aria-controls="manual_input" aria-selected="false">
+                                        <i class="mdi mdi-keyboard mr-1"></i>Input Manual
+                                    </a>
+                                </li>
+                            </ul>
 
-                        <!-- Input dari Database -->
-                        <div id="database_input" class="form-group">
-                            <label for="nama_bayi_db">Nama Bayi (dari Database)</label>
-                            <select class="form-control select2" id="nama_bayi_db" name="nama_bayi_db">
-                                <option value="">Pilih Bayi</option>
-                                @if(isset($bayiList_master))
-                                    @foreach($bayiList_master as $bayi)
-                                        <option value="{{ $bayi->nama_lengkap }}" data-nik="{{ $bayi->nik }}" data-tgl="{{ $bayi->tanggal_lahir }}" data-orangtua="{{ $bayi->nama_lengkap_ortu }}">
-                                            {{ $bayi->nama_lengkap }} - {{ $bayi->nama_lengkap_ortu }} ({{ $bayi->tanggal_lahir ? $bayi->tanggal_lahir->format('d-m-Y') : '' }})
-                                        </option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <small class="form-text text-muted">Pilih dari data bayi yang sudah terdaftar atau ketik untuk mencari</small>
-                        </div>
-
-                        <!-- Input Manual -->
-                        <div id="manual_input" class="form-group" style="display: none; border: 2px dashed #007bff; padding: 15px; border-radius: 5px; background-color: #f8f9fa;">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="nama_bayi_manual">Nama Bayi <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" placeholder="Masukkan nama bayi" id="nama_bayi_manual" name="nama_bayi_manual" />
-                                        <small class="form-text text-muted">Input nama bayi secara manual</small>
+                            <!-- Tab Content -->
+                            <div class="tab-content mt-3" id="inputTypeTabContent">
+                                <!-- Input dari Database -->
+                                <div class="tab-pane fade show active" id="database_input" role="tabpanel" aria-labelledby="database-tab">
+                                    <div class="card border-primary">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6 class="mb-0"><i class="mdi mdi-database mr-2"></i>Pilih Bayi dari Database</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <label for="nama_bayi_db">Nama Bayi</label>
+                                                <select class="form-control select2" id="nama_bayi_db" name="nama_bayi_db">
+                                                    <option value="">Pilih Bayi</option>
+                                                    @if(isset($bayiList_master))
+                                                    @foreach($bayiList_master as $bayi)
+                                                    <option value="{{ $bayi->nama_lengkap }}" data-nik="{{ $bayi->nik }}" data-tgl="{{ $bayi->tanggal_lahir }}" data-orangtua="{{ $bayi->nama_lengkap_ortu }}">
+                                                        {{ $bayi->nama_lengkap }} - {{ $bayi->nama_lengkap_ortu }} ({{ $bayi->tanggal_lahir ? $bayi->tanggal_lahir->format('d-m-Y') : '' }})
+                                                    </option>
+                                                    @endforeach
+                                                    @endif
+                                                </select>
+                                                <small class="form-text text-muted">Pilih dari data bayi yang sudah terdaftar atau ketik untuk mencari</small>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="tgl_lahir_manual">Tanggal Lahir <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control" id="tgl_lahir_manual" name="tgl_lahir_manual" max="{{ date('Y-m-d') }}" />
-                                        <small class="form-text text-muted">Tanggal lahir bayi (maksimal 12 bulan yang lalu)</small>
+
+                                <!-- Input Manual -->
+                                <div class="tab-pane fade" id="manual_input" role="tabpanel" aria-labelledby="manual-tab">
+                                    <div class="card border-success">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0"><i class="mdi mdi-keyboard mr-2"></i>Input Data Bayi Manual</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="nama_bayi_manual">Nama Bayi <span class="text-danger">*</span></label>
+                                                        <input type="text" class="form-control" placeholder="Masukkan nama bayi" id="nama_bayi_manual" name="nama_bayi_manual" />
+                                                        <small class="form-text text-muted">Input nama bayi secara manual</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="tgl_lahir_manual">Tanggal Lahir <span class="text-danger">*</span></label>
+                                                        <input type="date" class="form-control" id="tgl_lahir_manual" name="tgl_lahir_manual" max="{{ date('Y-m-d') }}" />
+                                                        <small class="form-text text-muted">Tanggal lahir bayi (maksimal 12 bulan yang lalu)</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -81,9 +103,9 @@
                                     <select class="form-control" id="dasawisma_id" name="dasawisma_id" required>
                                         <option value="">Pilih Dasawisma</option>
                                         @if(isset($dasawismaList))
-                                            @foreach($dasawismaList as $dasawisma)
-                                                <option value="{{ $dasawisma->dasawisma_id }}">{{ $dasawisma->nama_dasawisma }}</option>
-                                            @endforeach
+                                        @foreach($dasawismaList as $dasawisma)
+                                        <option value="{{ $dasawisma->dasawisma_id }}">{{ $dasawisma->nama_dasawisma }}</option>
+                                        @endforeach
                                         @endif
                                     </select>
                                 </div>
@@ -117,50 +139,45 @@
 </div>
 
 <script>
-// Define functions outside of document.ready so they can be called globally
-function setupInputToggle() {
-    $('input[name="input_type"]').off('change').on('change', function() {
-        const inputType = $(this).val();
-        console.log('Input type changed to:', inputType);
-        
-        if (inputType === 'database') {
-            $('#database_input').show();
-            $('#manual_input').hide();
-            
-            // Clear manual inputs and remove required
-            $('#nama_bayi_manual').val('').removeAttr('required');
-            $('#tgl_lahir_manual').val('').removeAttr('required');
-            
-            // Set database input as required
-            $('#nama_bayi_db').attr('required', 'required');
-            
-            // Clear hidden fields
-            $('#nama_bayi').val('');
-            $('#tgl_lahir').val('');
-        } else {
-            $('#database_input').hide();
-            $('#manual_input').show();
-            console.log('Manual input should be visible now');
-            
-            // Clear database inputs and remove required
-            $('#nama_bayi_db').val('').removeAttr('required');
-                
-                // Set manual inputs as required
-                $('#nama_bayi_manual').attr('required', 'required');
-                $('#tgl_lahir_manual').attr('required', 'required');
-                
-                // Clear auto-filled parent names
+    // Define functions outside of document.ready so they can be called globally
+    function setupTabToggle() {
+        // Handle tab switching between database and manual input
+        $('#inputTypeTab a[data-toggle="tab"]').off('shown.bs.tab').on('shown.bs.tab', function(e) {
+            const target = $(e.target).attr("href"); // activated tab
+            console.log('Tab switched to:', target);
+
+            if (target === '#database_input') {
+                // Database tab active
+                $('#nama_bayi_db').attr('required', 'required');
+                $('#nama_bayi_manual').removeAttr('required');
+                $('#tgl_lahir_manual').removeAttr('required');
+
+                // Clear manual inputs
+                $('#nama_bayi_manual').val('');
+                $('#tgl_lahir_manual').val('');
                 $('#nama_ayah').val('');
                 $('#nama_ibu').val('');
-                
+
                 // Clear hidden fields
                 $('#nama_bayi').val('');
                 $('#tgl_lahir').val('');
+
+                console.log('Database input mode activated');
+            } else if (target === '#manual_input') {
+                // Manual tab active
+                $('#nama_bayi_db').removeAttr('required');
+                $('#nama_bayi_manual').attr('required', 'required');
+                $('#tgl_lahir_manual').attr('required', 'required');
+
+                // Clear database inputs
+                $('#nama_bayi_db').val('').trigger('change');
+
+                // Clear hidden fields
+                $('#nama_bayi').val('');
+                $('#tgl_lahir').val('');
+
+                console.log('Manual input mode activated');
             }
-            
-            // Debug visibility
-            console.log('Database input visible:', $('#database_input').is(':visible'));
-            console.log('Manual input visible:', $('#manual_input').is(':visible'));
         });
     }
 
@@ -170,10 +187,13 @@ function setupInputToggle() {
             const selectedOption = $(this).find(':selected');
             const namaOrangtua = selectedOption.data('orangtua');
             const tglLahir = selectedOption.data('tgl');
-            
+
             // Set hidden fields
             $('#nama_bayi').val($(this).val());
-            
+
+            // Handle tanggal lahir
+            $('#nama_bayi').val($(this).val());
+
             // Handle tanggal lahir
             if (tglLahir) {
                 let formattedDate = tglLahir;
@@ -187,7 +207,7 @@ function setupInputToggle() {
                 }
                 $('#tgl_lahir').val(formattedDate);
             }
-            
+
             if (namaOrangtua) {
                 const orangtuaParts = namaOrangtua.split('/');
                 if (orangtuaParts.length >= 2) {
@@ -200,40 +220,43 @@ function setupInputToggle() {
             }
         });
     }
-    
+
     // Handle manual input - real time update
     function setupManualInput() {
         $('#nama_bayi_manual').off('input').on('input', function() {
             $('#nama_bayi').val($(this).val());
             console.log('Manual nama updated:', $(this).val());
         });
-        
+
         $('#tgl_lahir_manual').off('change').on('change', function() {
             $('#tgl_lahir').val($(this).val());
             console.log('Manual tgl lahir updated:', $(this).val());
         });
     }
-    
+
     // Form validation before submit
     function setupFormValidation() {
         $('#addnewformat2 form').off('submit').on('submit', function(e) {
-            const inputType = $('input[name="input_type"]:checked').val();
+            const activeTab = $('#inputTypeTab .nav-link.active').attr('href');
             let isValid = true;
             let errorMessage = '';
-            
-            console.log('Form submitting with input type:', inputType);
-            
-            if (inputType === 'database') {
+
+            console.log('Form submitting with active tab:', activeTab);
+
+            if (activeTab === '#database_input') {
                 if (!$('#nama_bayi_db').val()) {
                     errorMessage = 'Silakan pilih bayi dari database!';
                     isValid = false;
                 }
-            } else {
+            } else if (activeTab === '#manual_input') {
                 const namaBayi = $('#nama_bayi_manual').val().trim();
                 const tglLahir = $('#tgl_lahir_manual').val();
-                
-                console.log('Manual input values:', { namaBayi, tglLahir });
-                
+
+                console.log('Manual input values:', {
+                    namaBayi,
+                    tglLahir
+                });
+
                 if (!namaBayi || !tglLahir) {
                     errorMessage = 'Silakan lengkapi nama bayi dan tanggal lahir!';
                     isValid = false;
@@ -242,7 +265,7 @@ function setupInputToggle() {
                     const tglLahirDate = new Date(tglLahir);
                     const today = new Date();
                     const monthsDiff = (today.getFullYear() - tglLahirDate.getFullYear()) * 12 + (today.getMonth() - tglLahirDate.getMonth());
-                    
+
                     if (tglLahirDate > today) {
                         errorMessage = 'Tanggal lahir tidak boleh di masa depan!';
                         isValid = false;
@@ -251,72 +274,89 @@ function setupInputToggle() {
                         isValid = false;
                     }
                 }
-                
+
                 // Update hidden fields one more time before submit
                 $('#nama_bayi').val(namaBayi);
                 $('#tgl_lahir').val(tglLahir);
             }
-            
+
             if (!isValid) {
                 e.preventDefault();
                 alert(errorMessage);
                 return false;
             }
-            
+
             // Final check - make sure hidden fields have values
             if (!$('#nama_bayi').val()) {
                 e.preventDefault();
                 alert('Error: Nama bayi tidak terdeteksi. Silakan coba lagi.');
                 return false;
             }
-            
+
             console.log('Form validation passed, submitting...');
             return true;
         });
     }
-    
+
     // Set max and min date for manual input
     function setupDateLimits() {
         const today = new Date().toISOString().split('T')[0];
         $('#tgl_lahir_manual').attr('max', today);
-        
+
         const twelveMonthsAgo = new Date();
         twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
         const minDate = twelveMonthsAgo.toISOString().split('T')[0];
         $('#tgl_lahir_manual').attr('min', minDate);
     }
-    
-// Initialize when document is ready
-$(document).ready(function() {
-    console.log('Format 2 Add Modal Script Loaded');
-    
-    // Initialize all functions when document is ready
-    setupInputToggle();
-    setupDatabaseAutoFill();
-    setupManualInput();
-    setupFormValidation();
-    setupDateLimits();
-    
-    // Force trigger change event to set initial state
-    $('input[name="input_type"]:checked').trigger('change');
-    
-    console.log('All Format 2 functions initialized');
-});
 
-// Global function that can be called from parent page
-function initFormat2ManualInput() {
-    console.log('Global initFormat2ManualInput called');
-    
-    // Re-initialize all functions
-    setupInputToggle();
-    setupDatabaseAutoFill();
-    setupManualInput();
-    setupFormValidation();
-    setupDateLimits();
-    
-    // Force trigger change event to set initial state
-    $('input[name="input_type"]:checked').trigger('change');
-    
-    console.log('Format 2 manual input re-initialized');
-}
+    // Initialize when document is ready
+    $(document).ready(function() {
+        console.log('Format 2 Add Modal Script Loaded');
+
+        // Initialize when modal is shown
+        $('#addnewformat2').on('shown.bs.modal', function() {
+            console.log('Format 2 modal shown, re-initializing...');
+
+            // Re-initialize all functions
+            setupTabToggle();
+            setupDatabaseAutoFill();
+            setupManualInput();
+            setupFormValidation();
+            setupDateLimits();
+
+            // Set default active tab to database
+            $('#database-tab').tab('show');
+
+            console.log('Format 2 modal functions initialized');
+        });
+
+        // Initialize all functions when document is ready
+        setupTabToggle();
+        setupDatabaseAutoFill();
+        setupManualInput();
+        setupFormValidation();
+        setupDateLimits();
+
+        // Set default active tab to database
+        $('#database-tab').tab('show');
+
+        console.log('All Format 2 functions initialized');
+    });
+
+    // Global function that can be called from parent page
+    function initFormat2ManualInput() {
+        console.log('Global initFormat2ManualInput called');
+
+        // Re-initialize all functions
+        setupTabToggle();
+        setupDatabaseAutoFill();
+        setupManualInput();
+        setupFormValidation();
+        setupDateLimits();
+
+        // Set default active tab to database
+        $('#database-tab').tab('show');
+
+        console.log('Format 2 manual input re-initialized');
+    }
 </script>

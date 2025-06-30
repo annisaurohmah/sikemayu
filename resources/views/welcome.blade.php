@@ -53,7 +53,7 @@
 
             <!-- Card Template -->
             <div class="col-12 col-sm-6 col-lg-3 mb-3">
-              <a href="/menu1" class="text-decoration-none">
+              <a class="text-decoration-none">
                 <div class="card h-100 shadow-sm border-0 bg-primary text-white transform-hover">
                   <div class="card-body text-center">
                     <h5 class="card-title">Laporan Hari Buka Posyandu</h5>
@@ -64,7 +64,7 @@
             </div>
 
             <div class="col-12 col-sm-6 col-lg-3 mb-3">
-              <a href="/menu2" class="text-decoration-none">
+              <a class="text-decoration-none">
                 <div class="card h-100 shadow-sm border-0 bg-success text-white transform-hover">
                   <div class="card-body text-center">
                     <h5 class="card-title">Sistem Informasi Posyandu</h5>
@@ -75,7 +75,7 @@
             </div>
 
             <div class="col-12 col-sm-6 col-lg-3 mb-3">
-              <a href="/menu3" class="text-decoration-none">
+              <a class="text-decoration-none">
                 <div class="card h-100 shadow-sm border-0 bg-warning text-white transform-hover">
                   <div class="card-body text-center">
                     <h5 class="card-title">F1 Gizi</h5>
@@ -86,7 +86,7 @@
             </div>
 
             <div class="col-12 col-sm-6 col-lg-3 mb-3">
-              <a href="/menu4" class="text-decoration-none">
+              <a class="text-decoration-none">
                 <div class="card h-100 shadow-sm border-0 text-white transform-hover" style="background-color: #6f42c1;">
                   <div class="card-body text-center">
                     <h5 class="card-title">Dasawisma</h5>

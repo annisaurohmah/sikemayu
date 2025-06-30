@@ -15,9 +15,8 @@
     <ul class="navbar-right d-flex list-inline float-right mb-0">
         <!-- Dropdown Pilihan Tahun -->
         <li class="dropdown notification-list mr-3">
-            <div class="form-group mb-0">
-                <label for="yearSelector" style="color: white; font-size: 11px; margin-bottom: 3px; display: block;">Tahun:</label>
-                <select class="form-control form-control-sm" id="yearSelector" style="min-width: 80px; height: 30px; background-color: white; border: 1px solid #ddd; color: #333; font-size: 12px;">
+            <div class="form-group mb-0 mt-3">
+                <select class="form-control form-control-sm mt-4" id="yearSelector" style="min-width: 80px; height: 30px; background-color: white; border: 1px solid #ddd; color: #333; font-size: 12px;">
                     @php
                         $currentYear = date('Y');
                         $selectedYear = request()->get('tahun', $currentYear);

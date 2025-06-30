@@ -106,11 +106,6 @@ Route::group(['middleware' => ['auth', 'role.access:admin_desa,admin_rw', 'data.
 // Admin and Kader Posyandu routes (SIP)
 Route::group(['middleware' => ['auth', 'role.access:admin_desa,admin_kader', 'data.filter']], function () {
     Route::get('/sip/{posyandu_id}', [SIPController::class, 'index'])->name('sip.index');
-    Route::get('/sip/create', [SIPController::class, 'create'])->name('sip.create');
-    Route::post('/sip/store', [SIPController::class, 'store'])->name('sip.store');
-    Route::get('/sip/edit/{id}', [SIPController::class, 'edit'])->name('sip.edit');
-    Route::post('/sip/update/{id}', [SIPController::class, 'update'])->name('sip.update');
-    Route::post('/sip/delete/{id}', [SIPController::class, 'delete'])->name('sip.delete');
 
     // SIP1 Routes
     Route::post('/sip1/store', [SIPController::class, 'storeSip1'])->name('sip1.store');

@@ -42,6 +42,7 @@
     </table>
 
 </div>
+
 @foreach($format1 as $sip1)
 <!-- Edit -->
 <div class="modal fade" id="edit{{$sip1->sip1_id}}">

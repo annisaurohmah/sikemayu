@@ -66,7 +66,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if($dasawisma->count() > 0)
                             @foreach($dasawisma as $data)
                             <tr>
                                 <td>{{$loop->iteration }}</td>
@@ -81,11 +80,7 @@
                                 </td>
                             </tr>
                             @endforeach
-                            @else
-                            <tr>
-                                <td colspan="7" class="text-center">Tidak ada data untuk ditampilkan</td>
-                            </tr>
-                            @endif
+
                         </tbody>
                         <tfoot class="table-dark">
                             <tr>
@@ -124,7 +119,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if($dasawisma->count() > 0)
                             @foreach($dasawisma as $data)
                             <tr>
                                 <td>{{$loop->iteration }}</td>
@@ -146,11 +140,7 @@
                                 </td>
                             </tr>
                             @endforeach
-                            @else
-                            <tr>
-                                <td colspan="14" class="text-center">Tidak ada data untuk ditampilkan</td>
-                            </tr>
-                            @endif
+                
                         </tbody>
                         <tfoot class="table-dark">
                             <tr>
@@ -198,7 +188,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if($dasawisma->count() > 0)
                             @foreach($dasawisma as $data)
                             <tr>
                                 <td>{{$loop->iteration}}</td>
@@ -221,11 +210,7 @@
                                 </td>
                             </tr>
                             @endforeach
-                            @else
-                            <tr>
-                                <td colspan="15" class="text-center">Tidak ada data untuk ditampilkan</td>
-                            </tr>
-                            @endif
+                         
                         </tbody>
                         <tfoot class="table-dark">
                             <tr>
@@ -267,7 +252,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if($dasawisma->count() > 0)
                             @foreach($dasawisma as $data)
                             <tr>
                                 <td>{{$loop->iteration}}</td>
@@ -283,11 +267,7 @@
                                 </td>
                             </tr>
                             @endforeach
-                            @else
-                            <tr>
-                                <td colspan="8" class="text-center">Tidak ada data untuk ditampilkan</td>
-                            </tr>
-                            @endif
+                            
                         </tbody>
                         <tfoot class="table-dark">
                             <tr>

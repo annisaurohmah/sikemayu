@@ -102,7 +102,6 @@
                 @include('sip.format7')
                 @include('sip.dokum')
             </div>
-
         </div>
     </div> <!-- end col -->
 </div> <!-- end row -->
@@ -129,6 +128,20 @@
 
 <script>
     $(document).ready(function() {
+        // Check if there's an active tab from session
+        @if(session('activeTab'))
+            var activeTab = '{{ session('activeTab') }}';
+            console.log('Activating tab from session:', activeTab);
+            
+            // Remove active class from all tabs and content
+            $('.nav-tabs .nav-link').removeClass('active');
+            $('.tab-content .tab-pane').removeClass('show active');
+            
+            // Activate the specific tab
+            $('a[href="#' + activeTab + '"]').addClass('active');
+            $('#' + activeTab).addClass('show active');
+        @endif
+
         // Initialize DataTables
         $('#table-format1').DataTable({
             responsive: true
