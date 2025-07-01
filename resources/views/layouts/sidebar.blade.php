@@ -18,11 +18,23 @@
                       <!-- SIP Menu - Admin dan Kader Posyandu -->
                       @if($userRole === 'admin_desa' || ($userRole === 'admin_kader' && !empty($userPosyandu)))
                       <li class="waves-effect"><a href="#"><i class="ti-pencil"></i> <span> Sistem Informasi Posyandu </span> <i class='mdi mdi-chevron-down'></i></a>
+
                           <ul class="side-dropdown">
+                              <li>
+                                  <a href="{{ route('dashboard.utama') }}">
+                                      <i class='bx bxs-circle icon-dot'></i>
+                                      <span>Balok SKDN Desa</span>
+                                  </a>
+                              </li>
                               @foreach ($posyandus as $posyandu)
-                                  @if($userRole === 'admin_desa' || $posyandu->nama_posyandu === $userPosyandu)
-                                  <li><a href="{{ route('sip.index', $posyandu->posyandu_id) }}"><i class='bx bxs-circle icon-dot'></i>{{ $posyandu->nama_posyandu }}</a></li>
-                                  @endif
+                              @if($userRole === 'admin_desa' || $posyandu->nama_posyandu === $userPosyandu)
+                              <li>
+                                  <a href="{{ route('sip.index', $posyandu->posyandu_id) }}">
+                                      <i class='bx bxs-circle icon-dot'></i>
+                                      <span>{{ $posyandu->nama_posyandu }}</span>
+                                  </a>
+                              </li>
+                              @endif
                               @endforeach
                           </ul>
                       </li>

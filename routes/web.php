@@ -44,6 +44,8 @@ Route::group(['middleware' => ['auth', 'data.filter']], function () {
 
 // Admin only routes
 Route::group(['middleware' => ['auth', 'role.access:admin_desa', 'data.filter']], function () {
+
+    Route::get('/dashboard-sip', [DashboardController::class, 'getDashboardUtama'])->name('dashboard.utama');  
     // Master data routes
     Route::get('/gizi', [GiziController::class, 'index'])->name('gizi.index');
     Route::get('/gizi/create', [GiziController::class, 'create'])->name('gizi.create');

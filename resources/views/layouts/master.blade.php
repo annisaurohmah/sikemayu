@@ -94,6 +94,46 @@
 
     @yield('scripts')
 
+    <style>
+        /* Custom CSS untuk alignment sidebar menu */
+        .side-dropdown li a {
+            display: flex !important;
+            align-items: center !important;
+            padding: 8px 20px !important;
+            text-decoration: none !important;
+            color: inherit !important;
+        }
+
+        .side-dropdown li a i.icon-dot {
+            width: 16px !important;
+            height: 16px !important;
+            margin-right: 10px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+        }
+
+        .side-dropdown li a span {
+            flex: 1 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            line-height: 1.4 !important;
+        }
+
+        /* Ensure all dropdown items have consistent spacing */
+        .side-dropdown li {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .side-dropdown {
+            padding-left: 0 !important;
+            list-style: none !important;
+        }
+    </style>
+
 </body>
 
 </html>

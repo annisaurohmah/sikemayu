@@ -55,7 +55,7 @@ class SIPController extends Controller
         // Get data for dropdowns
         $dasawismaList = Dasawisma::all();
 
-        // Filter bayi (0-12 bulan) dan balita (1-5 tahun) berdasarkan umur dari tanggal lahir
+        // Filter bayi (0-11 bulan dan 11+1 hari) dan balita (12-59 bulan) berdasarkan umur dari tanggal lahir
         $today = now();
         
         // Ambil nama bayi yang sudah terdaftar di SIP Format 2 untuk posyandu ini (filter berdasarkan tahun lahir)
@@ -68,13 +68,13 @@ class SIPController extends Controller
             ->whereYear('tgl_lahir', $tahun)
             ->pluck('nama_balita')->toArray();
         
-        // Filter bayi yang belum terdaftar di SIP Format 2
-        $bayiList_master = Anak::whereRaw('TIMESTAMPDIFF(MONTH, tanggal_lahir, ?) <= 12', [$today])
+        // Filter bayi yang belum terdaftar di SIP Format 2 (0-11 bulan dan 11+1 hari)
+        $bayiList_master = Anak::whereRaw('TIMESTAMPDIFF(MONTH, tanggal_lahir, ?) < 12', [$today])
             ->whereNotIn('nama_lengkap', $registeredBayi)
             ->get();
             
-        // Filter balita yang belum terdaftar di SIP Format 3
-        $balitaList_master = Anak::whereRaw('TIMESTAMPDIFF(MONTH, tanggal_lahir, ?) > 12 AND TIMESTAMPDIFF(YEAR, tanggal_lahir, ?) <= 5', [$today, $today])
+        // Filter balita yang belum terdaftar di SIP Format 3 (12-59 bulan)
+        $balitaList_master = Anak::whereRaw('TIMESTAMPDIFF(MONTH, tanggal_lahir, ?) >= 12 AND TIMESTAMPDIFF(MONTH, tanggal_lahir, ?) < 60', [$today, $today])
             ->whereNotIn('nama_lengkap', $registeredBalita)
             ->get();
 
@@ -129,18 +129,18 @@ class SIPController extends Controller
             // Tanggal acuan untuk bulan dan tahun yang dipilih
             $tanggalAcuan = Carbon::create($tahun, $bulan, 1);
             
-            // Hitung bayi 0-12 bulan pada bulan tertentu di tahun yang dipilih
+            // Hitung bayi 0-11 bulan dan 11+1 hari pada bulan tertentu di tahun yang dipilih
             // Hanya menghitung bayi yang terdaftar dan aktif pada periode tersebut
-            $bayi012 = Sip2::whereRaw("TIMESTAMPDIFF(MONTH, tgl_lahir, ?) <= 12", [$tanggalAcuan])
+            $bayi012 = Sip2::whereRaw("TIMESTAMPDIFF(MONTH, tgl_lahir, ?) < 12", [$tanggalAcuan])
                 ->whereRaw("TIMESTAMPDIFF(MONTH, tgl_lahir, ?) >= 0", [$tanggalAcuan])
                 ->where('posyandu_id', $posyandu_id)
                 ->whereYear('tgl_lahir', '>=', $tahun - 1) // Filter: hanya bayi lahir maksimal 1 tahun sebelum tahun dipilih
                 ->whereYear('tgl_lahir', '<=', $tahun) // Filter: hanya bayi lahir sampai tahun dipilih
                 ->count();
 
-            // Hitung balita 1-5 tahun pada bulan tertentu di tahun yang dipilih
+            // Hitung balita 12-59 bulan pada bulan tertentu di tahun yang dipilih
             // Hanya menghitung balita yang terdaftar dan aktif pada periode tersebut
-            $balita15 = Sip3::whereRaw("TIMESTAMPDIFF(MONTH, tgl_lahir, ?) > 12 AND TIMESTAMPDIFF(YEAR, tgl_lahir, ?) <= 5", [
+            $balita15 = Sip3::whereRaw("TIMESTAMPDIFF(MONTH, tgl_lahir, ?) >= 12 AND TIMESTAMPDIFF(MONTH, tgl_lahir, ?) < 60", [
                 $tanggalAcuan,
                 $tanggalAcuan
             ])->where('posyandu_id', $posyandu_id)
@@ -1458,7 +1458,7 @@ class SIPController extends Controller
     //         $labels[] = \Carbon\Carbon::create()->month($item->bulan)->format('M'); // ex: JAN, FEB
     //         $dataS[] = $item->balita_sasaran ?? 0;
     //         $dataK[] = $item->balita_punya_buku ?? 0;
-    //         $dataD[] = $item->balita_ditimbang ?? 0;
+    //         $dataD[]  mmmm,,,,,,,,,,,,,,,,,,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       = $item->balita_ditimbang ?? 0;
     //         $dataN[] = $item->balita_naik ?? 0;
     //     }
 
