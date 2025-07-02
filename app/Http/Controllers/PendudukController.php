@@ -10,10 +10,78 @@ class PendudukController extends Controller
 {
     public function index()
     {
-        $penduduk = Penduduk::with('rwData')->get(); // Load relasi RW data
+        // Check if this is an AJAX request for DataTable
+        if (request()->ajax()) {
+            return $this->getDataTableData();
+        }
+        
         $rw = Rw::all(); // Get all RW data for dropdown
-        // Logic to retrieve and display the list of residents
-        return view('masterdata.penduduk', compact('penduduk', 'rw'));
+        // For initial page load, don't load all penduduk data
+        return view('masterdata.penduduk', compact('rw'));
+    }
+    
+    /**
+     * Get data for DataTable with server-side processing
+     */
+    public function getDataTableData()
+    {
+        $draw = request()->get('draw');
+        $start = request()->get('start');
+        $length = request()->get('length');
+        $search = request()->get('search');
+        
+        // Select only necessary columns to improve performance
+        $query = Penduduk::select([
+            'nik', 'no_kk', 'nama', 'jenis_kelamin', 'tanggal_lahir', 
+            'shdk', 'bpjs', 'faskes', 'pendidikan', 'pekerjaan', 
+            'alamat', 'rt', 'rw'
+        ])->with(['rwData:rw_id,no_rw']);
+        
+        // Search functionality
+        if (!empty($search['value'])) {
+            $searchTerm = $search['value'];
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('nik', 'like', "%{$searchTerm}%")
+                  ->orWhere('no_kk', 'like', "%{$searchTerm}%")
+                  ->orWhere('nama', 'like', "%{$searchTerm}%")
+                  ->orWhere('alamat', 'like', "%{$searchTerm}%");
+            });
+        }
+        
+        $totalRecords = Penduduk::count();
+        $filteredRecords = $query->count();
+        
+        $penduduk = $query->skip($start)
+                         ->take($length)
+                         ->get();
+        
+        $data = [];
+        foreach ($penduduk as $index => $item) {
+            $data[] = [
+                'DT_RowIndex' => $start + $index + 1,
+                'nik' => $item->nik,
+                'no_kk' => $item->no_kk,
+                'nama' => $item->nama,
+                'jenis_kelamin' => $item->jenis_kelamin,
+                'tanggal_lahir' => $item->tanggal_lahir ? $item->tanggal_lahir->format('d-m-Y') : '',
+                'shdk' => $item->shdk,
+                'bpjs' => $item->bpjs,
+                'faskes' => $item->faskes,
+                'pendidikan' => $item->pendidikan,
+                'pekerjaan' => $item->pekerjaan,
+                'alamat' => $item->alamat,
+                'rt' => $item->rt,
+                'rw' => $item->rwData ? $item->rwData->no_rw : $item->rw,
+                'actions' => view('masterdata.penduduk_actions', compact('item'))->render()
+            ];
+        }
+        
+        return response()->json([
+            'draw' => $draw,
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $data
+        ]);
     }
 
     public function create()
@@ -57,8 +125,19 @@ class PendudukController extends Controller
 
     public function edit($id)
     {
-        // Logic to show the form for editing an existing resident
-        return view('penduduk.edit', compact('id'));
+        $penduduk = Penduduk::with('rwData')->findOrFail($id);
+        $rw = Rw::all();
+        
+        return view('includes.edit_delete_penduduk', compact('penduduk', 'rw'))
+               ->with('modalType', 'edit');
+    }
+    
+    public function getDeleteModal($id)
+    {
+        $penduduk = Penduduk::findOrFail($id);
+        
+        return view('includes.edit_delete_penduduk', compact('penduduk'))
+               ->with('modalType', 'delete');
     }
 
     public function update(Request $request, $id)

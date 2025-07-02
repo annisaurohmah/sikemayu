@@ -1,3 +1,4 @@
+@if(!isset($modalType) || $modalType == 'edit')
 <!-- Edit -->
 <div class="modal fade" id="edit{{$penduduk->nik}}">
     <div class="modal-dialog modal-lg">
@@ -147,6 +148,9 @@
         </div>
     </div>
 </div>
+@endif
+
+@if(!isset($modalType) || $modalType == 'delete')
 <!-- Delete -->
 <div class="modal fade" id="delete{{ $penduduk->nik }}">
     <div class="modal-dialog">
@@ -174,3 +178,4 @@
         </div>
     </div>
 </div>
+@endif

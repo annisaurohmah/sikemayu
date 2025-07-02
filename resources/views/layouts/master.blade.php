@@ -16,6 +16,90 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* CRITICAL FIX: Override the main wrapper height and overflow restrictions */
+        #wrapper {
+            height: auto !important;
+            min-height: 100vh !important;
+            overflow: visible !important;
+            overflow-y: auto !important;
+        }
+
+        /* Fix scroll issues for long tables */
+        html,
+        body {
+            overflow-x: auto !important;
+            overflow-y: auto !important;
+            height: auto !important;
+            max-height: none !important;
+            min-height: 100vh !important;
+        }
+
+        .content-page {
+            overflow: visible !important;
+            height: auto !important;
+            max-height: none !important;
+            min-height: calc(100vh - 70px) !important;
+        }
+
+        .content {
+            overflow: visible !important;
+            height: auto !important;
+            max-height: none !important;
+            padding-bottom: 50px !important;
+        }
+
+        .container-fluid {
+            overflow: visible !important;
+            height: auto !important;
+            max-height: none !important;
+        }
+
+        .page-content-wrapper {
+            overflow: visible !important;
+            height: auto !important;
+            max-height: none !important;
+        }
+
+        /* Ensure table container can scroll */
+        .table-responsive {
+            overflow-x: auto !important;
+            overflow-y: visible !important;
+            max-height: none !important;
+            height: auto !important;
+        }
+
+        /* DataTable specific fixes */
+        .dataTables_wrapper {
+            overflow: visible !important;
+            clear: both !important;
+        }
+
+        .card-body {
+            overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
+            padding-bottom: 30px !important;
+        }
+
+        .card {
+            overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
+            margin-bottom: 30px !important;
+        }
+
+        /* Fix for sidebar scroll issues */
+        .left.side-menu {
+            height: 100vh !important;
+            overflow-y: auto !important;
+        }
+
+        /* Ensure page has proper bottom margin */
+        .row:last-child {
+            margin-bottom: 50px !important;
+        }
+    </style>
 
     @include('layouts.head')
 </head>
@@ -46,7 +130,7 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <!-- Popper.js (for Bootstrap 4 tooltips) -->
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-  
+
 
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>

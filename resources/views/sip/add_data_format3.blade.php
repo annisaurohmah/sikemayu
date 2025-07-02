@@ -65,10 +65,9 @@
                                             </div>
                                         </div>
                                         <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="tgl_lahir_manual_balita">Tanggal Lahir <span class="text-danger">*</span></label>
-                                                <input type="date" class="form-control" id="tgl_lahir_manual_balita" name="tgl_lahir_manual" max="{{ date('Y-m-d') }}" />
-                                                <small class="form-text text-muted">Tanggal lahir balita (1-5 tahun yang lalu)</small>
+                                            <div class="form-group">                                <label for="tgl_lahir_manual_balita">Tanggal Lahir</label>
+                                <input type="date" class="form-control" id="tgl_lahir_manual_balita" name="tgl_lahir_manual" max="{{ date('Y-m-d') }}" />
+                                <small class="form-text text-muted">Tanggal lahir balita (1-5 tahun yang lalu) - opsional</small>
                                             </div>
                                         </div>
                                     </div>
@@ -84,13 +83,13 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="bbl_kg">Berat Badan Lahir (kg)</label>
-                                    <input type="number" step="0.1" class="form-control" placeholder="Masukkan berat badan lahir" id="bbl_kg" name="bbl_kg" required />
+                                    <input type="number" step="0.1" class="form-control" placeholder="Masukkan berat badan lahir" id="bbl_kg" name="bbl_kg" />
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="dasawisma_id">Dasawisma</label>
-                                    <select class="form-control" id="dasawisma_id" name="dasawisma_id" required>
+                                    <select class="form-control" id="dasawisma_id" name="dasawisma_id">
                                         <option value="">Pilih Dasawisma</option>
                                         @if(isset($dasawismaList))
                                         @foreach($dasawismaList as $dasawisma)
@@ -104,12 +103,12 @@
 
                         <div class="form-group">
                             <label for="nama_ayah">Nama Ayah</label>
-                            <input type="text" class="form-control" placeholder="Masukkan nama ayah" id="nama_ayah" name="nama_ayah" required />
+                            <input type="text" class="form-control" placeholder="Masukkan nama ayah" id="nama_ayah" name="nama_ayah" />
                         </div>
 
                         <div class="form-group">
                             <label for="nama_ibu">Nama Ibu</label>
-                            <input type="text" class="form-control" placeholder="Masukkan nama ibu" id="nama_ibu" name="nama_ibu" required />
+                            <input type="text" class="form-control" placeholder="Masukkan nama ibu" id="nama_ibu" name="nama_ibu" />
                         </div>
                 </div>
 
@@ -154,11 +153,9 @@
         } else if (targetTab === '#manual_input_balita') {
             // Manual mode
             // Clear database inputs and remove required
-            $('#nama_balita_db').val(null).trigger('change').removeAttr('required');
-            
-            // Set manual inputs as required
-            $('#nama_balita_manual').attr('required', 'required');
-            $('#tgl_lahir_manual_balita').attr('required', 'required');
+            $('#nama_balita_db').val(null).trigger('change').removeAttr('required');                // Set manual inputs as required (only name)
+                $('#nama_balita_manual').attr('required', 'required');
+                // Note: Date is optional
             
             // Clear auto-filled parent names
             $('#nama_ayah').val('');
@@ -245,11 +242,11 @@
                     tglLahir
                 });
 
-                if (!namaBalita || !tglLahir) {
-                    errorMessage = 'Silakan lengkapi nama balita dan tanggal lahir!';
+                if (!namaBalita) {
+                    errorMessage = 'Silakan lengkapi nama balita!';
                     isValid = false;
-                } else {
-                    // Validate date (must be within 1-5 years old)
+                } else if (tglLahir) {
+                    // Only validate date if it's provided (optional)
                     const tglLahirDate = new Date(tglLahir);
                     const today = new Date();
                     const monthsDiff = (today.getFullYear() - tglLahirDate.getFullYear()) * 12 + (today.getMonth() - tglLahirDate.getMonth());
@@ -264,9 +261,13 @@
                         errorMessage = 'Tanggal lahir harus dalam rentang 1-5 tahun dari sekarang untuk kategori balita!';
                         isValid = false;
                     }
-                }            // Update hidden fields one more time before submit
-            $('#nama_balita').val(namaBalita);
-            $('#tgl_lahir').val(tglLahir);
+                }
+
+                // Update hidden fields one more time before submit
+                $('#nama_balita').val(namaBalita);
+                if (tglLahir) {
+                    $('#tgl_lahir').val(tglLahir);
+                }
         }
         
         if (!isValid) {

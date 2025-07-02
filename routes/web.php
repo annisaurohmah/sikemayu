@@ -13,6 +13,7 @@ use App\Http\Controllers\PosyanduController;
 use App\Http\Controllers\BayiBalitaController;
 use App\Models\Penduduk;
 use App\Http\Controllers\PendudukController;
+use App\Http\Controllers\PokjaController;
 use App\Models\User;
 use App\Http\Controllers\RWController;
 use App\Http\Controllers\UserController;
@@ -61,7 +62,7 @@ Route::group(['middleware' => ['auth', 'role.access:admin_desa', 'data.filter']]
     Route::delete('/anak/delete/{nik}', [BayiBalitaController::class, 'destroy'])->name('anak.delete');
     Route::put('/bayi/update/{nik}', [BayiBalitaController::class, 'update'])->name('bayi.update');
     Route::delete('/bayi/delete/{nik}', [BayiBalitaController::class, 'destroy'])->name('bayi.delete');
-    
+
     // Debug route
     Route::get('/debug/anak/{nik}', function($nik) {
         return 'NIK received: ' . $nik;
@@ -76,6 +77,7 @@ Route::group(['middleware' => ['auth', 'role.access:admin_desa', 'data.filter']]
     Route::get('/penduduk/create', [PendudukController::class, 'create'])->name('penduduk.create');
     Route::post('/penduduk/store', [PendudukController::class, 'store'])->name('penduduk.store');
     Route::get('/penduduk/edit/{id}', [PendudukController::class, 'edit'])->name('penduduk.edit');
+    Route::get('/penduduk/delete-modal/{id}', [PendudukController::class, 'getDeleteModal'])->name('penduduk.deleteModal');
     Route::post('/penduduk/update/{id}', [PendudukController::class, 'update'])->name('penduduk.update');
     Route::post('/penduduk/delete/{id}', [PendudukController::class, 'delete'])->name('penduduk.delete');
 
@@ -93,16 +95,14 @@ Route::group(['middleware' => ['auth', 'role.access:admin_desa', 'data.filter']]
     Route::post('/dasawisma/store', [DasawismaController::class, 'storeMasterdata'])->name('dasawisma.store');
     Route::post('/dasawisma/update', [DasawismaController::class, 'updateMasterdata'])->name('dasawisma.update');
     Route::post('/dasawisma/delete', [DasawismaController::class, 'deleteMasterdata'])->name('dasawisma.delete');
-});
 
-// Admin and Kader RW routes (Dasawisma)
-Route::group(['middleware' => ['auth', 'role.access:admin_desa,admin_rw', 'data.filter']], function () {
-    Route::get('rekap/dasawisma', [DasawismaController::class, 'indexRekap'])->name('dasawisma.rekap');
-    Route::get('rekap/dasawisma/create', [DasawismaController::class, 'createRekap'])->name('dasawisma.rekap.create');
-    Route::post('rekap/dasawisma/store', [DasawismaController::class, 'storeRekap'])->name('dasawisma.rekap.store');
-    Route::get('rekap/dasawisma/edit/{id}', [DasawismaController::class, 'editRekap'])->name('dasawisma.rekap.edit');
-    Route::post('rekap/dasawisma/update/{id}', [DasawismaController::class, 'updateRekap'])->name('dasawisma.rekap.update');
-    Route::post('rekap/dasawisma/delete/{id}', [DasawismaController::class, 'deleteRekap'])->name('dasawisma.rekap.delete');
+    // Pokja routes - moved inside admin middleware group
+    Route::prefix('pokja')->group(function() {
+        Route::get('/{pokjaType?}', [PokjaController::class, 'index'])->name('pokja.index');
+        Route::post('/store', [PokjaController::class, 'store'])->name('pokja.store');
+        Route::put('/update/{id}', [PokjaController::class, 'update'])->name('pokja.update');
+        Route::delete('/delete/{id}', [PokjaController::class, 'destroy'])->name('pokja.destroy');
+    });
 });
 
 // Admin and Kader Posyandu routes (SIP)
@@ -150,13 +150,8 @@ Route::group(['middleware' => ['auth', 'role.access:admin_desa,admin_kader', 'da
     Route::delete('/dokumentasi/delete/{id}', [SIPController::class, 'deleteDokumentasi'])->name('dokumentasi.delete');
 });
 
-// Dasawisma routes - Admin and Kader RW
+// Admin and Kader RW routes (Dasawisma)
 Route::group(['middleware' => ['auth', 'role.access:admin_desa,admin_rw', 'data.filter']], function () {
-    Route::get('/dasawisma', [DasawismaController::class, 'index'])->name('dasawisma.index');
-    Route::post('/dasawisma/store', [DasawismaController::class, 'storeMasterdata'])->name('dasawisma.store');
-    Route::post('/dasawisma/update', [DasawismaController::class, 'updateMasterdata'])->name('dasawisma.update');
-    Route::post('/dasawisma/delete', [DasawismaController::class, 'deleteMasterdata'])->name('dasawisma.delete');
-
     Route::get('rekap/dasawisma', [DasawismaController::class, 'indexRekap'])->name('dasawisma.rekap');
     Route::get('rekap/dasawisma/create', [DasawismaController::class, 'createRekap'])->name('dasawisma.rekap.create');
     Route::post('rekap/dasawisma/store', [DasawismaController::class, 'storeRekap'])->name('dasawisma.rekap.store');
@@ -164,51 +159,3 @@ Route::group(['middleware' => ['auth', 'role.access:admin_desa,admin_rw', 'data.
     Route::post('rekap/dasawisma/update/{id}', [DasawismaController::class, 'updateRekap'])->name('dasawisma.rekap.update');
     Route::post('rekap/dasawisma/delete/{id}', [DasawismaController::class, 'deleteRekap'])->name('dasawisma.rekap.delete');
 });
-
-// Master data routes - Admin only
-Route::group(['middleware' => ['auth', 'role.access:admin_desa', 'data.filter']], function () {
-    Route::get('/gizi', [GiziController::class, 'index'])->name('gizi.index');
-    Route::get('/gizi/create', [GiziController::class, 'create'])->name('gizi.create');
-    Route::post('/gizi/store', [GiziController::class, 'store'])->name('gizi.store');
-    Route::get('/gizi/edit/{id}', [GiziController::class, 'edit'])->name('gizi.edit');
-    Route::post('/gizi/update/{id}', [GiziController::class, 'update'])->name('gizi.update');
-    Route::post('/gizi/delete/{id}', [GiziController::class, 'delete'])->name('gizi.delete');
-
-    Route::get('/anak/bayi', [BayiBalitaController::class, 'showBayi'])->name('bayi.show');
-    Route::get('/anak/balita', [BayiBalitaController::class, 'showBalita'])->name('balita.show');
-    Route::post('/anak/store', [BayiBalitaController::class, 'store'])->name('anak.store');
-    Route::put('/anak/update/{nik}', [BayiBalitaController::class, 'update'])->name('anak.update');
-    Route::delete('/anak/delete/{nik}', [BayiBalitaController::class, 'destroy'])->name('anak.delete');
-    Route::put('/bayi/update/{nik}', [BayiBalitaController::class, 'update'])->name('bayi.update');
-    Route::delete('/bayi/delete/{nik}', [BayiBalitaController::class, 'destroy'])->name('bayi.delete');
-    
-    // Debug route
-    Route::get('/debug/anak/{nik}', function($nik) {
-        return 'NIK received: ' . $nik;
-    });
-
-    Route::get('/posyandu', [PosyanduController::class, 'index'])->name('posyandu.index');
-    Route::post('/posyandu/store', [PosyanduController::class, 'store'])->name('posyandu.store');
-    Route::post('/posyandu/update', [PosyanduController::class, 'update'])->name('posyandu.update');
-    Route::post('/posyandu/delete', [PosyanduController::class, 'delete'])->name('posyandu.delete');
-
-    Route::get('/penduduk' , [PendudukController::class, 'index'])->name('penduduk.index');
-    Route::get('/penduduk/create', [PendudukController::class, 'create'])->name('penduduk.create');
-    Route::post('/penduduk/store', [PendudukController::class, 'store'])->name('penduduk.store');
-    Route::get('/penduduk/edit/{id}', [PendudukController::class, 'edit'])->name('penduduk.edit');
-    Route::post('/penduduk/update/{id}', [PendudukController::class, 'update'])->name('penduduk.update');
-    Route::post('/penduduk/delete/{id}', [PendudukController::class, 'delete'])->name('penduduk.delete');
-
-    Route::get('/user', [UserController::class, 'index'])->name('user.index');
-    Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
-    Route::post('/user/update', [UserController::class, 'update'])->name('user.update');
-    Route::post('/user/delete', [UserController::class, 'delete'])->name('user.delete');
-
-    Route::get('rw/', [RWController::class, 'index'])->name('rw.index');
-    Route::post('rw/store', [RWController::class, 'store'])->name('rw.store');
-    Route::post('rw/update', [RWController::class, 'update'])->name('rw.update');
-    Route::post('rw/delete', [RWController::class, 'delete'])->name('rw.delete');
-
-});
-
-

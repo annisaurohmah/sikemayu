@@ -85,9 +85,9 @@
                             </div>
                         </div>
 
-                        <!-- Hasil Penimbangan (TB/BB) per Bulan -->
+                        <!-- Hasil Penimbangan (BB dan Umur Kehamilan) per Bulan -->
                         <div class="form-group">
-                            <label><strong>Hasil Penimbangan (TB/BB) per Bulan (Opsional)</strong></label>
+                            <label><strong>Hasil Penimbangan (BB dan Umur Kehamilan) per Bulan (Opsional)</strong></label>
                             <div class="row">
                                 @foreach(['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGS', 'SEP', 'OKT', 'NOV', 'DES'] as $index => $bulan)
                                 @php $bulanNumber = $index + 1; @endphp
@@ -96,13 +96,13 @@
                                     <div class="row">
                                         <div class="col-6">
                                             <input type="number" step="0.1" class="form-control form-control-sm" 
-                                                   placeholder="TB" id="tb_{{ $bulanNumber }}" name="tb_{{ $bulanNumber }}" />
-                                            <small class="text-muted">TB (cm)</small>
-                                        </div>
-                                        <div class="col-6">
-                                            <input type="number" step="0.1" class="form-control form-control-sm" 
                                                    placeholder="BB" id="bb_{{ $bulanNumber }}" name="bb_{{ $bulanNumber }}" />
                                             <small class="text-muted">BB (kg)</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" class="form-control form-control-sm" 
+                                                   placeholder="UK" id="uk_{{ $bulanNumber }}" name="uk_{{ $bulanNumber }}" />
+                                            <small class="text-muted">UK (minggu)</small>
                                         </div>
                                     </div>
                                 </div>

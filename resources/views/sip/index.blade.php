@@ -62,7 +62,7 @@
             <!-- Tabs -->
             <ul class="nav nav-tabs mb-3" id="pills-tab" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link active" data-toggle="tab" href="#dashboard">Dashboard</a>
+                    <a class="nav-link" data-toggle="tab" href="#dashboard">Dashboard</a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a class="nav-link" data-toggle="tab" href="#format1">Format 1</a>
@@ -128,19 +128,31 @@
 
 <script>
     $(document).ready(function() {
+        // Initialize default tab
+        var defaultTab = 'dashboard';
+        var targetTab = defaultTab;
+        
         // Check if there's an active tab from session
         @if(session('activeTab'))
-            var activeTab = '{{ session('activeTab') }}';
-            console.log('Activating tab from session:', activeTab);
-            
-            // Remove active class from all tabs and content
-            $('.nav-tabs .nav-link').removeClass('active');
-            $('.tab-content .tab-pane').removeClass('show active');
-            
-            // Activate the specific tab
-            $('a[href="#' + activeTab + '"]').addClass('active');
-            $('#' + activeTab).addClass('show active');
+            targetTab = '{{ session('activeTab') }}';
+            console.log('Activating tab from session:', targetTab);
+        @else
+            console.log('No session tab found, defaulting to:', defaultTab);
         @endif
+        
+        // Ensure all tabs start clean
+        $('.nav-tabs .nav-link').removeClass('active');
+        $('.tab-content .tab-pane').removeClass('show active');
+        
+        // Activate the target tab
+        $('a[href="#' + targetTab + '"]').addClass('active');
+        $('#' + targetTab).addClass('show active');
+        
+        // Trigger Bootstrap tab event to ensure proper activation
+        $('a[href="#' + targetTab + '"]').tab('show');
+        
+        // Debug: Log which tab was activated
+        console.log('Tab activated successfully:', targetTab);
 
         // Initialize DataTables
         $('#table-format1').DataTable({

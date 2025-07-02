@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tab Persistence</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Test Tab Persistence Logic</h2>
+        
+        <div class="alert alert-info">
+            <p>Test Cases:</p>
+            <ul>
+                <li>Click "Simulate Format 2 Save" to test if Format 2 tab activates</li>
+                <li>Click "Simulate Format 3 Save" to test if Format 3 tab activates</li>
+                <li>Check browser console for debug messages</li>
+            </ul>
+        </div>
+        
+        <div class="mb-3">
+            <button class="btn btn-primary" onclick="simulateFormat2Save()">Simulate Format 2 Save</button>
+            <button class="btn btn-success" onclick="simulateFormat3Save()">Simulate Format 3 Save</button>
+            <button class="btn btn-secondary" onclick="resetTabs()">Reset to Default</button>
+        </div>
+        
+        <!-- Replicated Tab Structure -->
+        <ul class="nav nav-tabs mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" data-toggle="tab" href="#dashboard">Dashboard</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" data-toggle="tab" href="#format1">Format 1</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" data-toggle="tab" href="#format2">Format 2</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" data-toggle="tab" href="#format3">Format 3</a>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content mt-2" id="dataTabsContent">
+            <div class="tab-pane fade" id="dashboard" role="tabpanel">
+                <h4>Dashboard Content</h4>
+                <p>This is the dashboard tab content.</p>
+            </div>
+            <div class="tab-pane fade" id="format1" role="tabpanel">
+                <h4>Format 1 Content</h4>
+                <p>This is the format 1 tab content.</p>
+            </div>
+            <div class="tab-pane fade" id="format2" role="tabpanel">
+                <h4>Format 2 Content</h4>
+                <p>This is the format 2 tab content.</p>
+            </div>
+            <div class="tab-pane fade" id="format3" role="tabpanel">
+                <h4>Format 3 Content</h4>
+                <p>This is the format 3 tab content.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function activateTab(targetTab) {
+            console.log('Activating tab:', targetTab);
+            
+            // Ensure all tabs start clean
+            $('.nav-tabs .nav-link').removeClass('active');
+            $('.tab-content .tab-pane').removeClass('show active');
+            
+            // Activate the target tab
+            $('a[href="#' + targetTab + '"]').addClass('active');
+            $('#' + targetTab).addClass('show active');
+            
+            // Trigger Bootstrap tab event to ensure proper activation
+            $('a[href="#' + targetTab + '"]').tab('show');
+            
+            console.log('Tab activated successfully:', targetTab);
+        }
+        
+        function simulateFormat2Save() {
+            console.log('Simulating Format 2 save...');
+            activateTab('format2');
+        }
+        
+        function simulateFormat3Save() {
+            console.log('Simulating Format 3 save...');
+            activateTab('format3');
+        }
+        
+        function resetTabs() {
+            console.log('Resetting to default tab...');
+            activateTab('dashboard');
+        }
+        
+        // Initialize default tab on page load
+        $(document).ready(function() {
+            console.log('Page loaded, setting default tab...');
+            activateTab('dashboard');
+        });
+    </script>
+</body>
+</html>

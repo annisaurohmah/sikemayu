@@ -1,5 +1,5 @@
 <!-- Tab Dashboard: Visualisasi Data Balok SKDN -->
-<div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+<div class="tab-pane fade" id="dashboard" role="tabpanel">
 
     <div class="alert alert-info mt-2 mb-2">
         <i class="fa fa-bar-chart"></i> Dashboard Balok SKDN - Sistem Informasi Posyandu 

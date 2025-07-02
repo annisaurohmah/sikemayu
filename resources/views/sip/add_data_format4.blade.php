@@ -57,10 +57,20 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="nama_suami">Nama Suami</label>
-                                    <input type="text" class="form-control" placeholder="Masukkan nama suami" id="nama_suami" name="nama_suami" required />
+                                    <label for="status_perkawinan">Status Perkawinan</label>
+                                    <select class="form-control" id="status_perkawinan" name="status_perkawinan" required>
+                                        <option value="">Pilih Status Perkawinan</option>
+                                        <option value="belum_menikah">Belum Menikah</option>
+                                        <option value="menikah">Menikah</option>
+                                        <option value="janda">Janda</option>
+                                    </select>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="form-group" id="nama_suami_group" style="display: none;">
+                            <label for="nama_suami">Nama Suami</label>
+                            <input type="text" class="form-control" placeholder="Masukkan nama suami" id="nama_suami" name="nama_suami" />
                         </div>
 
                         <div class="form-group">
@@ -204,5 +214,23 @@
             dateInputs.forEach(function(input) {
                 input.setAttribute('max', today);
             });
+
+            // Handle status perkawinan change
+            const statusPerkawinanSelect = document.getElementById('status_perkawinan');
+            const namaSuamiGroup = document.getElementById('nama_suami_group');
+            const namaSuamiInput = document.getElementById('nama_suami');
+
+            if (statusPerkawinanSelect && namaSuamiGroup && namaSuamiInput) {
+                statusPerkawinanSelect.addEventListener('change', function() {
+                    if (this.value === 'menikah') {
+                        namaSuamiGroup.style.display = 'block';
+                        namaSuamiInput.required = true;
+                    } else {
+                        namaSuamiGroup.style.display = 'none';
+                        namaSuamiInput.required = false;
+                        namaSuamiInput.value = '';
+                    }
+                });
+            }
         });
     </script>

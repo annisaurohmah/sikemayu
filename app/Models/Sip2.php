@@ -110,4 +110,22 @@ class Sip2 extends Model
 	{
 		return $this->hasOne(Sip2KeteranganBalita::class, 'bayi_id');
 	}
+
+	/**
+	 * Boot method untuk menambahkan model events
+	 */
+	protected static function boot()
+	{
+		parent::boot();
+
+		// Event ketika model akan dihapus
+		static::deleting(function ($sip2) {
+			// Hapus semua data terkait secara otomatis
+			$sip2->sip2_imunisasis()->delete();
+			$sip2->sip2_penimbangans()->delete();
+			$sip2->sip2_pelayanans()->delete();
+			$sip2->sip2_pemberianasis()->delete();
+			$sip2->sip2_keteranganbalita()->delete();
+		});
+	}
 }

@@ -94,13 +94,13 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="bbl_kg">Berat Badan Lahir (kg)</label>
-                                    <input type="number" step="0.1" class="form-control" placeholder="Masukkan berat badan lahir" id="bbl_kg" name="bbl_kg" required />
+                                    <input type="number" step="0.1" class="form-control" placeholder="Masukkan berat badan lahir" id="bbl_kg" name="bbl_kg" />
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="dasawisma_id">Dasawisma</label>
-                                    <select class="form-control" id="dasawisma_id" name="dasawisma_id" required>
+                                    <select class="form-control" id="dasawisma_id" name="dasawisma_id">
                                         <option value="">Pilih Dasawisma</option>
                                         @if(isset($dasawismaList))
                                         @foreach($dasawismaList as $dasawisma)
@@ -114,12 +114,12 @@
 
                         <div class="form-group">
                             <label for="nama_ayah">Nama Ayah</label>
-                            <input type="text" class="form-control" placeholder="Masukkan nama ayah" id="nama_ayah" name="nama_ayah" required />
+                            <input type="text" class="form-control" placeholder="Masukkan nama ayah" id="nama_ayah" name="nama_ayah" />
                         </div>
 
                         <div class="form-group">
                             <label for="nama_ibu">Nama Ibu</label>
-                            <input type="text" class="form-control" placeholder="Masukkan nama ibu" id="nama_ibu" name="nama_ibu" required />
+                            <input type="text" class="form-control" placeholder="Masukkan nama ibu" id="nama_ibu" name="nama_ibu" />
                         </div>
                         <div class="form-group">
                             <div>
@@ -167,7 +167,7 @@
                 // Manual tab active
                 $('#nama_bayi_db').removeAttr('required');
                 $('#nama_bayi_manual').attr('required', 'required');
-                $('#tgl_lahir_manual').attr('required', 'required');
+                // Note: Other fields are optional
 
                 // Clear database inputs
                 $('#nama_bayi_db').val('').trigger('change');
@@ -188,10 +188,13 @@
             const namaOrangtua = selectedOption.data('orangtua');
             const tglLahir = selectedOption.data('tgl');
 
-            // Set hidden fields
-            $('#nama_bayi').val($(this).val());
+            console.log('Database selection changed:', {
+                nama: $(this).val(),
+                tglLahir: tglLahir,
+                namaOrangtua: namaOrangtua
+            });
 
-            // Handle tanggal lahir
+            // Set hidden field nama_bayi
             $('#nama_bayi').val($(this).val());
 
             // Handle tanggal lahir
@@ -206,8 +209,10 @@
                     }
                 }
                 $('#tgl_lahir').val(formattedDate);
+                console.log('Set tgl_lahir to:', formattedDate);
             }
 
+            // Handle nama orang tua
             if (namaOrangtua) {
                 const orangtuaParts = namaOrangtua.split('/');
                 if (orangtuaParts.length >= 2) {
@@ -237,63 +242,26 @@
     // Form validation before submit
     function setupFormValidation() {
         $('#addnewformat2 form').off('submit').on('submit', function(e) {
-            const activeTab = $('#inputTypeTab .nav-link.active').attr('href');
-            let isValid = true;
-            let errorMessage = '';
-
-            console.log('Form submitting with active tab:', activeTab);
-
-            if (activeTab === '#database_input') {
-                if (!$('#nama_bayi_db').val()) {
-                    errorMessage = 'Silakan pilih bayi dari database!';
-                    isValid = false;
-                }
-            } else if (activeTab === '#manual_input') {
-                const namaBayi = $('#nama_bayi_manual').val().trim();
-                const tglLahir = $('#tgl_lahir_manual').val();
-
-                console.log('Manual input values:', {
-                    namaBayi,
-                    tglLahir
-                });
-
-                if (!namaBayi || !tglLahir) {
-                    errorMessage = 'Silakan lengkapi nama bayi dan tanggal lahir!';
-                    isValid = false;
-                } else {
-                    // Validate date (must be within 0-12 months old)
-                    const tglLahirDate = new Date(tglLahir);
-                    const today = new Date();
-                    const monthsDiff = (today.getFullYear() - tglLahirDate.getFullYear()) * 12 + (today.getMonth() - tglLahirDate.getMonth());
-
-                    if (tglLahirDate > today) {
-                        errorMessage = 'Tanggal lahir tidak boleh di masa depan!';
-                        isValid = false;
-                    } else if (monthsDiff > 12) {
-                        errorMessage = 'Tanggal lahir harus dalam rentang 0-12 bulan dari sekarang untuk kategori bayi!';
-                        isValid = false;
-                    }
-                }
-
-                // Update hidden fields one more time before submit
-                $('#nama_bayi').val(namaBayi);
-                $('#tgl_lahir').val(tglLahir);
-            }
-
-            if (!isValid) {
+            console.log('Form is submitting...');
+            
+            // Simplified validation - just check if we have at least a name
+            const namaBayiDB = $('#nama_bayi_db').val();
+            const namaBayiManual = $('#nama_bayi_manual').val();
+            
+            if (!namaBayiDB && !namaBayiManual) {
                 e.preventDefault();
-                alert(errorMessage);
+                alert('Silakan isi nama bayi!');
                 return false;
             }
-
-            // Final check - make sure hidden fields have values
-            if (!$('#nama_bayi').val()) {
-                e.preventDefault();
-                alert('Error: Nama bayi tidak terdeteksi. Silakan coba lagi.');
-                return false;
+            
+            // Set hidden fields
+            if (namaBayiDB) {
+                $('#nama_bayi').val(namaBayiDB);
+            } else if (namaBayiManual) {
+                $('#nama_bayi').val(namaBayiManual);
             }
-
-            console.log('Form validation passed, submitting...');
+            
+            console.log('Form validation passed, submitting with nama_bayi:', $('#nama_bayi').val());
             return true;
         });
     }

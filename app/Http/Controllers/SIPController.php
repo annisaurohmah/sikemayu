@@ -22,7 +22,6 @@ use App\Models\Sip5Vitaminaibuhamil;
 use App\Models\Sip6;
 use App\Models\DokumentasiKegiatan;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\HasYearFilter;
 use App\Traits\HasDataAccess;
@@ -663,48 +662,71 @@ class SIPController extends Controller
     // SIP2 CRUD Methods
     public function storeSip2(Request $request)
     {
+        // Cek apakah method dipanggil
+        file_put_contents(storage_path('logs/debug.log'), date('Y-m-d H:i:s') . " - SIP2 Store method called\n", FILE_APPEND);
+        file_put_contents(storage_path('logs/debug.log'), "Request data: " . print_r($request->all(), true) . "\n", FILE_APPEND);
+        
+        error_log('=== SIP2 Store Method Called ===');
+        error_log('Method: ' . $request->method());
+        error_log('URL: ' . $request->url());
+        
         // Debug: Log semua data yang diterima
-        /*
-        \Log::info('SIP2 Store Request Data:', [
+        error_log('SIP2 Store Request Data: ' . json_encode([
             'nama_bayi' => $request->nama_bayi,
             'nama_bayi_manual' => $request->nama_bayi_manual,
             'tgl_lahir' => $request->tgl_lahir,
             'tgl_lahir_manual' => $request->tgl_lahir_manual,
             'all_data' => $request->all()
-        ]);
-        */
+        ]));
         
-        $request->validate([
+        $validator = $request->validate([
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
-            'nama_bayi' => 'nullable|string|max:255', // Bisa kosong jika menggunakan manual
-            'nama_bayi_manual' => 'nullable|string|max:255', // Bisa kosong jika menggunakan database
-            'tgl_lahir' => 'nullable|date', // Bisa dari input manual atau otomatis dari database
-            'tgl_lahir_manual' => 'nullable|date', // Bisa kosong jika menggunakan database
-            'bbl_kg' => 'required|numeric|min:0',
-            'nama_ayah' => 'required|string|max:255',
-            'nama_ibu' => 'required|string|max:255',
-            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+            'nama_bayi' => 'nullable|string|max:255', // Hidden field
+            'nama_bayi_db' => 'nullable|string|max:255', // Dropdown database
+            'nama_bayi_manual' => 'nullable|string|max:255', // Input manual
+            'tgl_lahir' => 'nullable|date', // Hidden field untuk tanggal
+            'tgl_lahir_manual' => 'nullable|date', // Input manual tanggal
+            'bbl_kg' => 'nullable|numeric|min:0', // Tidak wajib
+            'nama_ayah' => 'nullable|string|max:255', // Tidak wajib
+            'nama_ibu' => 'nullable|string|max:255', // Tidak wajib
+            'dasawisma_id' => 'nullable|exists:dasawisma,dasawisma_id' // Tidak wajib
         ]);
         
-        // Pastikan ada minimal satu nama bayi (dari database atau manual)
-        if (!$request->nama_bayi && !$request->nama_bayi_manual) {
+        error_log('Validation passed successfully');
+        
+        // Pastikan ada minimal satu nama bayi (dari database, manual, atau dropdown db)
+        if (!$request->nama_bayi && !$request->nama_bayi_manual && !$request->nama_bayi_db) {
+            error_log('No nama_bayi found in any field');
             return redirect()->back()->with('error', 'Nama bayi harus diisi, baik dari database atau input manual.');
         }
 
         $data = $request->all();
 
-        // Jika tgl_lahir tidak dikirim dari form (input dari database), ambil dari master data
-        if (!$request->tgl_lahir && !$request->tgl_lahir_manual) {
-            $anak = Anak::where('nama_lengkap', $request->nama_bayi)->first();
-            if (!$anak) {
-                return redirect()->back()->with('error', 'Data anak tidak ditemukan di database master. Silakan gunakan input manual atau pastikan data anak sudah terdaftar.');
+        // Prioritas nama: nama_bayi_manual (input manual) atau nama_bayi (hidden) atau nama_bayi_db (dropdown)
+        $data['nama_bayi'] = $request->nama_bayi_manual ?: ($request->nama_bayi ?: $request->nama_bayi_db);
+        
+        error_log('Final nama_bayi: ' . $data['nama_bayi']);
+
+        // Handle tanggal lahir - sekarang opsional
+        $tanggalLahir = null;
+        
+        if ($request->tgl_lahir_manual) {
+            $tanggalLahir = $request->tgl_lahir_manual;
+            error_log('Using tgl_lahir_manual: ' . $tanggalLahir);
+        } elseif ($request->tgl_lahir) {
+            $tanggalLahir = $request->tgl_lahir;
+            error_log('Using tgl_lahir: ' . $tanggalLahir);
+        } elseif ($data['nama_bayi']) {
+            // Jika menggunakan data dari database, ambil tanggal lahir dari master data
+            $anak = Anak::where('nama_lengkap', $data['nama_bayi'])->first();
+            if ($anak) {
+                $tanggalLahir = $anak->tanggal_lahir;
+                error_log('Found tanggal_lahir from Anak table: ' . $tanggalLahir);
             }
-            $data['tgl_lahir'] = $anak->tanggal_lahir;
-        } else {
-            // Prioritas: tgl_lahir_manual (dari input manual) atau tgl_lahir (dari hidden field)
-            $tanggalLahir = $request->tgl_lahir_manual ?: $request->tgl_lahir;
-            
-            // Validasi bahwa usia bayi sesuai (0-12 bulan)
+        }
+        
+        // Jika ada tanggal lahir, validasi umur bayi
+        if ($tanggalLahir) {
             $tglLahir = \Carbon\Carbon::parse($tanggalLahir);
             $monthsDiff = $tglLahir->diffInMonths(now());
             
@@ -714,11 +736,15 @@ class SIPController extends Controller
             
             $data['tgl_lahir'] = $tanggalLahir;
         }
-        
-        // Prioritas nama: nama_bayi_manual (input manual) atau nama_bayi (dari database/hidden field)
-        $data['nama_bayi'] = $request->nama_bayi_manual ?: $request->nama_bayi;
 
-        Sip2::create($data);
+        try {
+            error_log('Attempting to create SIP2 with data: ' . json_encode($data));
+            $sip2 = Sip2::create($data);
+            error_log('SIP2 created successfully with ID: ' . $sip2->bayi_id);
+        } catch (\Exception $e) {
+            error_log('SIP2 creation failed: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage());
+        }
 
         return redirect()->route('sip.index', $request->posyandu_id)->with('success', 'Data SIP Format 2 berhasil ditambahkan. Silakan edit untuk menambah data penimbangan dan imunisasi.')->with('activeTab', 'format2');
     }
@@ -730,10 +756,10 @@ class SIPController extends Controller
         $request->validate([
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
             'nama_bayi' => 'required|string|max:255',
-            'bbl_kg' => 'required|numeric|min:0',
-            'nama_ayah' => 'required|string|max:255',
-            'nama_ibu' => 'required|string|max:255',
-            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id',
+            'bbl_kg' => 'nullable|numeric|min:0', // Tidak wajib
+            'nama_ayah' => 'nullable|string|max:255', // Tidak wajib
+            'nama_ibu' => 'nullable|string|max:255', // Tidak wajib
+            'dasawisma_id' => 'nullable|exists:dasawisma,dasawisma_id', // Tidak wajib
             // Validasi data penimbangan (opsional)
             'tb_penimbangan.*' => 'nullable|numeric|min:0',
             'bb_penimbangan.*' => 'nullable|numeric|min:0',
@@ -865,43 +891,57 @@ class SIPController extends Controller
 
     public function deleteSip2($id)
     {
-        $sip2 = Sip2::findOrFail($id);
-        $posyandu_id = $sip2->posyandu_id;
-        $nama_bayi = $sip2->nama_bayi;
+        try {
+            DB::beginTransaction();
+            
+            $sip2 = Sip2::findOrFail($id);
+            $posyandu_id = $sip2->posyandu_id;
+            $nama_bayi = $sip2->nama_bayi;
 
-        $sip2->delete();
+            // Model akan otomatis menghapus data terkait melalui boot() method
+            $sip2->delete();
 
-        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 2 untuk ' . $nama_bayi . ' berhasil dihapus.')->with('activeTab', 'format2');
+            DB::commit();
+            
+            return redirect()->route('sip.index', $posyandu_id)
+                           ->with('success', "Data SIP Format 2 untuk '{$nama_bayi}' beserta seluruh data terkait (imunisasi, penimbangan, dll) berhasil dihapus.")
+                           ->with('activeTab', 'format2');
+                           
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            // Log error untuk debugging
+            error_log('Error deleting SIP2 data - ID: ' . $id . ' - Error: ' . $e->getMessage());
+            
+            return redirect()->route('sip.index', $posyandu_id)
+                           ->with('error', 'Gagal menghapus data. Error: ' . $e->getMessage())
+                           ->with('activeTab', 'format2');
+        }
     }
 
     // SIP3 CRUD Methods
     public function storeSip3(Request $request)
     {
         // Debug: Log semua data yang diterima
-        /*
-        dd([
-            'nama_balita' => $request->nama_balita,
-            'nama_balita_manual' => $request->nama_balita_manual,
-            'tgl_lahir' => $request->tgl_lahir,
-            'tgl_lahir_manual' => $request->tgl_lahir_manual,
-            'all_data' => $request->all()
-        ]);
-        */
+        error_log('=== SIP3 STORE METHOD CALLED ===');
+        error_log('SIP3 All Request Data: ' . json_encode($request->all()));
         
         $request->validate([
-            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+            'dasawisma_id' => 'nullable|exists:dasawisma,dasawisma_id' // Tidak wajib
         ]);
         
         // Pastikan ada minimal satu nama balita (dari database atau manual)
-        if (!$request->nama_balita && !$request->nama_balita_manual) {
+        if (!$request->nama_balita && !$request->nama_balita_manual && !$request->nama_balita_db) {
+            error_log('No nama_balita found in any field for SIP3');
             return redirect()->back()->with('error', 'Nama balita wajib diisi!');
         }
 
         $data = $request->all();
 
-        // Gunakan nama balita dari hidden field (yang sudah diisi oleh JavaScript)
-        // atau fallback ke manual jika hidden field kosong
-        $data['nama_balita'] = $request->nama_balita ?: $request->nama_balita_manual;
+        // Prioritas nama: nama_balita_manual (input manual) atau nama_balita (hidden) atau nama_balita_db (dropdown)
+        $data['nama_balita'] = $request->nama_balita_manual ?: ($request->nama_balita ?: $request->nama_balita_db);
+        
+        error_log('Final nama_balita: ' . $data['nama_balita']);
         
         // Gunakan tanggal lahir dari hidden field atau manual
         $data['tgl_lahir'] = $request->tgl_lahir ?: $request->tgl_lahir_manual;
@@ -919,28 +959,27 @@ class SIPController extends Controller
             return redirect()->back()->with('error', 'Nama balita tidak valid!');
         }
         
-        if (!$data['tgl_lahir']) {
-            return redirect()->back()->with('error', 'Tanggal lahir wajib diisi!');
+        // Tanggal lahir sekarang opsional, tapi jika diisi harus valid
+        if ($data['tgl_lahir']) {
+            // Validasi bahwa usia balita sesuai (1-5 tahun)
+            $tglLahir = \Carbon\Carbon::parse($data['tgl_lahir']);
+            $yearsDiff = $tglLahir->diffInYears(now());
+            $monthsDiff = $tglLahir->diffInMonths(now());
+            
+            if ($monthsDiff <= 12) {
+                return redirect()->back()->with('error', 'Tanggal lahir tidak sesuai untuk kategori balita (harus lebih dari 1 tahun).');
+            }
+            
+            if ($yearsDiff > 5) {
+                return redirect()->back()->with('error', 'Tanggal lahir tidak sesuai untuk kategori balita (harus kurang dari 5 tahun).');
+            }
         }
 
-        // Validasi bahwa usia balita sesuai (1-5 tahun)
-        $tglLahir = \Carbon\Carbon::parse($data['tgl_lahir']);
-        $yearsDiff = $tglLahir->diffInYears(now());
-        $monthsDiff = $tglLahir->diffInMonths(now());
-        
-        if ($monthsDiff <= 12) {
-            return redirect()->back()->with('error', 'Tanggal lahir tidak sesuai untuk kategori balita (harus lebih dari 1 tahun).');
-        }
-        
-        if ($yearsDiff > 5) {
-            return redirect()->back()->with('error', 'Tanggal lahir tidak sesuai untuk kategori balita (harus kurang dari 5 tahun).');
-        }
-
-        // Validasi field wajib lainnya
+        // Validasi field wajib lainnya - all fields except name are optional
         $request->validate([
-            'bbl_kg' => 'required|numeric|min:0',
-            'nama_ayah' => 'required|string|max:255',
-            'nama_ibu' => 'required|string|max:255'
+            'bbl_kg' => 'nullable|numeric|min:0',
+            'nama_ayah' => 'nullable|string|max:255',
+            'nama_ibu' => 'nullable|string|max:255'
         ]);
 
         Sip3::create($data);
@@ -955,10 +994,10 @@ class SIPController extends Controller
         $request->validate([
             'posyandu_id' => 'required|exists:posyandu,posyandu_id',
             'nama_balita' => 'required|string|max:255',
-            'bbl_kg' => 'required|numeric|min:0',
-            'nama_ayah' => 'required|string|max:255',
-            'nama_ibu' => 'required|string|max:255',
-            'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id'
+            'bbl_kg' => 'nullable|numeric|min:0', // Tidak wajib
+            'nama_ayah' => 'nullable|string|max:255', // Tidak wajib
+            'nama_ibu' => 'nullable|string|max:255', // Tidak wajib
+            'dasawisma_id' => 'nullable|exists:dasawisma,dasawisma_id' // Tidak wajib
         ]);
 
         // Ambil tanggal lahir dari data anak master berdasarkan nama
@@ -983,13 +1022,31 @@ class SIPController extends Controller
 
     public function deleteSip3($id)
     {
-        $sip3 = Sip3::findOrFail($id);
-        $posyandu_id = $sip3->posyandu_id;
-        $nama_balita = $sip3->nama_balita;
+        try {
+            DB::beginTransaction();
+            
+            $sip3 = Sip3::findOrFail($id);
+            $posyandu_id = $sip3->posyandu_id;
+            $nama_balita = $sip3->nama_balita;
 
-        $sip3->delete();
+            // Model akan otomatis menghapus data terkait melalui boot() method
+            $sip3->delete();
 
-        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 3 untuk ' . $nama_balita . ' berhasil dihapus.')->with('activeTab', 'format3');
+            DB::commit();
+            
+            return redirect()->route('sip.index', $posyandu_id)
+                           ->with('success', "Data SIP Format 3 untuk '{$nama_balita}' beserta seluruh data terkait berhasil dihapus.")
+                           ->with('activeTab', 'format3');
+                           
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            error_log('Error deleting SIP3 data - ID: ' . $id . ' - Error: ' . $e->getMessage());
+            
+            return redirect()->route('sip.index', $posyandu_id)
+                           ->with('error', 'Gagal menghapus data. Error: ' . $e->getMessage())
+                           ->with('activeTab', 'format3');
+        }
     }
 
     // SIP4 CRUD Methods
@@ -1000,7 +1057,8 @@ class SIPController extends Controller
             'tahun' => 'required|integer|min:1900|max:2100',
             'bulan' => 'required|string|max:20',
             'nama' => 'required|string|max:255',  // Changed from nama_wuspus to nama
-            'nama_suami' => 'required|string|max:255',
+            'status_perkawinan' => 'required|string|in:belum_menikah,menikah,janda',
+            'nama_suami' => $request->status_perkawinan === 'menikah' ? 'required|string|max:255' : 'nullable|string|max:255',
             'umur' => 'required|integer|min:0',
             'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id',
             'tahapan_ks' => 'nullable|string|max:10',
@@ -1021,7 +1079,8 @@ class SIPController extends Controller
             'tahun' => $request->tahun,
             'bulan' => $request->bulan,
             'nama' => $request->nama,  // Use nama directly
-            'nama_suami' => $request->nama_suami,
+            'nama_suami' => $request->status_perkawinan === 'menikah' ? $request->nama_suami : null,
+            'status_perkawinan' => $request->status_perkawinan,
             'umur' => $request->umur,
             'dasawisma_id' => $request->dasawisma_id,
             'tahapan_ks' => $request->tahapan_ks,
@@ -1069,7 +1128,8 @@ class SIPController extends Controller
             'tahun' => 'required|integer|min:1900|max:2100',
             'bulan' => 'required|string|max:20',
             'nama' => 'required|string|max:255',
-            'nama_suami' => 'required|string|max:255',
+            'status_perkawinan' => 'required|string|in:belum_menikah,menikah,janda',
+            'nama_suami' => $request->status_perkawinan === 'menikah' ? 'required|string|max:255' : 'nullable|string|max:255',
             'umur' => 'required|integer|min:0',
             'dasawisma_id' => 'required|exists:dasawisma,dasawisma_id',
             'tahapan_ks' => 'required|string|max:10',
@@ -1084,11 +1144,16 @@ class SIPController extends Controller
         ]);
 
         // Update main SIP4 record (without contraception fields)
-        $sip4->update($request->only([
-            'posyandu_id', 'tahun', 'bulan', 'nama', 'nama_suami', 'umur', 
+        $updateData = $request->only([
+            'posyandu_id', 'tahun', 'bulan', 'nama', 'umur', 
             'dasawisma_id', 'tahapan_ks', 'jumlah_anak_hidup', 'anak_meninggal_umur',
-            'ukuran_lila_cm', 'lebih_23_5_cm'
-        ]));
+            'ukuran_lila_cm', 'lebih_23_5_cm', 'status_perkawinan'
+        ]);
+        
+        // Set nama_suami based on status_perkawinan
+        $updateData['nama_suami'] = $request->status_perkawinan === 'menikah' ? $request->nama_suami : null;
+        
+        $sip4->update($updateData);
 
         // Handle TT immunizations
         foreach(['I', 'II', 'III', 'IV', 'V'] as $tt_ke) {
@@ -1134,13 +1199,23 @@ class SIPController extends Controller
 
     public function deleteSip4($id)
     {
-        $sip4 = Sip4::findOrFail($id);
-        $posyandu_id = $sip4->posyandu_id;
-        $nama_wuspus = $sip4->nama;
+        try {
+            $sip4 = Sip4::findOrFail($id);
+            $posyandu_id = $sip4->posyandu_id;
+            $nama_wuspus = $sip4->nama;
 
-        $sip4->delete();
+            // Model event akan menangani cascade delete secara otomatis
+            $sip4->delete();
 
-        return redirect()->route('sip.index', $posyandu_id)->with('success', 'Data SIP Format 4 untuk ' . $nama_wuspus . ' berhasil dihapus.')->with('activeTab', 'format4');
+            return redirect()->route('sip.index', $posyandu_id)
+                ->with('success', 'Data SIP Format 4 untuk ' . $nama_wuspus . ' berhasil dihapus beserta semua data terkait.')
+                ->with('activeTab', 'format4');
+                
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus data: ' . $e->getMessage())
+                ->with('activeTab', 'format4');
+        }
     }
 
     // SIP5 CRUD Methods
@@ -1172,16 +1247,17 @@ class SIPController extends Controller
             'catatan' => $request->catatan
         ]);
 
-        // Handle monthly weighing results (TB/BB)
+        // Handle monthly weighing results (BB and umur kehamilan)
         for($i = 1; $i <= 12; $i++) {
-            $tbField = 'tb_' . $i;
             $bbField = 'bb_' . $i;
+            $ukField = 'uk_' . $i;  // umur kehamilan field
             
-            if ($request->filled($tbField) || $request->filled($bbField)) {
+            if ($request->filled($bbField) || $request->filled($ukField)) {
                 $sip5->penimbanganIbuHamil()->create([
                     'bulan' => $i,
+                    'tahun' => date('Y'), // Set current year
                     'berat_badan' => $request->$bbField,
-                    'umur_kehamilan' => $request->umur_kehamilan
+                    'umur_kehamilan' => $request->$ukField
                 ]);
             }
         }
@@ -1242,17 +1318,18 @@ class SIPController extends Controller
             'pmt_pemulihan', 'catatan'
         ]));
 
-        // Handle monthly weighing results (TB/BB)
+        // Handle monthly weighing results (BB and umur kehamilan)
         for($i = 1; $i <= 12; $i++) {
-            $tbField = 'tb_' . $i;
             $bbField = 'bb_' . $i;
+            $ukField = 'uk_' . $i;  // umur kehamilan field
             
-            if ($request->filled($tbField) || $request->filled($bbField)) {
+            if ($request->filled($bbField) || $request->filled($ukField)) {
                 $sip5->penimbanganIbuHamil()->updateOrCreate(
                     ['bulan' => $i],
                     [
+                        'tahun' => date('Y'), // Set current year
                         'berat_badan' => $request->$bbField,
-                        'umur_kehamilan' => $request->umur_kehamilan
+                        'umur_kehamilan' => $request->$ukField
                     ]
                 );
             } else {

@@ -1,4 +1,4 @@
-      <!-- ========== Left Sidebar Start ========== -->
+<!-- ========== Left Sidebar Start ========== -->
       <div class="left side-menu">
           <div class="slimscroll-menu" id="remove-scroll">
 
@@ -58,6 +58,39 @@
                       </li>
                       @endif
 
+                      <!-- Pokja Menu - Admin only -->
+                      @if($userRole === 'admin_desa')
+                      <li class="waves-effect">
+                          <a href="#"><i class="ti-briefcase"></i> <span> Kelompok Kerja (Pokja) </span> <i class='mdi mdi-chevron-down'></i></a>
+                          <ul class="side-dropdown">
+                              <li>
+                                  <a href="{{ route('pokja.index', 'pokja1') }}">
+                                      <i class='bx bxs-circle icon-dot'></i>
+                                      <span>Pokja I</span>
+                                  </a>
+                              </li>
+                              <li>
+                                  <a href="{{ route('pokja.index', 'pokja2') }}">
+                                      <i class='bx bxs-circle icon-dot'></i>
+                                      <span>Pokja II</span>
+                                  </a>
+                              </li>
+                              <li>
+                                  <a href="{{ route('pokja.index', 'pokja3') }}">
+                                      <i class='bx bxs-circle icon-dot'></i>
+                                      <span>Pokja III</span>
+                                  </a>
+                              </li>
+                              <li>
+                                  <a href="{{ route('pokja.index', 'pokja4') }}">
+                                      <i class='bx bxs-circle icon-dot'></i>
+                                      <span>Pokja IV</span>
+                                  </a>
+                              </li>
+                          </ul>
+                      </li>
+                      @endif
+
                       <!-- Master Data Menu - Admin only -->
                       @if($userRole === 'admin_desa')
                       <li class="menu-title">Master Data</li>
@@ -103,6 +136,8 @@
                           </a>
                       </li>
                       @endif
+
+                      
 
 
 

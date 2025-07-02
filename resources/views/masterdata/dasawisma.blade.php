@@ -59,20 +59,49 @@
             </div>
         </div>
     </div>
-    <!-- Log on to codeastro.com for more projects! -->
-</div>
 </div> <!-- end col -->
 </div> <!-- end row -->
-
-
-
 
 @endsection
 
 
 @section('script')
 <!-- Responsive-table-->
-
+<script>
+$(document).ready(function() {
+    // Fix wrapper height issues without touching DataTable initialization
+    // DataTable is already initialized by datatables.init.js
+    
+    // Force height recalculation after page load
+    setTimeout(function() {
+        // Fix wrapper height issues - this is the main problem
+        $('#wrapper').css({
+            'height': 'auto',
+            'min-height': '100vh',
+            'overflow': 'visible',
+            'overflow-y': 'auto'
+        });
+        
+        // Also fix content containers
+        $('.content-page, .content, .container-fluid').css({
+            'height': 'auto',
+            'overflow': 'visible'
+        });
+        
+        // Force browser to recalculate layout
+        $(window).trigger('resize');
+    }, 1000); // Increased delay to ensure DataTable is fully loaded
+    
+    // Additional fix on window resize
+    $(window).on('resize', function() {
+        $('#wrapper').css({
+            'height': 'auto',
+            'min-height': '100vh',
+            'overflow': 'visible'
+        });
+    });
+});
+</script>
 @endsection
 
 @include('includes.add_dasawisma_masterdata')

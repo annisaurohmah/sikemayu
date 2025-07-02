@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $nama
  * @property int|null $umur
  * @property string|null $nama_suami
+ * @property string|null $status_perkawinan
  * @property string|null $tahapan_ks
  * @property string|null $kelompok_dasawisma
  * @property int|null $jumlah_anak_hidup
@@ -52,6 +53,7 @@ class Sip4 extends Model
 		'nama',
 		'umur',
 		'nama_suami',
+		'status_perkawinan',
 		'tahapan_ks',
 		'dasawisma_id',
 		'jumlah_anak_hidup',
@@ -101,5 +103,19 @@ class Sip4 extends Model
 	public function getJenisKontrasepsiPenggantiAttribute()
 	{
 		return $this->penggantianKontrasepsi->first()->jenis_baru ?? null;
+	}
+
+	// Model events untuk cascade delete
+	protected static function boot()
+	{
+		parent::boot();
+
+		// Event ketika model akan dihapus
+		static::deleting(function ($sip4) {
+			// Hapus semua data terkait sebelum menghapus data utama
+			$sip4->imunisasitt()->delete();
+			$sip4->kontrasepsi()->delete(); 
+			$sip4->penggantianKontrasepsi()->delete();
+		});
 	}
 }

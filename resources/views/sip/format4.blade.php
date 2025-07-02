@@ -9,6 +9,7 @@
                 <th rowspan="2">No</th>
                 <th rowspan="2">Nama WUS dan PUS</th>
                 <th rowspan="2">Umur</th>
+                <th rowspan="2">Status Perkawinan</th>
                 <th rowspan="2">Nama Suami</th>
                 <th rowspan="2">Tahapan KS</th>
                 <th rowspan="2">Kelompok Dasawisma</th>
@@ -35,7 +36,22 @@
                 <td>{{ $index + 1 }}</td>
                 <td>{{ $wuspus->nama }}</td>
                 <td>{{ $wuspus->umur }}</td>
-                <td>{{ $wuspus->nama_suami }}</td>
+                <td>
+                    @switch($wuspus->status_perkawinan ?? '')
+                        @case('belum_menikah')
+                            Belum Menikah
+                            @break
+                        @case('menikah')
+                            Menikah
+                            @break
+                        @case('janda')
+                            Janda
+                            @break
+                        @default
+                            -
+                    @endswitch
+                </td>
+                <td>{{ $wuspus->nama_suami ?? '-' }}</td>
                 <td>{{ $wuspus->tahapan_ks }}</td>
                 <td>{{ $wuspus->dasawisma->nama_dasawisma ?? '-' }}</td>
                 <td>{{ $wuspus->jumlah_anak_hidup }}</td>
@@ -130,11 +146,21 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="nama_suami">Nama Suami</label>
-                                <input type="text" class="form-control" placeholder="Masukkan nama suami" id="nama_suami" name="nama_suami" 
-                                value="{{ $wuspus->nama_suami ?? '' }}" required />
+                                <label for="status_perkawinan">Status Perkawinan</label>
+                                <select class="form-control" id="status_perkawinan" name="status_perkawinan" required>
+                                    <option value="">Pilih Status Perkawinan</option>
+                                    <option value="belum_menikah" {{ ($wuspus->status_perkawinan ?? '') == 'belum_menikah' ? 'selected' : '' }}>Belum Menikah</option>
+                                    <option value="menikah" {{ ($wuspus->status_perkawinan ?? '') == 'menikah' ? 'selected' : '' }}>Menikah</option>
+                                    <option value="janda" {{ ($wuspus->status_perkawinan ?? '') == 'janda' ? 'selected' : '' }}>Janda</option>
+                                </select>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="form-group" id="nama_suami_group" @if(($wuspus->status_perkawinan ?? '') !== 'menikah') style="display: none;" @endif>
+                        <label for="nama_suami">Nama Suami</label>
+                        <input type="text" class="form-control" placeholder="Masukkan nama suami" id="nama_suami" name="nama_suami" 
+                        value="{{ $wuspus->nama_suami ?? '' }}" />
                     </div>
 
                     <div class="form-group">
@@ -290,7 +316,7 @@
                     <div class="text-center">
                         <h6>Are you sure you want to delete:</h6>
                         <h2 class="bold del_employee_name">{{ $wuspus->nama }}</h2>
-                        <p>Nama Suami: {{ $wuspus->nama_suami }}</p>
+                        <p>Nama Suami: {{ $wuspus->nama_suami ?? '-' }}</p>
                         <p>Umur: {{ $wuspus->umur }} tahun</p>
                         <p>{{ $wuspus->tahun }} - Bulan {{ $wuspus->bulan }}</p>
                     </div>
@@ -314,6 +340,24 @@ document.addEventListener('DOMContentLoaded', function() {
     dateInputs.forEach(function(input) {
         input.setAttribute('max', today);
     });
+
+    // Handle status perkawinan change for edit form
+    const statusPerkawinanSelect = document.getElementById('status_perkawinan');
+    const namaSuamiGroup = document.getElementById('nama_suami_group');
+    const namaSuamiInput = document.getElementById('nama_suami');
+
+    if (statusPerkawinanSelect && namaSuamiGroup && namaSuamiInput) {
+        statusPerkawinanSelect.addEventListener('change', function() {
+            if (this.value === 'menikah') {
+                namaSuamiGroup.style.display = 'block';
+                namaSuamiInput.required = true;
+            } else {
+                namaSuamiGroup.style.display = 'none';
+                namaSuamiInput.required = false;
+                namaSuamiInput.value = '';
+            }
+        });
+    }
 });
 </script>
 @endforeach

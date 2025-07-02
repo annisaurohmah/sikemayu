@@ -62,7 +62,7 @@ body {
 }
 
 html {
-  overflow-x: hidden;
+  overflow-x: auto; /* Changed from hidden to auto for better scroll support */
   position: relative;
   min-height: 100%;
 }
@@ -3112,8 +3112,8 @@ table.focus-on tbody tr.focused td {
 }
 
 .c3-tooltip {
-  -webkit-box-shadow: 0 8px 40px 0 rgba(0, 0, 0, 0.12);
-          box-shadow: 0 8px 40px 0 rgba(0, 0, 0, 0.12);
+  -webkit-box-shadow: 0 8px 40px 5px rgba(0, 0, 0, 0.12);
+          box-shadow: 0 8px 40px 5px rgba(0, 0, 0, 0.12);
   opacity: 1;
 }
 
@@ -3814,13 +3814,13 @@ Invoice
 
 @media (min-width: 768px) and (max-width: 991px) {
   body {
-    overflow-x: hidden;
+    overflow-x: auto; /* Changed from hidden to auto */
   }
 }
 
 @media (max-width: 768px) {
   body {
-    overflow-x: hidden;
+    overflow-x: auto; /* Changed from hidden to auto */
   }
   .topbar-left {
     width: 70px !important;
@@ -3892,4 +3892,96 @@ Invoice
 .modal-content {
   text-align: center;
 }
-/*# sourceMappingURL=style.css.map */
+
+/* 
+---------------------------------------------
+Custom fixes for scroll issues
+--------------------------------------------- 
+*/
+
+/* Fix scroll issues for long content */
+.content-page {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+}
+
+.table-responsive {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure tables can scroll horizontally */
+.table-container {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Fix for sidebar dropdown menus alignment */
+.side-dropdown {
+    padding-left: 0 !important;
+}
+
+.side-dropdown li {
+    list-style: none;
+}
+
+.side-dropdown li a {
+    display: flex !important;
+    align-items: center !important;
+    padding: 8px 20px !important;
+    text-decoration: none;
+    color: inherit;
+}
+
+.side-dropdown li a i {
+    margin-right: 8px !important;
+    flex-shrink: 0 !important;
+    width: 16px !important;
+    text-align: center !important;
+}
+
+.side-dropdown li a span {
+    flex: 1 !important;
+    white-space: nowrap !important;
+}
+
+/* Fix for mobile scroll */
+@media (max-width: 768px) {
+    body {
+        overflow-x: auto !important;
+    }
+    
+    .content-page,
+    .card-body,
+    .table-responsive {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+}
+
+/* Fix for very wide tables */
+.table {
+    min-width: 100% !important;
+    white-space: nowrap;
+}
+
+.table td,
+.table th {
+    white-space: nowrap !important;
+    overflow: visible !important;
+}
+
+/* Allow horizontal scroll for dashboard cards */
+.dashboard-stats {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Fix for modals with long content */
+.modal-body {
+    overflow-y: auto !important;
+    max-height: calc(100vh - 200px) !important;
+}

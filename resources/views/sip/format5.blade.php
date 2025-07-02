@@ -14,7 +14,7 @@
                 <th rowspan="2">Hamil Ke</th>
                 <th rowspan="2">LILA</th>
                 <th rowspan="2">PMT Pemulihan</th>
-                <th colspan="12" class="text-center">Hasil Penimbangan (BB)</th>
+                <th colspan="12" class="text-center">Hasil Penimbangan (BB/UK)</th>
                 <th colspan="3" class="text-center">Tablet Tambah Darah (BKS)</th>
                 <th colspan="5" class="text-center">Imunisasi</th>
                 <th rowspan="2">Vitamin A</th>
@@ -56,7 +56,10 @@
                     @endphp
                     <td>
                         @if($dataTimbang)
-                        {{ $dataTimbang->berat_badan ? $dataTimbang->berat_badan . ' kg' : '-' }}
+                        <div class="text-center">
+                            <small class="d-block">{{ $dataTimbang->berat_badan ? $dataTimbang->berat_badan . ' kg' : '-' }}</small>
+                            <small class="text-muted">{{ $dataTimbang->umur_kehamilan ? $dataTimbang->umur_kehamilan . ' mgg' : '-' }}</small>
+                        </div>
                         @else
                         -
                         @endif
@@ -181,9 +184,9 @@
                         </div>
                     </div>
 
-                    <!-- Hasil Penimbangan (TB/BB) per Bulan -->
+                    <!-- Hasil Penimbangan (BB dan Umur Kehamilan) per Bulan -->
                     <div class="form-group">
-                        <label><strong>Hasil Penimbangan (BB) per Bulan (Opsional)</strong></label>
+                        <label><strong>Hasil Penimbangan (BB dan Umur Kehamilan) per Bulan (Opsional)</strong></label>
                         <div class="row">
                             @foreach(['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGS', 'SEP', 'OKT', 'NOV', 'DES'] as $index => $bulan)
                             @php $bulanNumber = $index + 1; @endphp
@@ -192,13 +195,13 @@
                                 <div class="row">
                                     <div class="col-6">
                                         <input type="number" step="0.1" class="form-control form-control-sm"
-                                            placeholder="TB" id="tb_{{ $bulanNumber }}" name="tb_{{ $bulanNumber }}" />
-                                        <small class="text-muted">TB (cm)</small>
-                                    </div>
-                                    <div class="col-6">
-                                        <input type="number" step="0.1" class="form-control form-control-sm"
                                             placeholder="BB" id="bb_{{ $bulanNumber }}" name="bb_{{ $bulanNumber }}" />
                                         <small class="text-muted">BB (kg)</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" class="form-control form-control-sm"
+                                            placeholder="UK" id="uk_{{ $bulanNumber }}" name="uk_{{ $bulanNumber }}" />
+                                        <small class="text-muted">UK (minggu)</small>
                                     </div>
                                 </div>
                             </div>
@@ -464,9 +467,9 @@
                         <textarea class="form-control" placeholder="Masukkan catatan (opsional)" id="catatan" name="catatan" rows="3">{{ $ibuHamil->catatan ?? '' }}</textarea>
                     </div>
 
-                    <!-- Hasil Penimbangan (TB/BB) per Bulan -->
+                    <!-- Hasil Penimbangan (BB dan Umur Kehamilan) per Bulan -->
                     <div class="form-group">
-                        <label><strong>Hasil Penimbangan (BB) per Bulan</strong></label>
+                        <label><strong>Hasil Penimbangan (BB dan Umur Kehamilan) per Bulan</strong></label>
                         <div class="row">
                             @foreach(['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGS', 'SEP', 'OKT', 'NOV', 'DES'] as $index => $bulan)
                             @php
@@ -476,11 +479,17 @@
                             <div class="col-md-2 mb-2">
                                 <label for="penimbangan_{{ $bulanNumber }}">{{ $bulan }}</label>
                                 <div class="row">
-                                    <div class="col-12">
+                                    <div class="col-6">
                                         <input type="number" step="0.1" class="form-control form-control-sm"
-                                            placeholder="Berat Badan (kg)" id="bb_{{ $bulanNumber }}" name="bb_{{ $bulanNumber }}"
+                                            placeholder="BB" id="bb_{{ $bulanNumber }}" name="bb_{{ $bulanNumber }}"
                                             value="{{ $dataTimbang ? $dataTimbang->berat_badan : '' }}" />
                                         <small class="text-muted">BB (kg)</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" class="form-control form-control-sm"
+                                            placeholder="UK" id="uk_{{ $bulanNumber }}" name="uk_{{ $bulanNumber }}"
+                                            value="{{ $dataTimbang ? $dataTimbang->umur_kehamilan : '' }}" />
+                                        <small class="text-muted">UK (minggu)</small>
                                     </div>
                                 </div>
                             </div>

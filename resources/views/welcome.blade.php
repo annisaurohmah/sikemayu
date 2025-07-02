@@ -37,19 +37,40 @@
 </header>
 <!-- ***** Header Area End ***** -->
 
-<div class="main-banner">
+<!-- ***** Hero Image Section ***** -->
+<section class="hero-image-section">
+  <div class="container-fluid p-0">
+    <div class="hero-image-wrapper">
+      <img src="{{ asset('assets/images/fotobareng.jpeg') }}" alt="Kegiatan PKK Desa Margaluyu" class="img-fluid w-100 hero-image">
+      <div class="hero-overlay"></div>
+    </div>
+  </div>
+</section>
+<!-- ***** Hero Image Section End ***** -->
+
+<!-- ***** Title Section ***** -->
+<section class="title-section py-5">
   <div class="container">
     <div class="row">
-      <div class="col-lg-12">
+      <div class="col-lg-12 text-center">
         <div class="top-text header-text">
-          <h6>SIKEMAYU</h6>
-          <h2>Sistem Pelaporan Kegiatan PKK Desa Margaluyu</h2>
+          <h6 class="text-primary mb-3">SIKEMAYU</h6>
+          <h2 class="mb-4">Sistem Pelaporan Kegiatan PKK Desa Margaluyu</h2>
+          <p class="lead text-muted">Platform digital untuk mengelola dan memantau seluruh kegiatan PKK di Desa Margaluyu</p>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+<!-- ***** Title Section End ***** -->
+
+<!-- ***** Menu Cards Section ***** -->
+<section class="menu-cards-section py-5 bg-light">
+  <div class="container">
+    <div class="row">
       <div class="col-lg-10 offset-lg-1">
         <!-- Card Menu Grid -->
-        <div class="container">
-          <div class="row g-4">
+        <div class="row g-4">
 
             <!-- Card Template -->
             <div class="col-12 col-sm-6 col-lg-3 mb-3">
@@ -98,11 +119,13 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
-</div>
+</section>
+<!-- ***** Menu Cards Section End ***** -->
 
+<!-- ***** Additional Content Section ***** -->
+<section class="additional-content py-5">
 <div class="container py-5">
   <div class="row justify-content-center">
 
@@ -141,20 +164,109 @@
 
   </div>
 </div>
+</section>
+<!-- ***** Additional Content Section End ***** -->
 
-<!-- Custom CSS for hover effect and purple color -->
+<!-- Custom CSS for new layout -->
 <style>
+  /* Hero Image Section */
+  .hero-image-section {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .hero-image-wrapper {
+    position: relative;
+    height: 400px;
+    overflow: hidden;
+  }
+  
+  .hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 100%);
+  }
+
+  /* Title Section */
+  .title-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  }
+  
+  .title-section h6 {
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  
+  .title-section h2 {
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.3;
+  }
+
+  /* Menu Cards Section */
+  .menu-cards-section {
+    background: #f8f9fa;
+  }
+
+  /* Card Styling */
   .bg-purple {
     background-color: #6f42c1;
-    /* Custom purple color */
   }
 
   .transform-hover {
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
+    border-radius: 15px;
   }
 
   .transform-hover:hover {
-    transform: scale(1.05);
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  }
+
+  .card {
+    border-radius: 15px;
+    overflow: hidden;
+  }
+
+  .card-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .hero-image-wrapper {
+      height: 300px;
+    }
+    
+    .title-section h2 {
+      font-size: 1.8rem;
+    }
+    
+    .title-section h6 {
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .hero-image-wrapper {
+      height: 250px;
+    }
+    
+    .title-section {
+      padding: 3rem 0;
+    }
   }
 
   .full-height {

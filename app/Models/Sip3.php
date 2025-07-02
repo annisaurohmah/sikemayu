@@ -100,4 +100,25 @@ public function keteranganBalita() {
     return $this->hasOne(Sip3KeteranganBalita::class, 'balita_id');
 }
 
+/**
+ * Boot method untuk menambahkan model events
+ */
+protected static function boot()
+{
+    parent::boot();
+
+    // Event ketika model akan dihapus
+    static::deleting(function ($sip3) {
+        // Hapus semua data terkait secara otomatis
+        $sip3->sip3_imunisasis()->delete();
+        $sip3->sip3_penimbangans()->delete();
+        $sip3->sip3_keteranganbalita()->delete();
+        
+        // Jika ada relasi pelayanan untuk SIP3
+        if (method_exists($sip3, 'sip3_pelayanans')) {
+            $sip3->sip3_pelayanans()->delete();
+        }
+    });
+}
+
 }
